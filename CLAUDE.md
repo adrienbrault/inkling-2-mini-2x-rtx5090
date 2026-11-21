@@ -3,7 +3,8 @@
 Working agreement for this repository, for people and coding agents alike (`AGENTS.md` is a link to it).
 
 This repository is meant to become public. It mirrors the serving configuration kept in a private infrastructure repo.
-Until the owner says it goes public, it is local only: no remote, no push. Everything committed must already be fit to
+Its GitHub repository (github.com/adrienbrault/inkling-2-mini-2x-rtx5090) is private until the owner makes it
+public; push committed work there. Everything committed must already be fit to
 publish, because history is published as it is.
 
 ## Never commit
