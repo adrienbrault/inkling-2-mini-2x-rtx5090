@@ -1,0 +1,7 @@
+{"target": 2048, "prompt_tokens": 2046, "cached": 0, "ttft_s": 0.111, "e2e_prefill_tok_s": 18359.1}
+{"target": 8192, "prompt_tokens": 8189, "cached": 0, "ttft_s": 0.441, "e2e_prefill_tok_s": 18577.0}
+{"target": 30720, "prompt_tokens": 30717, "cached": 0, "ttft_s": 1.837, "e2e_prefill_tok_s": 16725.6}
+{"target": 61440, "prompt_tokens": 61436, "cached": 0, "ttft_s": 4.149, "e2e_prefill_tok_s": 14808.1}
+{"target": 122880, "prompt_tokens": 122879, "cached": 0, "ttft_s": 10.234, "e2e_prefill_tok_s": 12007.0}
+{"target": 204800, "prompt_tokens": 204798, "cached": 0, "ttft_s": 21.405, "e2e_prefill_tok_s": 9567.8}
+{"target": 245760, "prompt_tokens": 245758, "cached": 0, "ttft_s": 28.314, "e2e_prefill_tok_s": 8679.7}

@@ -1,0 +1,464 @@
+[
+ {
+  "prompt": "Write a Python function that merges overlapping intervals, with three doctest examples.",
+  "temperature": 0,
+  "seed": 1000,
+  "reasoning": "The user wants a Python function that merges overlapping intervals, with three doctest examples.\n\nLet me think about the classic interval merging problem. Given a list of intervals [start, end], merge overlapping ones.\n\nAlgorithm:\n1. Sort intervals by start time\n2. Iterate through, merging when current interval's start <= last merged interval's end\n\n```python\ndef merge_intervals(intervals):\n    if not intervals:\n        return []\n    intervals = sorted(intervals, key=lambda x: x[0])\n    merged = [list(intervals[0])]\n    for start, end in intervals[1:]:\n        if start <= merged[-1][-1]:\n            merged[-1][-1] = max(merged[-1][-1], end)\n        else:\n            merged.append([start, end])\n    return merged\n```\n\nDoctest examples:\n1. Basic overlapping case: `merge_intervals([[1,3],[2,6],[8,10],[15,18]])` → `[[1,6],[8,10],[15,18]]`\n2. Nested intervals: `merge_intervals([[1,4],[2,3]])` → `[[1,4]]`\n3. Empty input or non-overlapping: `merge_intervals([])` → `[]` or `merge_intervals([[1,2],[3,4]])` → `[[1,2],[3,4]]`\n\nLet me write the doctests carefully. Doctests need exact output matching.\n\n```python\ndef merge_intervals(intervals):\n    \"\"\"\n    Merge overlapping intervals.\n\n    >>> merge_intervals([[1, 3], [2, 6], [8, 10], [15, 18]])\n    [[1, 6], [8, 10], [15, 18]]\n    >>> merge_intervals([[1, 4], [2, 3]])\n    [[1, 4]",
+  "content": null,
+  "finish": "length",
+  "usage": {
+   "prompt_tokens": 32,
+   "total_tokens": 544,
+   "completion_tokens": 512,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 510
+   }
+  }
+ },
+ {
+  "prompt": "Write a Python function that merges overlapping intervals, with three doctest examples.",
+  "temperature": 1.0,
+  "seed": 1000,
+  "reasoning": "The user wants a Python function that merges overlapping intervals, with three doctest examples. This is a classic programming problem. Let me think about the solution.\n\nThe merge intervals algorithm:\n1. Sort intervals by start time\n2. Iterate through, merging if the current interval overlaps with the previous merged interval\n\nHere's a clean implementation:\n\n```python\ndef merge_intervals(intervals):\n    \"\"\"Merge overlapping intervals.\n\n    >>> merge_intervals([(1, 3), (2, 6), (8, 10), (15, 18)])\n    [(1, 6), (8, 10), (15, 18)]\n    >>> merge_intervals([(1, 4), (4, 5)])\n    [(1, 5)]\n    >>> merge_intervals([])\n    []\n    \"\"\"\n    if not intervals:\n        return []\n    intervals = sorted(intervals, key=lambda x: x[0])\n    merged = [list(intervals[0])]\n    for start, end in intervals[1:]:\n        if start <= merged[-1][1]:\n            merged[-1][1] = max(merged[-1][1], end)\n        else:\n            merged.append([start, end])\n    return [tuple(interval) for interval in merged]\n```\n\nWait, let me think about doctests carefully. If I return tuples, the doctest expects tuples. If I return lists, it expects lists. Either is fine, but I need consistency. Let me use a clean approach.\n\nActually, for doctest, the output should match exactly. Let me make sure my examples work:\n\nExample 1: `[(1, 3), (2, 6), (8, 10), (15, 18)]`\n- Sorted: same\n- First: [1, 3]\n- (2, 6): 2 <= 3, merge → [1, 6]\n- (8, 10): 8 > 6, append → [1, 6], [8, 10",
+  "content": null,
+  "finish": "length",
+  "usage": {
+   "prompt_tokens": 32,
+   "total_tokens": 544,
+   "completion_tokens": 512,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 510
+   }
+  }
+ },
+ {
+  "prompt": "Explain the difference between a mutex and a semaphore in four sentences.",
+  "temperature": 0,
+  "seed": 1001,
+  "reasoning": "The user wants a four-sentence explanation of the difference between a mutex and a semaphore. Need answer concise. Need ensure accuracy: Mutex is a lock with ownership, used for mutual exclusion, typically binary (0/1), only owning thread can unlock, often priority inheritance etc. Semaphore is a counting synchronization primitive, can allow multiple concurrent accesses up to count, can be signaled/waited by any thread, used for resource counting/signaling. Difference: mutex is for exclusive access to a resource and has ownership; semaphore is for controlling access to a pool of resources or signaling, can be counting and not owned. Need exactly four sentences. Let's craft four sentences.\n\nNeed be careful: semaphores can be binary too; mutex is a type of semaphore? In POSIX, mutex is a lock; semaphore is counting. Mention mutex cannot be used to signal between threads? It can be used for signaling? Not typically. Four sentences exactly.\n\nDraft:\n1. A mutex is a lock that grants exclusive access to a single resource, and only the thread that acquired it may release it.\n2. A semaphore is a counting synchronization primitive that tracks how many units of a resource are available or can be used.\n3. A mutex is therefore best for mutual exclusion around shared data, while a semaphore is best for limiting concurrency or signaling among threads.\n4. Unlike a mutex, a semaphore does not require ownership and can allow multiple threads to proceed as long as the count permits.\n\nCheck four sentences. Good. Need final only. Ensure no extra.",
+  "content": "A mutex is a lock that grants exclusive access to a single resource, and only the thread that acquired it may release it. A semaphore is a counting synchronization primitive that tracks how many units of a resource are available or can be used. A mutex is therefore best for mutual exclusion around shared data, while a semaphore is best for limiting concurrency or signaling among threads. Unlike a mutex, a semaphore does not require ownership and can allow multiple threads to proceed as long as the count permits.",
+  "finish": "stop",
+  "usage": {
+   "prompt_tokens": 29,
+   "total_tokens": 470,
+   "completion_tokens": 441,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 334
+   }
+  }
+ },
+ {
+  "prompt": "Explain the difference between a mutex and a semaphore in four sentences.",
+  "temperature": 1.0,
+  "seed": 1001,
+  "reasoning": "The user wants an explanation of the difference between a mutex and a semaphore in four sentences. Need answer concise, exactly four sentences likely. Need reason content: mutex is a mutual exclusion lock used to protect a single resource; it may be owned by one thread and typically cannot be used by other threads; has ownership/priority/unlock by same owner, often used for critical sections. Semaphore is a counting synchronization primitive that can allow multiple threads to access a resource (count >1) or signal/wait across threads; it is not inherently tied to ownership and can be binary or counting. Mutex usually has priority inheritance/error detection in some systems; semaphore is more general counting/binary signaling. Need avoid inaccuracies: Both are synchronization primitives. Mutex can be considered a special case of semaphore with count 1? But a mutex is not exactly a counting semaphore because it has ownership semantics and can only be released by the thread that acquired it; semaphore can be signaled by any thread (not necessarily same) usually. Semaphore supports decrement/increment; mutex only lock/unlock. Also mutexes are more general? Let's craft accurate four sentences.\n\nSentence 1: Both are synchronization primitives used to coordinate concurrent threads, but they solve different granularities of access control.\nSentence 2: A mutex is specifically a mutual-exclusion lock for a shared resource, typically allowing only one thread into a critical section at a time and usually requiring that the same thread release it.\nSentence 3: A semaphore is a counter that controls how many threads may proceed past a point or acquire a limited number of resource slots, and it can be released from a different thread or signaled by an event.\nSentence 4: Thus a mutex is about exclusive ownership of one resource, while a semaphore is about a countable number of available permits or completion signals.\n\nCheck sentence count = 4. Good. Need final only. Ensure no extra lines? Fine.",
+  "content": "Both are synchronization primitives used to coordinate concurrent threads, but they manage access at different granularities. A mutex is a mutual-exclusion lock for a shared resource, allowing only one thread into a critical section at a time and usually requiring the same thread to release it. A semaphore is a counter that limits how many threads may proceed or acquire a limited number of resource slots, and it can be signaled from a different thread.",
+  "finish": "length",
+  "usage": {
+   "prompt_tokens": 29,
+   "total_tokens": 541,
+   "completion_tokens": 512,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 416
+   }
+  }
+ },
+ {
+  "prompt": "Solve: a train leaves at 14:05 at 80 km/h; another leaves the same station at 14:35 at 110 km/h. When does the second catch up?",
+  "temperature": 0,
+  "seed": 1002,
+  "reasoning": "We need answer solve. Need be careful: train leaves at 14:05 at 80 km/h; another same station at 14:35 at 110 km/h. When does second catch up? Need compute. Let's reason.\n\nFirst train starts 14:05 at 80 km/h. Second starts 14:35 (30 min later) at 110 km/h. At 14:35, first has traveled 80 * 0.5 h = 40 km. Relative speed = 110 - 80 = 30 km/h. Time for second to close 40 km = 40/30 h = 4/3 h = 1 h 20 min. Second starts 14:35, add 1:20 = 15:55. Check first distance at 15:55: from 14:05 to 15:55 = 1h50m = 11/6 h? 1h50 = 110 min = 11/6 h. *80 = 80*11/6 = 880/6 = 146.666... km. Second from 14:35 to 15:55 = 1h20 = 4/3 h *110 = 440/3 = 146.666... yes.\n\nNeed present maybe mention assuming constant speeds and same direction. Answer 15:55. Could include equations. Need maybe note if second train leaves same station at 14:35 at 110 km/h. Yes.\n\nNeed final concise. Ensure no hidden trap: \"leaves at 14:05 at 80 km/h\" maybe train leaves at 14:05 at 80 km/h (speed). Another leaves same station at 14:35 at 110 km/h. When does second catch up? Straightforward.\n\nNeed final with calculation. Since user says solve, include steps. No need too verbose. Use 24-hour time. Could say 15:55 (3:55 PM). Let's craft.",
+  "content": "At 14:35, the first train has gone for 30 min:\n\n\\[\n80 \\times 0.5 = 40\\text{ km}\n\\]\n\nThe second train gains at:\n\n\\[\n110-80=30\\text{ km/h}\n\\]\n\nTime to close 40 km:\n\n\\[",
+  "finish": "length",
+  "usage": {
+   "prompt_tokens": 56,
+   "total_tokens": 568,
+   "completion_tokens": 512,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 432
+   }
+  }
+ },
+ {
+  "prompt": "Solve: a train leaves at 14:05 at 80 km/h; another leaves the same station at 14:35 at 110 km/h. When does the second catch up?",
+  "temperature": 1.0,
+  "seed": 1002,
+  "reasoning": "We have a train leaving at 14:05 at 80 km/h. Another leaves the same station at 14:35 at 110 km/h. When does the second catch up?\n\nTrain 1: leaves at 14:05 at 80 km/h.\nTrain 2: leaves at 14:35 at 110 km/h.\n\nBy 14:35, train 1 has been traveling for 30 minutes = 0.5 h, covering 80 × 0.5 = 40 km.\n\nRelative speed: 110 − 80 = 30 km/h.\n\nTime for train 2 to close 40 km gap: 40 / 30 = 4/3 h = 1 h 20 min.\n\nTrain 2 starts at 14:35, so it catches up at 14:35 + 1:20 = 15:55.\n\nCheck: at 15:55, train 1 traveled from 14:05 to 15:55 = 1 h 50 min = 1.8333 h, distance = 80 × 11/6 = 80 × 1.8333 = 146.67 km. Train 2 traveled 1 h 20 min = 4/3 h, distance = 110 × 4/3 = 440/3 = 146.67 km. ✓\n\nSo answer: 15:55.\n\nLet me write it clearly.",
+  "content": "## Setting Up the Problem\n\n**Train 1** leaves at 14:05 at 80 km/h.\n**Train 2** leaves at 14:35 at 110 km/h.\n\nAt 14:35, Train 1 has already been traveling for **30 minutes (0.5 h)**, so it has a head start of:\n\n$$80 \\text{ km/h} \\times 0.5 \\text{ h} = 40 \\text{ km}$$\n\n## Solving\n\nTrain 2 gains on Train 1 at a relative speed of:\n\n$$110 - 80 = 30 \\text{ km/h}$$\n\nTime needed to close the 40 km gap:\n\n$$t = \\frac{40 \\text{ km}}{30 \\text{ km/h}} = \\frac{4}{3} \\text{ h} = 1 \\",
+  "finish": "length",
+  "usage": {
+   "prompt_tokens": 56,
+   "total_tokens": 568,
+   "completion_tokens": 512,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 312
+   }
+  }
+ },
+ {
+  "prompt": "Translate into French: 'The quick brown fox jumps over the lazy dog while the farmer sleeps.'",
+  "temperature": 0,
+  "seed": 1003,
+  "reasoning": "The user wants a translation into French of a pangram: 'The quick brown fox jumps over the lazy dog while the farmer sleeps.'\n\nNeed produce French translation. Need be accurate. Let's translate carefully.\n\nEnglish: The quick brown fox jumps over the lazy dog while the farmer sleeps.\nFrench: Le renard brun rapide saute par-dessus le chien paresseux pendant que le fermier dort.\nCheck word order and idioms. \"quick brown fox\" = renard brun rapide (adjective order? French often adjective after noun for color/nationality but quick/brown? \"renard brun rapide\" is acceptable; more natural \"un renard brun rapide\". \"jumps over\" = saute par-dessus / saute par-dessus. \"lazy dog\" = chien paresseux. \"while the farmer sleeps\" = pendant que le fermier dort. Good.\n\nNeed maybe preserve pangram? French translation doesn't need pangram. Could mention if you want a French pangram, different. But user just asks translate. Provide only translation likely.\n\nNeed ensure no extra. Final in French maybe just sentence. Could include quotes.\n\nNeed consider accents: \"par-dessus\" hyphen. \"pendant que\". Good.\n\nFinal concise.",
+  "content": "Le renard brun rapide saute par-dessus le chien paresseux pendant que le fermier dort.",
+  "finish": "stop",
+  "usage": {
+   "prompt_tokens": 39,
+   "total_tokens": 352,
+   "completion_tokens": 313,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 283
+   }
+  }
+ },
+ {
+  "prompt": "Translate into French: 'The quick brown fox jumps over the lazy dog while the farmer sleeps.'",
+  "temperature": 1.0,
+  "seed": 1003,
+  "reasoning": "The user wants a translation into French of: 'The quick brown fox jumps over the lazy dog while the farmer sleeps.'\nNeed provide French translation. Need be accurate. French: « Le renard brun rapide saute par-dessus le chien paresseux pendant que le fermier dort. » Check word order and adjectives placement.\nEnglish adjectives: quick brown fox = quick (rapid) brown fox (renard brun). In French, adjectives generally after noun, but color and some adjectives can precede? Brown = brun/brune. Fox masculine = renard brun. Quick = quick/rapide. French adjective rapide usually after noun: renard brun rapide? Or renard rapide brun? Better: « le renard brun et rapide » but concise. Common pangram in French? « Le renard brun rapide saute par-dessus le chien paresseux pendant que le fermier dort. » This is grammatical: le renard brun rapide (brown quick fox) / le chien paresseux. \"while the farmer sleeps\" = pendant que le fermier dort. Could use \"tandis que\". Need final only translation likely. Ensure proper French punctuation. Maybe « par-dessus » vs « par-dessus le jardin »? For over (jumps over), « par-dessus » is okay; « sur » maybe. Original: jumps over the lazy dog: « saute par-dessus le chien paresseux ». Good.\nNeed final only, maybe include just translated sentence. No extra explanation. Ensure accents: « Pendant que le fermier dort » capital? Within sentence no. Sentence: « Le renard brun rapide saute par-dessus le chien paresseux pendant que le fermier dort. » Good.\nNeed consider gender: renard masculine, chien masculine. Brun is adjective for fox (brun) no need brune. Good.",
+  "content": "Le renard brun rapide saute par-dessus le chien paresseux pendant que le fermier dort.",
+  "finish": "stop",
+  "usage": {
+   "prompt_tokens": 39,
+   "total_tokens": 488,
+   "completion_tokens": 449,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 419
+   }
+  }
+ },
+ {
+  "prompt": "Write a SQL query that returns the three most recent orders per customer from orders(id, customer_id, created_at).",
+  "temperature": 0,
+  "seed": 1004,
+  "reasoning": "The user wants a SQL query that returns the three most recent orders per customer from a table `orders(id, customer_id, created_at)`.\n\nThis is a classic \"top-N per group\" problem. There are several ways to do this:\n\n1. Using a window function (ROW_NUMBER) with a CTE — the most common modern approach\n2. Using a correlated subquery\n3. Using a join with a derived table\n\nLet me write the standard solution using ROW_NUMBER():\n\n```sql\nWITH ranked_orders AS (\n    SELECT\n        id,\n        customer_id,\n        created_at,\n        ROW_NUMBER() OVER (\n            PARTITION BY customer_id\n            ORDER BY created_at DESC\n        ) AS rn\n    FROM orders\n)\nSELECT id, customer_id, created_at\nFROM ranked_orders\nWHERE rn <= 3;\n```\n\nThis works in most modern databases (PostgreSQL, SQL Server, MySQL 8+, Oracle, etc.).\n\nAlternative approaches:\n\n**Correlated subquery approach:**\n```sql\nSELECT o.id, o.customer_id, o.created_at\nFROM orders o\nWHERE (\n    SELECT COUNT(*)\n    FROM orders o2\n    WHERE o2.customer_id = o.customer_id\n      AND o2.created_at > o.created_at\n) < 3;\n```\n\nThis handles ties differently — if two orders have the same created_at, both could be included (or the count approach includes ties). Actually with the COUNT approach, if there are ties at the boundary, you might get more than 3 rows per customer. The ROW_NUMBER approach gives exactly 3 (or fewer) rows per customer but arbitrary tie-breaking.\n\n**Using RANK/DENSE_RANK** would include ties, potentially returning more than 3 rows.\n\nI should mention the tie-breaking consideration briefly. Also note that if created_at has ties, ROW_NUMBER picks an arbitrary one; you could add a tiebreaker like `ORDER BY created_at DESC, id DESC` for determinism.\n\nLet me also consider MySQL compatibility — ROW_NUMBER works in MySQL 8.0+. For older MySQL, you'd need the",
+  "content": null,
+  "finish": "length",
+  "usage": {
+   "prompt_tokens": 42,
+   "total_tokens": 554,
+   "completion_tokens": 512,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 510
+   }
+  }
+ },
+ {
+  "prompt": "Write a SQL query that returns the three most recent orders per customer from orders(id, customer_id, created_at).",
+  "temperature": 1.0,
+  "seed": 1004,
+  "reasoning": "The user wants a SQL query that returns the three most recent orders per customer from an orders table with columns id, customer_id, created_at. Need provide SQL. Need consider database dialect differences. We can give standard SQL using ROW_NUMBER() window function (works in Postgres, SQL Server, etc.), mention MySQL older versions need different approach. Need answer concise. Could include tie handling: order by created_at DESC, id DESC maybe to get deterministic. Use QUALIFY for Snowflake/BigQuery? Better give common standard SQL with ROW_NUMBER and partition by customer_id, filter rn <=3. Need be careful: In standard SQL, ORDER BY in window then subquery.\n\nLet's craft:\nSELECT id, customer_id, created_at\nFROM (\n  SELECT id, customer_id, created_at,\n         ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY created_at DESC, id DESC) AS rn\n  FROM orders\n) t\nWHERE rn <= 3\nORDER BY customer_id, created_at DESC;\n\nNote ties: created_at ties broken by id (or add secondary criterion). If exact three most recent including ties? The request says three most recent orders per customer; window picks top 3 by ordering. If created_at ties and want all tied at boundary, different. Could mention. Mention MySQL 8+ supports ROW_NUMBER. Older MySQL uses join or user variables. Now final. Ensure no chain-of-thought. Keep answer moderate detail. No citations.",
+  "content": "```sql\nSELECT id, customer_id, created_at\nFROM (\n    SELECT\n        id,\n        customer_id,\n        created_at,\n        ROW_NUMBER() OVER (\n            PARTITION BY customer_id\n            ORDER BY created_at DESC, id DESC\n        ) AS rn\n    FROM orders\n) ranked\nWHERE rn <= 3\nORDER BY customer_id, created_at DESC;\n```\n\n`id DESC` is a deterministic tie-breaker for identical `created_at` values. This works on PostgreSQL, SQL Server, MySQL 8+, Oracle 12c+, Snowflake, etc. For older MySQL, use a different approach such as a join or user-defined variable/application-side",
+  "finish": "length",
+  "usage": {
+   "prompt_tokens": 42,
+   "total_tokens": 554,
+   "completion_tokens": 512,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 335
+   }
+  }
+ },
+ {
+  "prompt": "List five failure modes of a distributed lock built on Redis SETNX and how to mitigate each.",
+  "temperature": 0,
+  "seed": 1005,
+  "reasoning": "The user asks: \"List five failure modes of a distributed lock built on Redis SETNX and how to mitigate each.\" Need answer technical. Need think through content.\n\nWe need produce five failure modes and mitigations. Need be accurate. Distributed lock on Redis SETNX (SET key value NX). Common failure modes:\n1. Lock expiry/TTL too short or not set: lock held forever if process crashes before release; or if TTL too short, lock expires while work still in progress causing mutual exclusion violation. Mitigation: always set PX/EX with lock, use unique token/value, extend/renew (watchdog/lease), use Redlock? Actually SETNX with PX. Mitigate by setting TTL and fencing tokens.\n2. Non-atomic check-and-set / race: SETNX alone is atomic for set if not exists, but release via DEL is not atomic with ownership check; need Lua script compare-and-delete (get value, if matches del). Also if using SETNX then GET to verify? Mitigation: use SET key value NX PX (atomic) and Lua for release.\n3. Clock/TTL and process pause: lock expires while holder still working (GC pause, network partition), another client acquires -> concurrent critical sections. Mitigation: fencing tokens/epoch from lock service, monotonic tokens checked by downstream resource; keep critical section shorter than TTL; renew lease; use storage-level fencing.\n4. Redis failover/replication: SETNX on primary acknowledged but not replicated; failover promotes replica without lock -> two holders. Mitigation: use Redis Sentinel/Cluster with careful config, wait for replication/acks? Redis doesn't have strong consistency; use Redlock (multiple independent Redis instances) with caveats, or use consensus-backed lock (etcd/ZooKeeper) for strong guarantees; avoid relying solely on Redis for correctness-critical mutual exclusion.\n5. Lost/duplicate release / deleting someone else's lock: client A acquires, TTL expires, client B acquires same key, client A wakes and DEL deletes B's lock. Mitigation: unique value per acquisition (UUID), release only if value matches via Lua; never DEL",
+  "content": null,
+  "finish": "length",
+  "usage": {
+   "prompt_tokens": 35,
+   "total_tokens": 547,
+   "completion_tokens": 512,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 510
+   }
+  }
+ },
+ {
+  "prompt": "List five failure modes of a distributed lock built on Redis SETNX and how to mitigate each.",
+  "temperature": 1.0,
+  "seed": 1005,
+  "reasoning": "The user asks to list five failure modes of a distributed lock built on Redis SETNX and mitigation for each. Need provide accurate distributed systems content. Need ensure final answer only after tool. Think through content carefully.\n\nKey Redis SETNX lock failure modes:\n1) Lock not atomic with value/fencing token: SETNX returns OK/nil but if you set key without expiry or bad value can block forever; actually SETNX itself atomic but no automatic release/ownership. Failure modes often: \n- No TTL/deadlock: crashed client holds lock forever. Mitigate: expire lock (SETNX + EXPIRE) atomically via SET key value NX PX/PX (or Lua), keep TTL, watch renewal.\n- Expiry too short/lease too short: lock expires while holder still working (clock skew, GC pause), another client enters; mitigates: lease duration > operation max, renewal/keepalive (watchdog), fencing tokens to reject stale writes.\n- Unlock by wrong owner / delete others' lock due to TTL expiry then relock and delete: client A's lock expires, client B acquires, A finishes and DEL key removing B's lock. Mitigate: unique token per acquisition, release only if value matches (Lua compare-and-delete), random fencing monotonic token.\n- Non-atomic check-and-set with SETNX + manual EXPIRE: race between SETNX and EXPIRE means lock can persist forever if crash between; mitigation: SET ... NX PX in one command (Redis 2.6.12+) or Lua script.\n- Lock granularity/Redis failover/read replica split brain: Redis is sometimes unavailable or replica promotion causes lock lost/duplicate locks; clients don't see same lock. Mitigate: use Redis with persistence/wait, Redlock with multiple independent Redis instances, use strong consistency/quorum/consensus (etcd/ZooKeeper) or confirm majority; acknowledge Redlock caveats.\n- Clock drift/lease timing and GC; mitigation NTP, conservative expiry, renewal.\n- Thundering herd/livelock on retry? maybe less central.\n- Partial failure while writing critical section then commit after lock lost (fencing) mitigation monotonic fencing tokens checked",
+  "content": null,
+  "finish": "length",
+  "usage": {
+   "prompt_tokens": 35,
+   "total_tokens": 547,
+   "completion_tokens": 512,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 510
+   }
+  }
+ },
+ {
+  "prompt": "Write a bash one-liner that finds the ten largest files under the current directory, human-readable sizes.",
+  "temperature": 0,
+  "seed": 1006,
+  "reasoning": "The user wants a bash one-liner that finds the ten largest files under the current directory, human-readable sizes.\n\nNeed produce answer. Need think about exact command. Options:\n- `find . -type f -print0 | du -h --files0-from=- | sort -rh | head -n 10`\nThis finds files, du prints human-readable sizes and paths, sort -rh sorts human-readable sizes descending, head 10. But `du -h --files0-from=-` with `-print0`? du supports --files0-from. However `du` with multiple files prints each file size? Yes `du -h --files0-from=-` reads file names from stdin and prints sizes. It may print total? With --files0-from, no total? Need verify. `du --files0-from=-` reads names from stdin; it prints each file's disk usage. It might not print total when files are listed? I think `du` prints a total line only when multiple args? Actually `du file1 file2` prints each file and a total line? Let's recall: `du` with multiple arguments prints each argument and a total at end? Example `du a b` prints `4.0K a`, `8.0K b`, `12K total`? I think yes, du prints total for multiple arguments. With --files0-from maybe also prints total? Need avoid total line. Could use `du -h --files0-from=- | sort -rh | head -n 10` might include total line if it sorts high (total likely largest) and head would show total. Bad.\n\nAlternative: `find . -type f -exec du -h {} + | sort -rh | head -n 10` also may print total? With many args, du prints total line. Bad.\n\nBetter: use `find . -type f -print0 | xargs -0 du -h | sort -rh | head -n 10` same total issue.\n\nUse `find . -type f -printf '%s %p\\n' | sort -rn | head -n 10 | while read -r size path; do printf '%s\\t%s\\n' \"$(numfmt",
+  "content": null,
+  "finish": "length",
+  "usage": {
+   "prompt_tokens": 38,
+   "total_tokens": 550,
+   "completion_tokens": 512,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 510
+   }
+  }
+ },
+ {
+  "prompt": "Write a bash one-liner that finds the ten largest files under the current directory, human-readable sizes.",
+  "temperature": 1.0,
+  "seed": 1006,
+  "reasoning": "The user wants a bash one-liner that finds the ten largest files under the current directory, with human-readable sizes. Need provide correct command. Consider portability: GNU find supports -size and sort by human? We want sizes human-readable. Common one-liner:\nfind . -type f -printf '%s\\t%p\\n' | sort -nr | head -n 10 | cut -f2- | xargs -I {} du -h {}\nBut that prints each file with its du size, but duplicates? du -h {} prints size and name. Need human-readable sizes. Better:\nfind . -type f -exec du -h {} + | sort -rh | head -n 10\nThis is simplest. du -h prints human-readable size, and sort -h sorts human-readable values (GNU sort needed -h). Actually `sort -h` works on human-readable. `du -h` output lines like \"1.2M\\t./file\". sort -rh sorts reverse numeric human. head. That is idiomatic GNU.\nAlternative fully GNU and robust:\nfind . -type f -printf '%s\\t%p\\n' | sort -nr | head -n 10 | awk '{ printf \"%.1f\\t%s\\n\", $1/1024, $2 }' but need human-readable. Use `numfmt --to=iec` per line maybe:\nfind . -type f -printf '%s\\t%p\\n' | sort -nr | head -n 10 | while IFS=$'\\t' read -r size path; do printf '%s\\t%s\\n' \"$(numfmt --to=iec \"$size\")\" \"$path\"; done\nBut asks one-liner. Simplest: `find . -type f -exec du -h {} + | sort -rh | head -n 10`. Need ensure current directory includes hidden files? find . includes hidden. Files under current dir. It prints directory? -type f excludes dirs. Hardlinks counted multiple times (each file entry), okay. Empty etc fine.\n\nNeed maybe mention GNU. Could give one-liner and brief note. Final only. Ensure no extra tool mentions",
+  "content": null,
+  "finish": "length",
+  "usage": {
+   "prompt_tokens": 38,
+   "total_tokens": 550,
+   "completion_tokens": 512,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 510
+   }
+  }
+ },
+ {
+  "prompt": "Summarize the plot of Romeo and Juliet in exactly three sentences.",
+  "temperature": 0,
+  "seed": 1007,
+  "reasoning": "The user wants a summary of the plot of Romeo and Juliet in exactly three sentences. Need answer exactly three sentences. Need ensure no extra text. Plot: Romeo and Juliet are lovers from feuding families; they secretly marry, fate/family feud leads to tragedy, both die and families reconcile. Need exactly three sentences. Let's craft concise.\n\nSentence 1: In Verona, Romeo and Juliet, from feuding families, fall in love and secretly marry despite their families' hatred.\nSentence 2: Their secret union is complicated by fate, family conflict, and miscommunication, including Romeo's banishment and Juliet's desperate attempts to avoid marriage.\nSentence 3: After Romeo kills Tybalt and is banished, Juliet takes a sleeping potion to fake her death, but the potion fails and both lovers die, forcing the feuding families to reconcile.\n\nCheck exactly three sentences. Yes. Need maybe avoid inaccuracies: Romeo kills Tybalt after Tybalt kills Mercutio; banished. Juliet takes potion; Romeo hears she died, kills himself; Juliet wakes and kills herself. Good.\n\nNeed final only three sentences. Ensure no bullets. Exactly three sentences. Count punctuation: Sentence 1 ends period. Sentence 2 ends period. Sentence 3 ends period. Good.",
+  "content": "In Verona, Romeo and Juliet, from feuding families, fall in love and secretly marry despite their families’ hatred. Their secret union is complicated by fate, family conflict, and miscommunication, including Romeo’s banishment and Juliet’s desperate attempts to avoid marriage. After Romeo kills Tybalt and is banished, Juliet takes a sleeping potion to fake her death, but the potion fails and both lovers die, forcing the feuding families to reconcile.",
+  "finish": "stop",
+  "usage": {
+   "prompt_tokens": 30,
+   "total_tokens": 464,
+   "completion_tokens": 434,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 315
+   }
+  }
+ },
+ {
+  "prompt": "Summarize the plot of Romeo and Juliet in exactly three sentences.",
+  "temperature": 1.0,
+  "seed": 1007,
+  "reasoning": "The user wants a plot summary of Romeo and Juliet in exactly three sentences. Need ensure exactly three sentences. Need summarize accurately.\n\nNeed compose final with exactly three sentences. Avoid extra text. Let's craft three sentences.\n\nSentence 1: Two lovers, Romeo (from the Montague household) and Juliet (from the Capulet household), fall in love despite their families' bitter feud.\nSentence 2: Secretly married, they try to keep their union hidden until a chance meeting identifies/raises conflict? Need accurate: After secret marriage, Juliet is forced to marry count? Let's recall plot: Romeo and Juliet fall in love at a Capulet party, secretly marry. Tybalt kills Mercutio (who fights on Romeo's? Actually Mercutio is Prince Escalus? No). Romeo kills Tybalt in revenge, is banished. Juliet takes a potion to fake death, later returns after Romeo arrives. Romeo kills himself upon learning Juliet is dead, Juliet wakes and dies, families reconcile.\n\nNeed exactly three sentences. Keep concise.\n\nDraft:\n\"Romeo and Juliet, whose families are bitter enemies, fall in love and secretly marry. In the ensuing violence, Romeo kills Tybalt and is banished, while Juliet tries to escape her arranged marriage and then takes a sleeping potion to fake her death. After Romeo arrives and kills himself upon believing Juliet is dead, Juliet wakes and dies too, bringing the warring families to reconcile.\"\n\nCount sentences: 1 \"Romeo and Juliet, whose families are bitter enemies, fall in love and secretly marry.\" 2 \"In the ensuing violence, Romeo kills Tybalt and is banished, while Juliet tries to escape her arranged marriage and then takes a sleeping potion to fake her death.\" 3 \"After Romeo arrives and kills himself upon believing Juliet is dead, Juliet wakes and dies too, bringing the warring families to reconcile.\" Exactly 3.\n\nNeed ensure \"against arranged marriage\" accurate: Juliet was to be married to Paris; Romeo banished before wedding. Fine.\n\nNeed final only three sentences. Ensure no semicolon weird. No",
+  "content": null,
+  "finish": "length",
+  "usage": {
+   "prompt_tokens": 30,
+   "total_tokens": 542,
+   "completion_tokens": 512,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 510
+   }
+  }
+ },
+ {
+  "prompt": "Long prompt 0.\n# FILE: exllamav3/__init__.py\nimport os\n\n# ROCm: the profiler tool registration torch loads for torch.profiler leaves the HSA runtime's event\n# thread spinning on a core for the life of",
+  "temperature": 0,
+  "seed": 1008,
+  "reasoning": "The user asks to explain the code above, function by function. The code is truncated (ends mid-line \"mlp_post_\"). I should explain what's visible, note the truncation, and describe each file/function.\n\nLet me go through:\n\nFile 1: exllamav3/__init__.py\n- Sets ROCPROFILER_REGISTER_ENABLED=0 default (ROCm profiler thread spinning).\n- Imports torch, raises RuntimeError with helpful message if missing.\n- _default_allocator_settings(): expandable segments for CUDA caching allocator unless user configured PYTORCH_CUDA_ALLOC_CONF, on Windows, ROCm, or EXL3_EXPANDABLE_SEGMENTS=0. Uses torch._C._accelerator_setAllocatorSettings or torch.cuda.memory._set_allocator_settings.\n- _default_triton_backend(): on ROCm, sets TRITON_DEFAULT_BACKEND=amd.\n- Imports Config, Model, Tokenizer, MMEmbedding, Cache, CacheLayer_fp16, CacheLayer_quant, Generator, Job,",
+  "content": null,
+  "finish": "length",
+  "usage": {
+   "prompt_tokens": 3629,
+   "total_tokens": 3885,
+   "completion_tokens": 256,
+   "prompt_tokens_details": {
+    "cached_tokens": 3584,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 254
+   }
+  }
+ },
+ {
+  "prompt": "Long prompt 0.\n# FILE: exllamav3/__init__.py\nimport os\n\n# ROCm: the profiler tool registration torch loads for torch.profiler leaves the HSA runtime's event\n# thread spinning on a core for the life of",
+  "temperature": 1.0,
+  "seed": 1008,
+  "reasoning": "The user asks to explain the code above, function by function. I need to note the prompt is truncated (\"mlp_post_\" cut off). I should explain what is shown, and note the truncation.\n\nLet me go through the files:\n\nFile 1: exllamav3/__init__.py\n- Imports os\n- ROCm profiler registration: sets env var ROCPROFILER_REGISTER_ENABLED=0 via setdefault (unless already set). This prevents profiler tool registration torch loads which leaves HSA event thread spinning. Has no effect on CUDA.\n- try import torch; on ImportError raise RuntimeError with message about installing torch.\n- _default_allocator_settings(): expands CUDA caching allocator segments (expandable_segments:True) unless user configured PYTORCH_CUDA_ALLOC_CONF, or on Windows (sys.platform win32), or ROCm (torch.version.hip), or EXL3_EXPANDABLE_SEGMENTS=0. Tries torch._C._accelerator_setAllocatorSettings or torch.cuda.memory._set_allocator_settings",
+  "content": null,
+  "finish": "length",
+  "usage": {
+   "prompt_tokens": 3629,
+   "total_tokens": 3885,
+   "completion_tokens": 256,
+   "prompt_tokens_details": {
+    "cached_tokens": 3584,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 254
+   }
+  }
+ },
+ {
+  "prompt": "Long prompt 1.\n# FILE: exllamav3/__init__.py\nimport os\n\n# ROCm: the profiler tool registration torch loads for torch.profiler leaves the HSA runtime's event\n# thread spinning on a core for the life of",
+  "temperature": 0,
+  "seed": 1009,
+  "reasoning": "The user pasted a long prompt containing code from exllamav3 (a library for running quantized LLMs). They ask: \"Explain what the code above does, function by function.\"\n\nThe code is truncated (the cohere2.py file is cut off mid-way). I should explain what's shown, function by function, and note the truncation.\n\nLet me go through the files:\n\n1. `exllamav3/__init__.py`:\n   - Sets `ROCPROFILER_REGISTER_ENABLED=0` env var (unless already set) to avoid HSA runtime event thread spinning on ROCm.\n   - Imports torch; raises RuntimeError with helpful message if torch missing.\n   - `_default_allocator_settings()`: expands CUDA caching allocator segments (expandable_segments:True) unless user configured PYTORCH_CUDA_ALLOC_CONF, on Windows, on ROCm, or EXL3_EXPANDABLE_SEGMENTS=0. Uses `torch._C._accelerator_setAllocatorSettings` or `torch.cuda.memory._set",
+  "content": null,
+  "finish": "length",
+  "usage": {
+   "prompt_tokens": 12681,
+   "total_tokens": 12937,
+   "completion_tokens": 256,
+   "prompt_tokens_details": {
+    "cached_tokens": 12672,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 254
+   }
+  }
+ },
+ {
+  "prompt": "Long prompt 1.\n# FILE: exllamav3/__init__.py\nimport os\n\n# ROCm: the profiler tool registration torch loads for torch.profiler leaves the HSA runtime's event\n# thread spinning on a core for the life of",
+  "temperature": 1.0,
+  "seed": 1009,
+  "reasoning": "The user has pasted a huge prompt containing multiple files from the exllamav3 library (an inference library for LLMs). They ask: \"Explain what the code above does, function by function.\"\n\nNote that the pasted content is truncated—cohere2.py is cut off mid-file, and architectures.py seems oddly truncated (\"from .cohere import CohereModel\\nfrom .cohere2 import Cohere2Model\\nfrom .decilm...\" — actually it appears the ARCHITECTURES dict includes many models). I should explain the code shown, noting it's a fragment of the exllamav3 library, giving function-by-function explanations of the files shown.\n\nI should be careful: the prompt is very long. I need to provide a thorough function-by-function explanation. Since the content is truncated mid-way (cohere2.py cut off, architectures.py cut at \"self.num_kv_heads = self.read_cfg(int, \"num_key_value_heads\", self.num_q_heads)\"), I should note that.\n\nLet me go through",
+  "content": null,
+  "finish": "length",
+  "usage": {
+   "prompt_tokens": 12681,
+   "total_tokens": 12937,
+   "completion_tokens": 256,
+   "prompt_tokens_details": {
+    "cached_tokens": 12672,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 254
+   }
+  }
+ },
+ {
+  "prompt": "Long prompt 2.\n# FILE: exllamav3/__init__.py\nimport os\n\n# ROCm: the profiler tool registration torch loads for torch.profiler leaves the HSA runtime's event\n# thread spinning on a core for the life of",
+  "temperature": 0,
+  "seed": 1010,
+  "reasoning": "The user pasted a large codebase (exllamav3) and asks: \"Explain what the code above does, function by function.\"\n\nThis is a huge amount of code. I should provide a structured explanation of the files and functions shown. I need to be careful: the code is truncated at the end (deepseek_v4_mtp.py forward is cut off mid-line). I should explain what's visible, note the truncation, and organize by file/module.\n\nLet me go through the files:\n\n1. `exllamav3/__init__.py` — package init. Sets ROCPROFILER_REGISTER_ENABLED=0 default (ROCm profiler thread spin). Imports torch with a helpful error if missing. `_default_allocator_settings()` — sets expandable_segments for CUDA caching allocator unless user configured PYTORCH_CUDA_ALLOC_CONF, on Windows, on ROCm, or EXL3_EXPANDABLE_SEGMENTS=0. `_default_triton_backend()` — on ROCm sets TRITON_DEFAULT_BACKEND=amd. Then imports Config, Model",
+  "content": null,
+  "finish": "length",
+  "usage": {
+   "prompt_tokens": 38825,
+   "total_tokens": 39081,
+   "completion_tokens": 256,
+   "prompt_tokens_details": {
+    "cached_tokens": 38784,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 254
+   }
+  }
+ },
+ {
+  "prompt": "Long prompt 2.\n# FILE: exllamav3/__init__.py\nimport os\n\n# ROCm: the profiler tool registration torch loads for torch.profiler leaves the HSA runtime's event\n# thread spinning on a core for the life of",
+  "temperature": 1.0,
+  "seed": 1010,
+  "reasoning": "The user asks: \"Explain what the code above does, function by function.\" The prompt contains many files. I need to explain the code above, function by function. This is a huge amount of code (many architecture files). I should not reproduce the code verbatim, but explain functions/classes.\n\nHowever, note the prompt is \"Long prompt 2.\" with lots of files. The task likely wants a summary of the code. This is code explanation, not harmful. Need to be careful: The code includes multiple files; some messages may be truncated in the user prompt (e.g., deepseek_v4_mtp.py ends mid-function). We should explain what we can.\n\nNeed answer in English (user's language). We should be thorough but not invent. We can organize by file/module and list function-level descriptions. Since the content is large, I can give a structured explanation.\n\nLet me parse the files:\n\n1. exllamav3/__init__.py\n- Sets ROCPROFILER_REGISTER_ENABLED=0 by default (unless already set), before importing torch, to avoid profiler thread spinning on RO",
+  "content": null,
+  "finish": "length",
+  "usage": {
+   "prompt_tokens": 38825,
+   "total_tokens": 39081,
+   "completion_tokens": 256,
+   "prompt_tokens_details": {
+    "cached_tokens": 38784,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 254
+   }
+  }
+ }
+]

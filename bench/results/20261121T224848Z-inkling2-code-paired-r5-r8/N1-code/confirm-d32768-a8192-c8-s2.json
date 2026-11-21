@@ -1,0 +1,1 @@
+{"key": "confirm-d32768-a8192-c8-s2", "prompt_tokens": 32764, "completion_tokens": 1, "finish": "length", "cached_tokens": 32640, "ttft_s": 0.2327856519841589, "first_s": 163894.882351224, "last_s": 163894.883464472, "chunks": 2, "marks": [[163894.882351, 0], [163894.883464, 1]], "decode_tok_s": 898.2724428778296}

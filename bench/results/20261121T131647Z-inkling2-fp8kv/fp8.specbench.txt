@@ -1,0 +1,7 @@
+{"c": 1, "drafts": 10377.0, "accepted": 20448.0, "mean_acceptance_length": 2.971}
+c1: Output token throughput (tok/s): 357.52 ;Median TTFT (ms): 33.51 ;Mean TPOT (ms): 2.63 ;
+{"c": 4, "drafts": 10201.0, "accepted": 20628.0, "mean_acceptance_length": 3.022}
+c4: Output token throughput (tok/s): 798.83 ;Median TTFT (ms): 56.09 ;Mean TPOT (ms): 4.61 ;
+{"c": 8, "drafts": 10166.0, "accepted": 20654.0, "mean_acceptance_length": 3.032}
+c8: Output token throughput (tok/s): 1282.70 ;Median TTFT (ms): 73.67 ;Mean TPOT (ms): 5.76 ;
+/srv/qwen5090/results/20261121T132748Z-inkling2-specbench-fp8kv-fp8

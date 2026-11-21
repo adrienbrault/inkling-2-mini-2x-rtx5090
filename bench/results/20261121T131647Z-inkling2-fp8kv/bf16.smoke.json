@@ -1,0 +1,52 @@
+{
+ "tool_call": {
+  "status": 200,
+  "ok": true,
+  "detail": [
+   {
+    "id": "chatcmpl-tool-9431e694f893615c",
+    "type": "function",
+    "function": {
+     "name": "get_weather",
+     "arguments": "{\"city\":\"Paris\"}"
+    }
+   }
+  ]
+ },
+ "image": {
+  "status": 200,
+  "ok": true,
+  "detail": "red"
+ },
+ "t08": [
+  {
+   "status": 200,
+   "ok": true,
+   "tokens": 999,
+   "finish": "stop",
+   "head": "In copper and light, a thousand tiny engines breathe;  \neach"
+  },
+  {
+   "status": 200,
+   "ok": true,
+   "tokens": 945,
+   "finish": "stop",
+   "head": "Thousands of lanes hum in the dark array,  \nEach tiny core a"
+  },
+  {
+   "status": 200,
+   "ok": true,
+   "tokens": 722,
+   "finish": "stop",
+   "head": "Silicon fields hum with parallel light,  \nten thousand lanes"
+  },
+  {
+   "status": 200,
+   "ok": true,
+   "tokens": 688,
+   "finish": "stop",
+   "head": "Short poem:  \nSilicon choirs hum in bright motion,  \nthousan"
+  }
+ ],
+ "all_ok": true
+}

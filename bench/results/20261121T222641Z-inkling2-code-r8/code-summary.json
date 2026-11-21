@@ -1,0 +1,656 @@
+[
+ {
+  "cell": "d1024-a2048-c1",
+  "depth": 1024,
+  "context_tokens": 1021,
+  "append": 2048,
+  "c": 1,
+  "prompt_tokens": [
+   3069
+  ],
+  "cached": [
+   896
+  ],
+  "context_cached": true,
+  "ttft_s": [
+   0.135
+  ],
+  "decode_tok_s": [
+   573.8
+  ],
+  "per_stream_mean": 573.8,
+  "aggregate_sum_of_rates": 573.8,
+  "aggregate_shared_window": 575.3
+ },
+ {
+  "cell": "d1024-a2048-c4",
+  "depth": 1024,
+  "context_tokens": 1021,
+  "append": 2048,
+  "c": 4,
+  "prompt_tokens": [
+   3069,
+   3068,
+   3068,
+   3063
+  ],
+  "cached": [
+   1024,
+   1024,
+   1024,
+   896
+  ],
+  "context_cached": true,
+  "ttft_s": [
+   0.327,
+   0.45,
+   0.534,
+   0.14
+  ],
+  "decode_tok_s": [
+   332.3,
+   253.6,
+   250.8,
+   232.7
+  ],
+  "per_stream_mean": 267.3,
+  "aggregate_sum_of_rates": 1069.4,
+  "aggregate_shared_window": 1131.0
+ },
+ {
+  "cell": "d1024-a2048-c8",
+  "depth": 1024,
+  "context_tokens": 1021,
+  "append": 2048,
+  "c": 8,
+  "prompt_tokens": [
+   3065,
+   3067,
+   3068,
+   3069,
+   3066,
+   3065,
+   3067,
+   3066
+  ],
+  "cached": [
+   1024,
+   1024,
+   1024,
+   1024,
+   1024,
+   1024,
+   1024,
+   1024
+  ],
+  "context_cached": true,
+  "ttft_s": [
+   0.432,
+   0.684,
+   0.936,
+   0.308,
+   0.811,
+   0.558,
+   0.123,
+   1.037
+  ],
+  "decode_tok_s": [
+   161.3,
+   222.0,
+   210.1,
+   193.0,
+   230.9,
+   170.6,
+   150.0,
+   230.8
+  ],
+  "per_stream_mean": 196.1,
+  "aggregate_sum_of_rates": 1568.7,
+  "aggregate_shared_window": 1697.5
+ },
+ {
+  "cell": "d1024-a8192-c1",
+  "depth": 1024,
+  "context_tokens": 1021,
+  "append": 8192,
+  "c": 1,
+  "prompt_tokens": [
+   9210
+  ],
+  "cached": [
+   1024
+  ],
+  "context_cached": true,
+  "ttft_s": [
+   0.456
+  ],
+  "decode_tok_s": [
+   375.9
+  ],
+  "per_stream_mean": 375.9,
+  "aggregate_sum_of_rates": 375.9,
+  "aggregate_shared_window": 377.8
+ },
+ {
+  "cell": "d1024-a8192-c4",
+  "depth": 1024,
+  "context_tokens": 1021,
+  "append": 8192,
+  "c": 4,
+  "prompt_tokens": [
+   9212,
+   9210,
+   9211,
+   9210
+  ],
+  "cached": [
+   1024,
+   1024,
+   1024,
+   1024
+  ],
+  "context_cached": true,
+  "ttft_s": [
+   1.545,
+   0.46,
+   2.036,
+   1.031
+  ],
+  "decode_tok_s": [
+   238.9,
+   169.0,
+   264.5,
+   180.0
+  ],
+  "per_stream_mean": 213.1,
+  "aggregate_sum_of_rates": 852.5,
+  "aggregate_shared_window": 979.9
+ },
+ {
+  "cell": "d1024-a8192-c8",
+  "depth": 1024,
+  "context_tokens": 1021,
+  "append": 8192,
+  "c": 8,
+  "prompt_tokens": [
+   9213,
+   9210,
+   9210,
+   9211,
+   9210,
+   9212,
+   9211,
+   9213
+  ],
+  "cached": [
+   1024,
+   1024,
+   1024,
+   1024,
+   1024,
+   1024,
+   1024,
+   1024
+  ],
+  "context_cached": true,
+  "ttft_s": [
+   1.546,
+   3.693,
+   3.105,
+   2.582,
+   2.064,
+   0.461,
+   4.209,
+   1.032
+  ],
+  "decode_tok_s": [
+   95.9,
+   185.0,
+   150.6,
+   136.0,
+   131.9,
+   91.6,
+   217.1,
+   112.5
+  ],
+  "per_stream_mean": 140.1,
+  "aggregate_sum_of_rates": 1120.6,
+  "aggregate_shared_window": 1830.1
+ },
+ {
+  "cell": "d32768-a2048-c1",
+  "depth": 32768,
+  "context_tokens": 32764,
+  "append": 2048,
+  "c": 1,
+  "prompt_tokens": [
+   34809
+  ],
+  "cached": [
+   32640
+  ],
+  "context_cached": true,
+  "ttft_s": [
+   0.219
+  ],
+  "decode_tok_s": [
+   547.3
+  ],
+  "per_stream_mean": 547.3,
+  "aggregate_sum_of_rates": 547.3,
+  "aggregate_shared_window": 545.9
+ },
+ {
+  "cell": "d32768-a2048-c4",
+  "depth": 32768,
+  "context_tokens": 32764,
+  "append": 2048,
+  "c": 4,
+  "prompt_tokens": [
+   34808,
+   34808,
+   34809,
+   34812
+  ],
+  "cached": [
+   32768,
+   32640,
+   32768,
+   32768
+  ],
+  "context_cached": true,
+  "ttft_s": [
+   0.735,
+   0.22,
+   0.617,
+   0.462
+  ],
+  "decode_tok_s": [
+   278.3,
+   241.8,
+   289.6,
+   250.2
+  ],
+  "per_stream_mean": 264.9,
+  "aggregate_sum_of_rates": 1059.8,
+  "aggregate_shared_window": 1143.8
+ },
+ {
+  "cell": "d32768-a2048-c8",
+  "depth": 32768,
+  "context_tokens": 32764,
+  "append": 2048,
+  "c": 8,
+  "prompt_tokens": [
+   34809,
+   34806,
+   34812,
+   34811,
+   34812,
+   34807,
+   34809,
+   34812
+  ],
+  "cached": [
+   32768,
+   32768,
+   32768,
+   32768,
+   32768,
+   32768,
+   32768,
+   32768
+  ],
+  "context_cached": true,
+  "ttft_s": [
+   0.76,
+   0.44,
+   0.921,
+   0.599,
+   1.081,
+   1.241,
+   1.38,
+   0.189
+  ],
+  "decode_tok_s": [
+   161.0,
+   169.0,
+   162.1,
+   196.2,
+   214.5,
+   188.7,
+   192.8,
+   187.2
+  ],
+  "per_stream_mean": 183.9,
+  "aggregate_sum_of_rates": 1471.5,
+  "aggregate_shared_window": 1643.2
+ },
+ {
+  "cell": "d32768-a8192-c1",
+  "depth": 32768,
+  "context_tokens": 32764,
+  "append": 8192,
+  "c": 1,
+  "prompt_tokens": [
+   40955
+  ],
+  "cached": [
+   32768
+  ],
+  "context_cached": true,
+  "ttft_s": [
+   0.624
+  ],
+  "decode_tok_s": [
+   346.6
+  ],
+  "per_stream_mean": 346.6,
+  "aggregate_sum_of_rates": 346.6,
+  "aggregate_shared_window": 348.3
+ },
+ {
+  "cell": "d32768-a8192-c4",
+  "depth": 32768,
+  "context_tokens": 32764,
+  "append": 8192,
+  "c": 4,
+  "prompt_tokens": [
+   40951,
+   40948,
+   40955,
+   40956
+  ],
+  "cached": [
+   32768,
+   32768,
+   32768,
+   32768
+  ],
+  "context_cached": true,
+  "ttft_s": [
+   0.631,
+   2.009,
+   1.358,
+   2.637
+  ],
+  "decode_tok_s": [
+   117.1,
+   192.6,
+   159.4,
+   267.3
+  ],
+  "per_stream_mean": 184.1,
+  "aggregate_sum_of_rates": 736.4,
+  "aggregate_shared_window": 1003.3
+ },
+ {
+  "cell": "d32768-a8192-c8",
+  "depth": 32768,
+  "context_tokens": 32764,
+  "append": 8192,
+  "c": 8,
+  "prompt_tokens": [
+   40951,
+   40956,
+   40954,
+   40955,
+   40955,
+   40953,
+   40956,
+   40950
+  ],
+  "cached": [
+   32768,
+   32768,
+   32768,
+   32768,
+   32768,
+   32768,
+   32768,
+   32768
+  ],
+  "context_cached": true,
+  "ttft_s": [
+   3.984,
+   1.36,
+   3.323,
+   5.389,
+   2.665,
+   4.732,
+   0.632,
+   2.01
+  ],
+  "decode_tok_s": [
+   141.0,
+   78.3,
+   108.0,
+   224.7,
+   111.3,
+   164.3,
+   70.3,
+   99.5
+  ],
+  "per_stream_mean": 124.7,
+  "aggregate_sum_of_rates": 997.4,
+  "aggregate_shared_window": 1609.2
+ },
+ {
+  "cell": "d65536-a2048-c1",
+  "depth": 65536,
+  "context_tokens": 65534,
+  "append": 2048,
+  "c": 1,
+  "prompt_tokens": [
+   67582
+  ],
+  "cached": [
+   65408
+  ],
+  "context_cached": true,
+  "ttft_s": [
+   0.3
+  ],
+  "decode_tok_s": [
+   485.5
+  ],
+  "per_stream_mean": 485.5,
+  "aggregate_sum_of_rates": 485.5,
+  "aggregate_shared_window": 485.5
+ },
+ {
+  "cell": "d65536-a2048-c4",
+  "depth": 65536,
+  "context_tokens": 65534,
+  "append": 2048,
+  "c": 4,
+  "prompt_tokens": [
+   67579,
+   67582,
+   67577,
+   67579
+  ],
+  "cached": [
+   65536,
+   65536,
+   65536,
+   65408
+  ],
+  "context_cached": true,
+  "ttft_s": [
+   0.793,
+   0.946,
+   0.602,
+   0.306
+  ],
+  "decode_tok_s": [
+   258.3,
+   261.6,
+   212.9,
+   203.1
+  ],
+  "per_stream_mean": 234.0,
+  "aggregate_sum_of_rates": 935.9,
+  "aggregate_shared_window": 1014.7
+ },
+ {
+  "cell": "d65536-a2048-c8",
+  "depth": 65536,
+  "context_tokens": 65534,
+  "append": 2048,
+  "c": 8,
+  "prompt_tokens": [
+   67578,
+   67578,
+   67581,
+   67581,
+   67576,
+   67581,
+   67577,
+   67581
+  ],
+  "cached": [
+   65536,
+   65536,
+   65536,
+   65536,
+   65536,
+   65536,
+   65536,
+   65536
+  ],
+  "context_cached": true,
+  "ttft_s": [
+   0.582,
+   1.365,
+   0.973,
+   1.169,
+   1.563,
+   1.736,
+   0.776,
+   0.27
+  ],
+  "decode_tok_s": [
+   125.5,
+   196.6,
+   153.7,
+   182.4,
+   249.2,
+   256.1,
+   135.4,
+   146.0
+  ],
+  "per_stream_mean": 180.6,
+  "aggregate_sum_of_rates": 1444.8,
+  "aggregate_shared_window": 1658.2
+ },
+ {
+  "cell": "d65536-a8192-c1",
+  "depth": 65536,
+  "context_tokens": 65534,
+  "append": 8192,
+  "c": 1,
+  "prompt_tokens": [
+   73724
+  ],
+  "cached": [
+   65536
+  ],
+  "context_cached": true,
+  "ttft_s": [
+   0.799
+  ],
+  "decode_tok_s": [
+   461.6
+  ],
+  "per_stream_mean": 461.6,
+  "aggregate_sum_of_rates": 461.6,
+  "aggregate_shared_window": 465.1
+ },
+ {
+  "cell": "d65536-a8192-c4",
+  "depth": 65536,
+  "context_tokens": 65534,
+  "append": 8192,
+  "c": 4,
+  "prompt_tokens": [
+   73723,
+   73724,
+   73723,
+   73720
+  ],
+  "cached": [
+   65536,
+   65536,
+   65536,
+   65536
+  ],
+  "context_cached": true,
+  "ttft_s": [
+   1.69,
+   3.25,
+   2.481,
+   0.804
+  ],
+  "decode_tok_s": [
+   146.3,
+   272.0,
+   165.4,
+   115.0
+  ],
+  "per_stream_mean": 174.7,
+  "aggregate_sum_of_rates": 698.7,
+  "aggregate_shared_window": 910.9
+ },
+ {
+  "cell": "d65536-a8192-c8",
+  "depth": 65536,
+  "context_tokens": 65534,
+  "append": 8192,
+  "c": 8,
+  "prompt_tokens": [
+   73724,
+   73723,
+   73721,
+   73725,
+   73724,
+   73722,
+   73725,
+   73722
+  ],
+  "cached": [
+   65536,
+   65536,
+   65536,
+   65536,
+   65536,
+   65536,
+   65536,
+   65536
+  ],
+  "context_cached": true,
+  "ttft_s": [
+   2.485,
+   4.897,
+   4.088,
+   1.693,
+   6.62,
+   0.806,
+   3.286,
+   5.812
+  ],
+  "decode_tok_s": [
+   69.4,
+   114.6,
+   92.3,
+   64.7,
+   227.2,
+   58.1,
+   83.7,
+   162.3
+  ],
+  "per_stream_mean": 109.0,
+  "aggregate_sum_of_rates": 872.3,
+  "aggregate_shared_window": 1448.4
+ }
+]

@@ -1,0 +1,1 @@
+{"key": "confirm-d1024-a2048-c8-s2", "prompt_tokens": 1021, "completion_tokens": 1, "finish": "length", "cached_tokens": 896, "ttft_s": 0.027678443992044777, "first_s": 164296.468414229, "last_s": 164296.468529056, "chunks": 2, "marks": [[164296.468414, 0], [164296.468529, 1]], "decode_tok_s": 8708.752456135282}

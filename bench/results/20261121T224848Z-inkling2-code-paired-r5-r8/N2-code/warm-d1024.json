@@ -1,0 +1,1 @@
+{"key": "warm-d1024", "prompt_tokens": 1021, "completion_tokens": 1, "finish": "length", "cached_tokens": 0, "ttft_s": 0.07528145500691608, "first_s": 164146.013896882, "last_s": 164146.014017089, "chunks": 2, "marks": [[164146.013897, 0], [164146.014017, 1]], "decode_tok_s": 8318.983228501886}

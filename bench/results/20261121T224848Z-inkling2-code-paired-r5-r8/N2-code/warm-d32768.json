@@ -1,0 +1,1 @@
+{"key": "warm-d32768", "prompt_tokens": 32764, "completion_tokens": 1, "finish": "length", "cached_tokens": 896, "ttft_s": 1.9446375429979526, "first_s": 164166.4195838, "last_s": 164166.420615985, "chunks": 2, "marks": [[164166.419584, 0], [164166.420616, 1]], "decode_tok_s": 968.8185618252636}

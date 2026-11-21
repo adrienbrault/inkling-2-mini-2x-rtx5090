@@ -22,10 +22,10 @@ import matplotlib.pyplot as plt  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 RES = ROOT / "bench" / "results"
 OUT = ROOT / "docs" / "img"
-SPEC = RES / "20261121T021530Z-inkling2-specbench-served-r4"
+SPEC = RES / "20261121T222403Z-inkling2-specbench-served-r8"
 SPEC_OFF = RES / "20261121T012150Z-inkling2-specbench-nospec-r3"
-CODE = RES / "20261121T021954Z-inkling2-code-r4"
-PREFILL = RES / "20261121T022131Z-inkling2-prefill-r4a"
+CODE = RES / "20261121T222641Z-inkling2-code-r8"
+PREFILL = RES / "20261121T222811Z-inkling2-prefill-r8a"
 CS = (1, 4, 8)
 
 

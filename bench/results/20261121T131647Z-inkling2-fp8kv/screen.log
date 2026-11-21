@@ -1,0 +1,25 @@
+2026-11-21T13:17:25Z bf16 GPU KV cache size: 481,529 tokens Maximum concurrency for 262,144 tokens per request: 1.84x 
+bf16: greedy identical to bf16 8/8; common prefix chars [1304, 2247, 1484, 1363, 2019, 1975, 1756, 1524]
+bf16 {"c": 1, "requests": 120, "per_stream_decode_median": 372.9, "aggregate": 404.1, "ttft_median_ms": 32.2, "wall_output_tok_s": 356.1}
+bf16 {"c": 4, "requests": 120, "per_stream_decode_median": 224.9, "aggregate": 967.1, "ttft_median_ms": 56.3, "wall_output_tok_s": 847.7}
+bf16 {"c": 8, "requests": 120, "per_stream_decode_median": 170.8, "aggregate": 1468.0, "ttft_median_ms": 73.3, "wall_output_tok_s": 1259.9}
+bf16 spec {"c": 1, "drafts": 10430.0, "accepted": 20393.0, "mean_acceptance_length": 2.955}
+bf16 spec {"c": 4, "drafts": 10411.0, "accepted": 20444.0, "mean_acceptance_length": 2.964}
+bf16 spec {"c": 8, "drafts": 10327.0, "accepted": 20497.0, "mean_acceptance_length": 2.985}
+bf16 prefill [(2046, 18359.1), (8189, 18577.0), (30717, 16725.6), (61436, 14808.1), (122879, 12007.0), (204798, 9567.8), (245758, 8679.7)]
+bf16 smoke {"tool_call": true, "image": true, "t08": [true, true, true, true], "all_ok": true}
+bf16 fidelity {"needle": {"hits": 0, "of": 27, "errors": 0}, "nll_8192": {"tokens": 8191, "mean_nll": 0.4035076111164081, "top1": 0.9048956171407643}, "nll_32768": {"tokens": 32767, "mean_nll": 0.3186342682142126, "top1": 0.923032319101535}}
+2026-11-21T13:27:35Z fp8 GPU KV cache size: 699,259 tokens Maximum concurrency for 262,144 tokens per request: 2.67x 
+fp8: greedy identical to bf16 0/8; common prefix chars [153, 169, 0, 43, 183, 13, 122, 204]
+fp8 {"c": 1, "requests": 120, "per_stream_decode_median": 369.2, "aggregate": 405.4, "ttft_median_ms": 33.5, "wall_output_tok_s": 357.5}
+fp8 {"c": 4, "requests": 120, "per_stream_decode_median": 226.3, "aggregate": 953.8, "ttft_median_ms": 56.1, "wall_output_tok_s": 798.8}
+fp8 {"c": 8, "requests": 120, "per_stream_decode_median": 170.6, "aggregate": 1487.7, "ttft_median_ms": 73.7, "wall_output_tok_s": 1282.7}
+fp8 spec {"c": 1, "drafts": 10377.0, "accepted": 20448.0, "mean_acceptance_length": 2.971}
+fp8 spec {"c": 4, "drafts": 10201.0, "accepted": 20628.0, "mean_acceptance_length": 3.022}
+fp8 spec {"c": 8, "drafts": 10166.0, "accepted": 20654.0, "mean_acceptance_length": 3.032}
+fp8 prefill [(2046, 17523.9), (8188, 18159.7), (30717, 16601.2), (61439, 14662.4), (122878, 11857.0), (204799, 9434.2), (245759, 8558.7)]
+fp8 smoke {"tool_call": true, "image": true, "t08": [true, true, true, true], "all_ok": true}
+fp8 fidelity {"needle": {"hits": 0, "of": 27, "errors": 0}, "nll_8192": {"tokens": 8191, "mean_nll": 0.40251489740133395, "top1": 0.90660481015749}, "nll_32768": {"tokens": 32767, "mean_nll": 0.31972039235609273, "top1": 0.923917355876339}}
+paired NLL fp8 - bf16 at 8192: -0.00099 nats/token (se 0.00148), PPL ratio 0.9990
+paired NLL fp8 - bf16 at 32768: +0.00109 nats/token (se 0.00073), PPL ratio 1.0011
+2026-11-21T13:36:39Z done (no restore: chained): /srv/qwen5090/results/20261121T131647Z-inkling2-fp8kv

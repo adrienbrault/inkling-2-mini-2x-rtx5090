@@ -1,0 +1,154 @@
+[
+ {
+  "prompt": "Write a Python function that merges overlapping intervals, with three doctest examples.",
+  "reasoning": "The user wants a Python function that merges overlapping intervals, with three doctest examples.\n\nLet me think about the classic interval merging problem. Given a list of intervals [start, end], merge overlapping ones.\n\nApproach: sort intervals by start time, then iterate, merging when the next interval's start is <= current merged interval's end.\n\n```python\ndef merge_intervals(intervals):\n    if not intervals:\n        return []\n    intervals = sorted(intervals, key=lambda x: x[0])\n    merged = [list(intervals[0])]\n    for start, end in intervals[1:]:\n        if start <= merged[-1][-1]:\n            merged[-1][-1] = max(merged[-1][-1], end)\n        else:\n            merged.append([start, end])\n    return merged\n```\n\nDoctest examples:\n\n1. Basic overlap: `merge_intervals([[1, 3], [2, 6], [8, 10], [15, 18]])` → `[[1, 6], [8, 10], [15, 18]]`\n2. Nested intervals: `merge_intervals([[1, 4], [2, 3]])` → `[[1, 4]]`\n3. Empty input or no overlaps: `merge_intervals([[1, 2], [3, 4]])` → `[[1, 2], [3, 4]]`\n\nOr maybe include empty list as one example. Three doctests:\n\n```\n>>> merge_intervals([[1, 3], [2, 6], [8, 10], [15, 18]])\n[[1, 6], [8, 10], [15, 18]]\n>>> merge_intervals([[1, 4], [2, 3]])\n[[1, 4]]\n>>> merge_intervals([])\n[]\n```\n\nThat covers overlap, nesting, and empty. Maybe also no-overlap case",
+  "content": null,
+  "finish": "length",
+  "usage": {
+   "prompt_tokens": 32,
+   "total_tokens": 544,
+   "completion_tokens": 512,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 510
+   }
+  }
+ },
+ {
+  "prompt": "Explain the difference between a mutex and a semaphore in four sentences.",
+  "reasoning": "The user wants a four-sentence explanation of the difference between a mutex and a semaphore. Need answer concise. Need ensure accuracy: Mutex is a lock with ownership, binary (0/1), only locking thread can unlock, used for mutual exclusion. Semaphore is a counter with wait/signal (P/V), can allow multiple threads up to count, no ownership, can be binary or counting. Difference: mutex is for exclusive access to a resource and has owner; semaphore is for signaling/resource counting and can be used for synchronization among multiple threads. Need exactly four sentences. Let's craft four sentences.\n\nNeed be careful: semaphores can be binary too, but generally counting. Mutex is a type of semaphore? In some contexts mutex is a binary semaphore with ownership. Mention that. Four sentences exactly.\n\nDraft:\n1. A mutex is a lock that grants exclusive access to a resource and is owned by the thread that acquired it, so only that thread can release it.\n2. A semaphore is a counter-based synchronization primitive that threads decrement on entry and increment on exit, allowing up to N threads to proceed when the count is greater than zero.\n3. A mutex is therefore typically used for mutual exclusion around a shared critical section, while a semaphore is used for counting available resources or signaling between threads.\n4. Although a binary semaphore can resemble a mutex, it lacks ownership and can be signaled by a different thread, making it more general but less strict about who releases it.\n\nCheck four sentences. Good. Need final only. Ensure no extra.",
+  "content": "A mutex is a lock that grants exclusive access to a resource and is owned by the thread that acquired it, so only that thread can release it. A semaphore is a counter-based synchronization primitive that threads decrement on entry and increment on exit, allowing up to N threads to proceed when the count is greater than zero. A mutex is therefore typically used for mutual exclusion around a shared critical section, while a semaphore is used for counting available resources or signaling between threads. Although a binary semaphore can resemble a mutex, it lacks ownership and can be signaled by a different thread, making it more general but less strict about who releases it.",
+  "finish": "stop",
+  "usage": {
+   "prompt_tokens": 29,
+   "total_tokens": 508,
+   "completion_tokens": 479,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 339
+   }
+  }
+ },
+ {
+  "prompt": "Solve: a train leaves at 14:05 at 80 km/h; another leaves the same station at 14:35 at 110 km/h. When does the second catch up?",
+  "reasoning": "We need answer solve. Need be careful: train leaves at 14:05 at 80 km/h; another same station at 14:35 at 110 km/h. When does second catch up? Need compute. Let's reason.\n\nFirst train starts 14:05 at 80 km/h. Second starts 14:35 (30 min later) at 110 km/h. At 14:35, first has traveled 0.5 h * 80 = 40 km. Relative speed = 110 - 80 = 30 km/h. Time for second to close 40 km = 40/30 h = 4/3 h = 1 h 20 min. Second starts 14:35, add 1:20 = 15:55. Check first distance at 15:55: from 14:05 to 15:55 = 1 h 50 min = 1.833333 h *80 = 146.666... km. Second from 14:35 to 15:55 = 1 h20 = 1.333333 h *110 = 146.666... yes.\n\nNeed present maybe mention assuming same direction and constant speeds. Could also set equation. Need answer concise. Ensure no hidden trick: \"another leaves the same station at 14:35\" maybe same station but could be opposite direction? Usually catch up implies same direction. If opposite, they never catch up (they separate). But wording \"catch up\" implies same direction. We can state assumption.\n\nNeed final with calculation. Since user says Solve, likely wants time. Provide maybe formula.\n\nNeed not use more tools. Final only.",
+  "content": "Assuming they travel in the same direction at constant speeds:\n\n- First train head start: 14:35 − 14:05 = 30 min = 0.5 h  \n- Distance ahead at 14:35: \\(80 \\times 0.5 = 40\\) km  \n- Relative speed: \\(110 - 80 = 30\\) km/h  \n- Time to catch up: \\(40 / 30 = 4/3\\) h = 1 h 20 min  \n\nSecond train starts at 14:35, so it catches up at **15:55**.",
+  "finish": "stop",
+  "usage": {
+   "prompt_tokens": 56,
+   "total_tokens": 551,
+   "completion_tokens": 495,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 357
+   }
+  }
+ },
+ {
+  "prompt": "Translate into French: 'The quick brown fox jumps over the lazy dog while the farmer sleeps.'",
+  "reasoning": "The user wants a translation into French of a pangram: 'The quick brown fox jumps over the lazy dog while the farmer sleeps.'\n\nNeed produce French translation. Need be accurate. Let's translate:\nThe quick brown fox = Le renard brun rapide? French adjective order: quick brown fox = renard brun rapide? In French, adjectives often after noun, but color and quick? \"Le renard brun rapide\" sounds okay but \"quick\" maybe \"rapide\". \"brown\" = brun (masculine). \"fox\" = renard. \"jumps\" = saute. \"over\" = par-dessus? \"the lazy dog\" = le chien paresseux. \"while the farmer sleeps\" = pendant que le fermier dort.\n\nNeed preserve pangram? French translation doesn't need same letters. Sentence: \"Le renard brun rapide saute par-dessus le chien paresseux pendant que le fermier dort.\" Check grammar: \"par-dessus\" with \"le chien\" okay. \"while the farmer sleeps\" = pendant que le fermier dort. Good.\n\nCould use \"Le renard brun rapide saute par-dessus le chien paresseux pendant que le fermier dort.\" That's natural.\n\nNeed maybe mention if wanting exact pangram, French equivalents differ. But user just asks translate. Final only translation likely. Ensure no extra. Could include just French sentence. Need maybe accents. \"paresseux\" masculine singular. \"fermier\". Good.\n\nNeed final concise.",
+  "content": "Le renard brun rapide saute par-dessus le chien paresseux pendant que le fermier dort.",
+  "finish": "stop",
+  "usage": {
+   "prompt_tokens": 39,
+   "total_tokens": 410,
+   "completion_tokens": 371,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 341
+   }
+  }
+ },
+ {
+  "prompt": "Write a SQL query that returns the three most recent orders per customer from orders(id, customer_id, created_at).",
+  "reasoning": "The user wants a SQL query that returns the three most recent orders per customer from orders(id, customer_id, created_at).\n\nThis is a classic \"top-N per group\" problem. The standard solution uses a window function like ROW_NUMBER() partitioned by customer_id, ordered by created_at descending, then filter to rows where the rank <= 3.\n\nLet me write this:\n\n```sql\nSELECT id, customer_id, created_at\nFROM (\n    SELECT id, customer_id, created_at,\n           ROW_NUMBER() OVER (\n               PARTITION BY customer_id\n               ORDER BY created_at DESC\n           ) AS rn\n    FROM orders\n) ranked\nWHERE rn <= 3;\n```\n\nThis is standard SQL (works in PostgreSQL, SQL Server, etc.). For MySQL, window functions are supported in MySQL 8.0+. For older MySQL, you'd need a different approach.\n\nI should mention:\n- The window function approach\n- Tie-breaking consideration: if multiple orders have the same created_at, ROW_NUMBER picks arbitrarily (or by id if we add a tiebreaker). Adding `, id DESC` as a tiebreaker makes it deterministic.\n- Alternative approaches for older databases (e.g., correlated subquery, or using MAX with joins).\n\nLet me also consider ties: if two orders have the same created_at, ROW_NUMBER will still assign distinct numbers but the choice is arbitrary. Adding a secondary sort key like id DESC makes it deterministic.\n\nI could also mention a variant using RANK() which would return ties (could return more than 3 rows per customer). ROW_NUMBER is the right choice for exactly 3.\n\nFormat: Code block with the query, brief explanation, maybe a note on ties and older databases. Keep it reasonably concise. The user asked a direct technical question, so a direct answer with the query and a short explanation is appropriate. Maybe include an alternative for databases without window functions briefly.\n\nLet me draft:\n\n```sql\nSELECT id, customer_id, created_at\nFROM (\n    SELECT\n        id,\n        customer_id,\n        created_at,\n        ROW_NUMBER() OVER (\n            PARTITION BY customer_id",
+  "content": null,
+  "finish": "length",
+  "usage": {
+   "prompt_tokens": 42,
+   "total_tokens": 554,
+   "completion_tokens": 512,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 510
+   }
+  }
+ },
+ {
+  "prompt": "List five failure modes of a distributed lock built on Redis SETNX and how to mitigate each.",
+  "reasoning": "The user asks for five failure modes of a distributed lock built on Redis SETNX and mitigations. Need answer technical. Need think through content carefully.\n\nNeed produce final only. Let's reason.\n\nRedis SETNX (SET key value NX) creates lock if key absent. Failure modes:\n1. Lock expiry/TTL too short or not set: if process crashes/pauses, lock held forever (if no TTL) or released early while still working (if TTL too short). Mitigate: always set PX/PEXPIRE with lock, use unique token/value, renew/extend via Lua (compare-and-set), use Redlock/fencing tokens, keep critical section shorter than TTL, watchdog/heartbeat.\n2. Non-atomic check-and-set / race: SETNX alone atomic for set if absent, but release often done with DEL without checking owner -> another client deletes lock. Mitigate: store unique client ID/token in value; release via Lua script that checks value then DEL; use Redis SET with NX PX (atomic) rather than SETNX+EXPIRE.\n3. Clock/TTL and network partitions: client thinks lock held but actually expired; or Redis failover loses lock. Mitigate: fencing tokens/monotonic epoch from lock service, validate token downstream, use Redlock (with caveats), avoid relying solely on Redis for correctness, use consensus/ZooKeeper/etcd for strong guarantees.\n4. Failover/replication data loss: Redis primary fails before replica syncs; lock key lost; two clients acquire. Mitigate: WAIT/WAIT? Redis WAIT for replication, use Redis Sentinel/Cluster with careful config, Redlock across independent masters, accept eventual consistency, use durable consensus.\n5. Thundering herd / retry storms and lock convoy: many clients retry SETNX causing load; or lock holder slow causes queue. Mitigate: exponential backoff with jitter, bounded retries, queue/serialize work, fair locks, avoid long critical sections, use per-resource locks.\n6. Stale lock after client pause (GC pause): client holds lock but paused; another acquires after expiry; both run. Mitigate: fencing",
+  "content": null,
+  "finish": "length",
+  "usage": {
+   "prompt_tokens": 35,
+   "total_tokens": 547,
+   "completion_tokens": 512,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 510
+   }
+  }
+ },
+ {
+  "prompt": "Write a bash one-liner that finds the ten largest files under the current directory, human-readable sizes.",
+  "reasoning": "The user wants a bash one-liner that finds the ten largest files under the current directory, human-readable sizes.\n\nNeed provide a one-liner. Need be careful: \"under the current directory\" could mean current directory and subdirectories. Find files, get sizes, sort numerically descending, head 10, print human-readable sizes and paths.\n\nOptions:\n- `find . -type f -print0 | du -h --files0-from=- | sort -rh | head -n 10` but du -h prints human-readable sizes and paths; sort -rh sorts by human-readable? `sort -h` handles human-readable sizes, but with `-r` descending. However `du -h --files0-from=-` output format: size path. `sort -rh` sorts by human-readable size? GNU sort -h interprets human-readable numbers in the key; default key is whole line? Actually `sort -h` uses human numeric sort on the whole line? It sorts according to human-readable numbers in the line, but if line starts with size then path, works. Need ensure `du` with `--files0-from` and `-h` outputs e.g. `1.2G\\t./file`. `sort -rh` should sort by size. But `du` may aggregate? With `--files0-from`, it lists each file individually? Let's recall: `du -h --files0-from=-` reads file names from stdin and prints disk usage for each. It should print each file's size. Good.\n\nAlternative simpler: `find . -type f -exec du -h {} + | sort -rh | head -n 10` but `du -h {} +` with many files prints each file size? `du -h file1 file2` prints each file size and total? Actually `du` with multiple args prints each argument and a total line at end? Let's recall: `du file1 file2` prints `size file1`, `size file2`, and `total`? I think `du` with multiple arguments prints each argument and a grand total line. Yes `du` prints a total line when multiple args. That would pollute. Use `du -h",
+  "content": null,
+  "finish": "length",
+  "usage": {
+   "prompt_tokens": 38,
+   "total_tokens": 550,
+   "completion_tokens": 512,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 510
+   }
+  }
+ },
+ {
+  "prompt": "Summarize the plot of Romeo and Juliet in exactly three sentences.",
+  "reasoning": "The user wants a summary of the plot of Romeo and Juliet in exactly three sentences. Need answer exactly three sentences. Need ensure no extra text. Plot: Romeo and Juliet are lovers from feuding families; they secretly marry, their families' feud and misunderstandings lead to tragedy; both die, ending the feud. Need exactly three sentences. Let's craft carefully with exactly three sentence-ending periods. Avoid semicolons? Fine.\n\nSentence 1: In Verona, Romeo and Juliet fall in love despite their families’ long feud and secretly marry.\nSentence 2: Their secret union is discovered/threatened, and a series of misunderstandings—including Romeo’s banishment and Juliet’s forced marriage—drives the lovers toward ruin.\nSentence 3: After Romeo kills Tybalt and Juliet takes a sleeping potion to avoid marriage, the deaths of both lovers finally bring the feuding families together.\n\nNeed check accuracy: Romeo kills Tybalt after Tybalt kills Mercutio; Romeo banished; Juliet forced to marry Paris; she takes potion; Romeo hears she is dead, kills himself; Juliet wakes, kills herself; families reconcile. Good. Exactly three sentences. Ensure no extra intro. Final only three sentences.",
+  "content": "In Verona, Romeo and Juliet fall in love despite their families’ long feud and secretly marry. Their union is threatened by misunderstandings, including Romeo’s banishment and Juliet’s forced marriage to Paris. After Romeo kills Tybalt and Juliet takes a sleeping potion, both lovers die and the feuding families are finally reconciled.",
+  "finish": "stop",
+  "usage": {
+   "prompt_tokens": 30,
+   "total_tokens": 418,
+   "completion_tokens": 388,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "created_cache_tokens": 0,
+    "multimodal_tokens": null
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 296
+   }
+  }
+ }
+]

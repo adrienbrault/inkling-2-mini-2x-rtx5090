@@ -1,0 +1,52 @@
+{
+ "tool_call": {
+  "status": 200,
+  "ok": true,
+  "detail": [
+   {
+    "id": "chatcmpl-tool-ab21e5f4da13d6ef",
+    "type": "function",
+    "function": {
+     "name": "get_weather",
+     "arguments": "{\"city\":\"Paris\"}"
+    }
+   }
+  ]
+ },
+ "image": {
+  "status": 200,
+  "ok": true,
+  "detail": "Red"
+ },
+ "t08": [
+  {
+   "status": 200,
+   "ok": true,
+   "tokens": 796,
+   "finish": "stop",
+   "head": "Poem:\nParallel lanes of copper and light,\nbillions of questi"
+  },
+  {
+   "status": 200,
+   "ok": true,
+   "tokens": 531,
+   "finish": "stop",
+   "head": "Short poem:\nIn blazing black, a thousand lanes wake—\ntiny la"
+  },
+  {
+   "status": 200,
+   "ok": true,
+   "tokens": 575,
+   "finish": "stop",
+   "head": "Short poem:\nThousands of tiny lanes march in lockstep,  \nPix"
+  },
+  {
+   "status": 200,
+   "ok": true,
+   "tokens": 694,
+   "finish": "stop",
+   "head": "Silicon chorus,\nthousands trade light, heat, and thought—\nno"
+  }
+ ],
+ "all_ok": true
+}
