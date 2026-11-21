@@ -4,9 +4,10 @@ All measured 2026-11-21 on two RTX 5090s with the same checkpoint and image.
 
 ## Drafter on or off
 
-Spec-Bench with the README's protocol (forced 256 tokens), tensor parallel 2 both ways, the same image:
-[drafter off](../bench/results/20261121T012150Z-inkling2-specbench-nospec-r3),
-[drafter on](../bench/results/20261121T010840Z-inkling2-specbench-served-r3).
+Spec-Bench with the README's protocol (forced 256 tokens), tensor parallel 2 with NCCL all-reduce both ways, the same
+image: [drafter off](../bench/results/20261121T012150Z-inkling2-specbench-nospec-r3); drafter on gave 319 / 184 / 115
+tok/s per stream and 347 / 719 / 997 aggregate at 1 / 4 / 8 streams on the same boot setup (before the PCIe all-reduce
+below, which adds about 10 % to both).
 
 | Streams | Off: per stream / aggregate / TTFT | On: per stream / aggregate / TTFT |
 | ---: | ---: | ---: |
@@ -14,8 +15,24 @@ Spec-Bench with the README's protocol (forced 256 tokens), tensor parallel 2 bot
 | 4 | 128 / 492 tok/s / 99 ms | 184 / 719 tok/s / 62 ms |
 | 8 | 114 / 905 tok/s / 2.1 s | 115 / 997 tok/s / 81 ms |
 
-The drafter helps most at low concurrency. At eight streams per-stream decode is the same; the drafter-off run's
-median TTFT at c8 was 2.1 s on this boot.
+The drafter helps most at low concurrency. The drafter-off run's median TTFT at eight streams was 2.1 s on its boot.
+
+## All-reduce and one card versus two
+
+Inkling's fused all-reduce needs NVLink multicast, which the PCIe-only RTX 5090 lacks, and vLLM's custom all-reduce has
+no sm_120 code in the day-0 image, so tensor parallel 2 falls back to NCCL. Drafter off, Spec-Bench c1 / c4:
+
+| Configuration | Per stream, 1 stream | Aggregate, 4 streams | Mean time per output token, 1 stream |
+| --- | ---: | ---: | ---: |
+| One card (tensor parallel 1, 32K context) | 177 tok/s | 418 tok/s | 5.67 ms |
+| Two cards, NCCL | 206 tok/s | 492 tok/s | 4.92 ms |
+| Two cards, FlashInfer PCIe IPC all-reduce | 222 tok/s | 546 tok/s | 4.52 ms |
+
+Results: [one card](../bench/results/20261121T014555Z-inkling2-specbench-tp1-nospec-32k),
+[PCIe IPC](../bench/results/20261121T015459Z-inkling2-specbench-tp2-nospec-pcieipc). Communication is about 0.4 ms of the
+per-token time; the rest is spent inside each card (48 layer applications per token on the sm_120 Triton paths). With
+the drafter, the PCIe all-reduce raises Spec-Bench from 319 / 184 / 115 to 351 / 205 / 138 tok/s per stream, with the
+drafter's drafted and accepted token counts unchanged at one and four streams (the same token streams).
 
 DSpark only accepts 7 draft tokens: the checkpoint's block size is 8, and vLLM refuses any other
 `num_speculative_tokens`.
