@@ -13,5 +13,7 @@ fail with `cudaErrorNoKernelImageForDevice`:
 
 FlashInfer's warmup autotune also profiles kernels with no sm_120 build; `scripts/serve.sh` turns it off.
 
-Each patch script checks the SHA-256 of the file it edits and replaces exactly one block, so a different base image
-fails the build instead of patching the wrong code.
+Each patch script checks the SHA-256 of the file it edits and replaces exactly one block (explicit failures, not
+`assert`), so a different base image fails the build instead of patching the wrong code. The scatter covers the
+unquantized KV cache only: on SM12x an fp8 `--kv-cache-dtype` is refused at startup instead of reaching the missing
+kernel.

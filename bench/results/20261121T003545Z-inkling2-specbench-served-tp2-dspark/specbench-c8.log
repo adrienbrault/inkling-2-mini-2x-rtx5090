@@ -1,64 +1,0 @@
-W1121 00:39:28.614000 1 torch/utils/cpp_extension.py:183] No CUDA runtime is found, using CUDA_HOME='/usr/local/cuda'
-Failed to import from vllm._C: ModuleNotFoundError("No module named 'vllm._C'")
-Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x7cc6dfa61e80>, trust_remote_code=False, seed=7318, num_prompts=120, dataset_name='spec_bench', no_stream=False, dataset_path='/data/specbench-subset-c8.jsonl', no_oversample=True, skip_chat_template=False, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category=None, sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, random_mm_video_encode_fps=30.0, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url='http://127.0.0.1:8022', host='127.0.0.1', port=8000, endpoint='/v1/chat/completions', header=None, max_concurrency=8, model='inkling-2-mini', input_len=None, output_len=None, tokenizer='/model', tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=False, num_warmups=0, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/out', result_filename='specbench-c8.json', ignore_eos=False, self_timed=None, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,99', goodput=None, request_id_prefix='bench-f1ffeaab-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body=None, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, logging_config=LoggingConfig(log_level='INFO', formatter='text', configure_logging=True, pylogging_config_file=None))
-(MainProcess pid=1) INFO 11-21 00:39:30 [datasets.py:310] Skipping oversampling. Total samples: 120.
-Starting initial single prompt test run...
-Skipping endpoint ready check.
-Starting main benchmark run...
-Traffic request rate: inf
-Burstiness factor: 1.0 (Poisson process)
-Maximum request concurrency: 8
-  0%|          | 0/120 [00:00<?, ?it/s]  1%|          | 1/120 [00:01<02:08,  1.08s/it]  2%|▏         | 2/120 [00:01<01:03,  1.85it/s]  2%|▎         | 3/120 [00:03<02:32,  1.30s/it]  3%|▎         | 4/120 [00:05<03:10,  1.64s/it]  4%|▍         | 5/120 [00:06<02:19,  1.22s/it]  6%|▌         | 7/120 [00:06<01:14,  1.51it/s]  7%|▋         | 8/120 [00:06<01:02,  1.79it/s]  8%|▊         | 9/120 [00:06<00:53,  2.08it/s]  8%|▊         | 10/120 [00:07<00:46,  2.36it/s]  9%|▉         | 11/120 [00:07<00:44,  2.44it/s] 10%|█         | 12/120 [00:07<00:42,  2.54it/s] 11%|█         | 13/120 [00:07<00:33,  3.21it/s] 12%|█▏        | 14/120 [00:08<00:26,  3.97it/s] 13%|█▎        | 16/120 [00:08<00:18,  5.65it/s] 14%|█▍        | 17/120 [00:10<01:13,  1.40it/s] 15%|█▌        | 18/120 [00:10<01:02,  1.64it/s] 16%|█▌        | 19/120 [00:11<00:55,  1.83it/s] 18%|█▊        | 21/120 [00:11<00:37,  2.63it/s] 18%|█▊        | 22/120 [00:11<00:31,  3.12it/s] 20%|██        | 24/120 [00:11<00:21,  4.38it/s] 21%|██        | 25/120 [00:12<00:20,  4.74it/s] 22%|██▎       | 27/120 [00:12<00:21,  4.37it/s] 23%|██▎       | 28/120 [00:12<00:22,  4.11it/s] 24%|██▍       | 29/120 [00:13<00:22,  3.97it/s] 25%|██▌       | 30/120 [00:13<00:19,  4.64it/s] 26%|██▌       | 31/120 [00:13<00:16,  5.34it/s] 27%|██▋       | 32/120 [00:13<00:15,  5.69it/s] 28%|██▊       | 33/120 [00:13<00:13,  6.30it/s] 28%|██▊       | 34/120 [00:13<00:12,  6.66it/s] 30%|███       | 36/120 [00:14<00:10,  7.97it/s] 31%|███       | 37/120 [00:14<00:18,  4.49it/s] 32%|███▏      | 38/120 [00:14<00:16,  5.06it/s] 33%|███▎      | 40/120 [00:16<00:39,  2.02it/s] 34%|███▍      | 41/120 [00:17<00:42,  1.87it/s] 36%|███▌      | 43/120 [00:17<00:27,  2.77it/s] 37%|███▋      | 44/120 [00:17<00:25,  2.97it/s] 38%|███▊      | 45/120 [00:17<00:21,  3.55it/s] 38%|███▊      | 46/120 [00:18<00:21,  3.41it/s] 39%|███▉      | 47/120 [00:18<00:21,  3.43it/s] 40%|████      | 48/120 [00:18<00:22,  3.22it/s] 41%|████      | 49/120 [00:18<00:19,  3.65it/s] 42%|████▎     | 51/120 [00:18<00:12,  5.31it/s] 43%|████▎     | 52/120 [00:19<00:12,  5.60it/s] 44%|████▍     | 53/120 [00:19<00:11,  5.70it/s] 45%|████▌     | 54/120 [00:19<00:14,  4.56it/s] 46%|████▌     | 55/120 [00:20<00:19,  3.29it/s] 47%|████▋     | 56/120 [00:20<00:15,  4.02it/s] 49%|████▉     | 59/120 [00:20<00:11,  5.51it/s] 50%|█████     | 60/120 [00:20<00:10,  5.75it/s] 51%|█████     | 61/120 [00:20<00:10,  5.82it/s] 52%|█████▏    | 62/120 [00:21<00:13,  4.37it/s] 52%|█████▎    | 63/120 [00:21<00:12,  4.62it/s] 53%|█████▎    | 64/120 [00:21<00:15,  3.66it/s] 54%|█████▍    | 65/120 [00:22<00:15,  3.52it/s] 55%|█████▌    | 66/120 [00:22<00:14,  3.62it/s] 56%|█████▌    | 67/120 [00:22<00:12,  4.40it/s] 57%|█████▋    | 68/120 [00:23<00:16,  3.17it/s] 57%|█████▊    | 69/120 [00:23<00:14,  3.55it/s] 58%|█████▊    | 70/120 [00:23<00:11,  4.33it/s] 59%|█████▉    | 71/120 [00:23<00:12,  3.91it/s] 61%|██████    | 73/120 [00:26<00:33,  1.39it/s] 62%|██████▏   | 74/120 [00:26<00:26,  1.76it/s] 62%|██████▎   | 75/120 [00:26<00:22,  1.99it/s] 63%|██████▎   | 76/120 [00:29<00:43,  1.01it/s] 64%|██████▍   | 77/120 [00:30<00:53,  1.25s/it] 65%|██████▌   | 78/120 [00:31<00:38,  1.08it/s] 66%|██████▌   | 79/120 [00:31<00:29,  1.40it/s] 67%|██████▋   | 80/120 [00:31<00:22,  1.81it/s] 68%|██████▊   | 81/120 [00:33<00:35,  1.10it/s] 68%|██████▊   | 82/120 [00:35<00:51,  1.34s/it] 69%|██████▉   | 83/120 [00:36<00:42,  1.14s/it] 71%|███████   | 85/120 [00:36<00:23,  1.48it/s] 72%|███████▏  | 86/120 [00:36<00:19,  1.73it/s] 73%|███████▎  | 88/120 [00:37<00:12,  2.47it/s] 74%|███████▍  | 89/120 [00:37<00:10,  2.89it/s] 75%|███████▌  | 90/120 [00:37<00:12,  2.43it/s] 76%|███████▌  | 91/120 [00:38<00:10,  2.85it/s] 78%|███████▊  | 94/120 [00:38<00:05,  5.18it/s] 79%|███████▉  | 95/120 [00:38<00:05,  4.28it/s] 80%|████████  | 96/120 [00:38<00:05,  4.65it/s] 81%|████████  | 97/120 [00:38<00:04,  4.75it/s] 82%|████████▏ | 98/120 [00:39<00:07,  2.79it/s] 86%|████████▌ | 103/120 [00:40<00:03,  5.31it/s] 88%|████████▊ | 105/120 [00:42<00:06,  2.29it/s] 88%|████████▊ | 106/120 [00:43<00:06,  2.16it/s] 89%|████████▉ | 107/120 [00:43<00:05,  2.26it/s] 90%|█████████ | 108/120 [00:43<00:04,  2.58it/s] 91%|█████████ | 109/120 [00:43<00:03,  3.08it/s] 93%|█████████▎| 112/120 [00:44<00:01,  4.49it/s] 94%|█████████▍| 113/120 [00:44<00:01,  4.29it/s] 95%|█████████▌| 114/120 [00:44<00:01,  3.79it/s] 98%|█████████▊| 117/120 [00:44<00:00,  6.46it/s] 99%|█████████▉| 119/120 [00:45<00:00,  5.03it/s]100%|██████████| 120/120 [00:45<00:00,  2.64it/s]
-tip: install termplotlib and gnuplot to plot the metrics
-============ Serving Benchmark Result ============
-Successful requests:                     120       
-Failed requests:                         0         
-Maximum request concurrency:             8         
-Benchmark duration (s):                  45.45     
-Total input tokens:                      38963     
-Total generated tokens:                  29732     
-Request throughput (req/s):              2.64      
-Output token throughput (tok/s):         654.10    
-Peak output token throughput (tok/s):    431.00    
-Peak concurrent requests:                15.00     
-Total token throughput (tok/s):          1511.28   
----------------Time to First Token----------------
-Mean TTFT (ms):                          307.96    
-Median TTFT (ms):                        80.37     
-P50 TTFT (ms):                           80.37     
-P90 TTFT (ms):                           1665.72   
-P99 TTFT (ms):                           2198.76   
------Time per Output Token (excl. 1st token)------
-Mean TPOT (ms):                          10.79     
-Median TPOT (ms):                        7.34      
-P50 TPOT (ms):                           7.34      
-P90 TPOT (ms):                           22.66     
-P99 TPOT (ms):                           36.55     
----------------Inter-token Latency----------------
-Mean ITL (ms):                           32.50     
-Median ITL (ms):                         17.95     
-P50 ITL (ms):                            17.95     
-P90 ITL (ms):                            18.98     
-P99 ITL (ms):                            56.28     
-----------------End-to-end Latency----------------
-Mean E2EL (ms):                          2990.77   
-Median E2EL (ms):                        2010.22   
-P50 E2EL (ms):                           2010.22   
-P90 E2EL (ms):                           6052.54   
-P99 E2EL (ms):                           9502.36   
----------------Speculative Decoding---------------
-Acceptance rate (%):                     27.79     
-Acceptance length:                       2.95      
-Drafts:                                  10127     
-Draft tokens:                            70889     
-Accepted tokens:                         19698     
-Verified tokens:                         70889     
-Per-position acceptance (%):
-  Position 0:                            67.91     
-  Position 1:                            45.63     
-  Position 2:                            30.52     
-  Position 3:                            20.90     
-  Position 4:                            13.78     
-  Position 5:                            9.54      
-  Position 6:                            6.22      
-==================================================

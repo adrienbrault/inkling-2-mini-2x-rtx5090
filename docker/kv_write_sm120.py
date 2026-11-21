@@ -41,10 +41,14 @@ def kv_scatter(key, value, key_cache, value_cache, slot_mapping):
     if num_tokens == 0:
         return
     _, block_n, heads, d = key_cache.shape
-    assert key.shape[-2:] == (heads, d) and value.shape[-2:] == (heads, d)
-    assert key.stride(-1) == 1 and value.stride(-1) == 1 and key_cache.stride(-1) == 1 and value_cache.stride(-1) == 1
-    assert key.dtype == key_cache.dtype and value.dtype == value_cache.dtype
-    assert d & (d - 1) == 0, "head_dim must be a power of two"
+    if not (key.shape[-2:] == (heads, d) and value.shape[-2:] == (heads, d)):
+        raise ValueError("kv_scatter: key/value shape does not match the cache")
+    if not (key.stride(-1) == 1 and value.stride(-1) == 1 and key_cache.stride(-1) == 1 and value_cache.stride(-1) == 1):
+        raise ValueError("kv_scatter: head dimension must be contiguous")
+    if not (key.dtype == key_cache.dtype and value.dtype == value_cache.dtype):
+        raise ValueError("kv_scatter: key/value dtype differs from the cache dtype")
+    if d & (d - 1):
+        raise ValueError("kv_scatter: head_dim must be a power of two (Inkling's is 128)")
     _kv_scatter_kernel[(num_tokens,)](
         key, value, key_cache, value_cache, slot_mapping,
         key.stride(0), key.stride(1), value.stride(0), value.stride(1),
@@ -55,6 +59,14 @@ def kv_scatter(key, value, key_cache, value_cache, slot_mapping):
 
 
 def needs_sm12x_kv_scatter(kv_cache_dtype: str) -> bool:
+    """True on SM12x, where the compiled writer has no code. Only an unquantized cache is supported: an fp8 cache
+    would need scaled writes and an fp8-aware draft reader, so it fails here with a clear message instead of reaching
+    the missing kernel."""
     from vllm.platforms import current_platform
 
-    return current_platform.is_device_capability_family(120) and kv_cache_dtype == "auto"
+    if not current_platform.is_device_capability_family(120):
+        return False
+    if kv_cache_dtype not in ("auto", "bfloat16", "float16"):
+        raise RuntimeError(f"Inkling DSpark on SM12x: kv_cache_dtype {kv_cache_dtype!r} is not supported by this overlay; "
+                           "use the default (auto)")
+    return True

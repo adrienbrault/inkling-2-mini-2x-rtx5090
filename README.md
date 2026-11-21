@@ -10,45 +10,49 @@ vLLM's day-0 image for this model does not run its drafter on consumer Blackwell
 
 ## Numbers
 
-Measured 2026-11-21 on the served configuration (`scripts/serve.sh`, image built by `scripts/build-image.sh`), stock
-power limits. **Decode rate** is one stream's output tokens per second from its first to its last token;
-**aggregate** is the sum of the rates of the streams running together. Time to first token (TTFT) is separate.
+Measured 2026-11-21 on one boot of the served configuration (`scripts/serve.sh`, image from `scripts/build-image.sh`),
+stock power limits. **Decode rate** is one stream's output tokens per second from its first to its last token, from the
+server's per-chunk token counts; **aggregate** is the total decode rate of the streams running together. Time to first
+token (TTFT) is separate.
 
-**Spec-Bench** (120-prompt stratified subset of each concurrency's set, temperature 0, 256 output tokens, `vllm bench
-serve`; [results](bench/results/20261121T003545Z-inkling2-specbench-served-tp2-dspark), summary by
+**Spec-Bench** (120-prompt stratified subset per concurrency, temperature 0, 256 forced output tokens, `vllm bench serve`;
+[results](bench/results/20261121T010840Z-inkling2-specbench-served-r3), `bench/specbench.sh`,
 `bench/specbench_summary.py`):
 
-| Streams | Decode rate per stream (median) | Aggregate | TTFT (median) |
-| ---: | ---: | ---: | ---: |
-| 1 | 319 tok/s | 343 tok/s | 37 ms |
-| 4 | 187 tok/s | 732 tok/s | 63 ms |
-| 8 | 136 tok/s | 1,060 tok/s | 80 ms |
+| Streams | Decode rate per stream (median) | Aggregate | TTFT (median) | Drafter acceptance length |
+| ---: | ---: | ---: | ---: | ---: |
+| 1 | 319 tok/s | 347 tok/s | 37 ms | 2.96 |
+| 4 | 184 tok/s | 719 tok/s | 62 ms | 2.95 |
+| 8 | 115 tok/s | 997 tok/s | 81 ms | 2.96 |
 
-The drafter's mean acceptance length on this set is 2.88 tokens per verification step.
+Here the aggregate is the stream count times the mean request decode rate (the benchmark keeps every stream busy).
 
-**Code at depth** (a shared code context cached at 1K / 32K / 64K tokens, a fresh 2K tool-output append per stream, a
-HumanEval task, 400 forced output tokens, temperature 0, no thinking; [results](bench/results/20261121T005515Z-inkling2-code),
-client `bench/headline_inkling.py code`):
+**Code at depth** (a shared code context cached at 1K / 32K / 64K tokens, a fresh tool-output append and a HumanEval task
+per stream, 400 forced output tokens, temperature 0, no thinking; the cached context is verified as a cache hit on every
+stream; [results](bench/results/20261121T011319Z-inkling2-code-r3), `bench/headline_inkling.py code`). Aggregate = tokens
+decoded by all streams during the window in which every stream is decoding, divided by its length:
 
-| Cached context | 1 stream | 4 streams: per stream / aggregate | 8 streams: per stream / aggregate |
-| ---: | ---: | ---: | ---: |
-| 1K | 450 tok/s | 169 / 676 tok/s | 130 / 1,040 tok/s |
-| 32K | 457 tok/s | 213 / 852 tok/s | 168 / 1,345 tok/s |
-| 64K | 495 tok/s | 170 / 681 tok/s | 154 / 1,233 tok/s |
+| Cached context | Append | 1 stream | 4 streams: per stream / aggregate | 8 streams: per stream / aggregate |
+| ---: | ---: | ---: | ---: | ---: |
+| 1K | 2K | 498 tok/s | 224 / 873 tok/s | 178 / 1,459 tok/s |
+| 32K | 2K | 383 tok/s | 189 / 957 tok/s | 178 / 1,339 tok/s |
+| 64K | 2K | 523 tok/s | 169 / 849 tok/s | 162 / 1,379 tok/s |
+| 1K | 8K | 314 tok/s | 202 / 951 tok/s | 134 / 1,453 tok/s |
+| 32K | 8K | 418 tok/s | 173 / 913 tok/s | 119 / 1,428 tok/s |
+| 64K | 8K | 364 tok/s | 157 / 830 tok/s | 106 / 1,290 tok/s |
 
-With an 8K append instead of 2K, one stream decodes at 387–481 tok/s and 4 and 8 streams reach 643–812 tok/s
-aggregate: the appends' prefills overlap the other streams' decode. All cells are in `code-summary.json`.
+One stream's rate varies with the task and the appended code (the drafter accepts more on predictable code). Median
+TTFT is 0.13–0.77 s for one stream and up to 3.8 s for eight streams with 8K appends, whose prefills queue together.
 
-**Cold prefill** (fresh prompts with no cached prefix, one at a time; [results](bench/results/20261121T005354Z-inkling2-prefill-pass2),
-client `bench/headline_inkling.py prefill`):
+**Cold prefill** (fresh salted prompts with no cached prefix, verified, one at a time; end to end: prompt tokens divided
+by the client's TTFT; [results](bench/results/20261121T011457Z-inkling2-prefill-r3a), `bench/headline_inkling.py prefill`):
 
-| Prompt tokens | 2,046 | 8,190 | 30,718 | 61,436 | 122,876 | 204,797 | 245,758 |
+| Prompt tokens | 2,043 | 8,192 | 30,718 | 61,437 | 122,880 | 204,798 | 245,759 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| TTFT | 0.11 s | 0.44 s | 1.82 s | 4.13 s | 10.2 s | 21.3 s | 28.2 s |
-| Prefill rate | 18,611 | 18,668 | 16,896 | 14,894 | 12,063 | 9,608 | 8,717 tok/s |
+| TTFT | 0.11 s | 0.44 s | 1.82 s | 4.13 s | 10.2 s | 21.4 s | 28.3 s |
+| Prefill rate | 18,844 | 18,627 | 16,857 | 14,880 | 12,041 | 9,586 | 8,696 tok/s |
 
-A first pass measured the same within 1 % except its 8K cell, which paid a one-time kernel warmup
-([results](bench/results/20261121T005235Z-inkling2-prefill)).
+A second pass on the same boot is within 1.3 % on every cell ([results](bench/results/20261121T011611Z-inkling2-prefill-r3b)).
 
 ## Served configuration
 
@@ -60,12 +64,13 @@ MODEL_DIR=/path/to/Inkling-2-Mini bash scripts/serve.sh     # OpenAI-compatible 
 | Setting | Value |
 | --- | --- |
 | Checkpoint | `thinkingmachines/Inkling-2-Mini`, official NVFP4/MXFP8 (19.5 GB) + DSpark drafter `mtp.safetensors` (636 MB) |
-| Engine | `vllm/vllm-openai:inkling-2-mini` (vLLM `0.1.dev25855+g7cb5dae22`, pinned by digest) + the `docker/` overlay |
+| Engine | `vllm/vllm-openai:inkling-2-mini` (vLLM `0.1.dev25855+g7cb5dae22`, pinned by digest) + the `docker/` overlay (`inkling2-rtx5090:sm120-r3`) |
 | Parallelism | tensor parallel 2, NCCL all-reduce (`--disable-custom-all-reduce`) |
 | Drafter | DSpark, 7 draft tokens per step (the only value the checkpoint accepts) |
 | Context | 262,144 tokens; KV pool 312,417 tokens (bf16), `--gpu-memory-utilization 0.92` |
 | API | `--reasoning-parser inkling --tool-call-parser inkling --enable-auto-tool-choice`; `reasoning_effort` none … max |
 | Warmup | FlashInfer autotune off (`--kernel-config`) |
+| Usage | `--enable-prompt-tokens-details` (cached prompt tokens in `usage`) |
 
 ## What the stack is
 

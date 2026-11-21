@@ -9,9 +9,11 @@ code  : a shared code context (inputs/code-corpus.txt, ExLlamaV3 sources) of 1,0
         c4 /1-4, c8 /5-12), 400 forced output tokens, temperature 0, reasoning_effort "none". Per depth: one warm
         request (1 token), then per cell a simultaneous 1-token residency replay of the context by every stream, then
         the measured concurrent batch. Per stream: TTFT, decode rate = (tokens - 1) / (last - first token time);
-        aggregate = sum of the concurrent streams' rates.
-prefill: fresh prompts (a random salt line first, so no cached prefix) of 2K/8K/30K/60K/120K/200K/240K tokens, 1 output
-        token, sequential; prompt tokens / TTFT.
+        aggregate = tokens decoded by all streams during the window in which all are decoding / its length (the sum
+        of the per-stream rates is also recorded). Checks: served prompt tokens match the calibration, and the shared
+        context is a cache hit on every measured stream (vLLM --enable-prompt-tokens-details).
+prefill: fresh prompts (a random salt line first, so no cached prefix; checked) of 2K/8K/30K/60K/120K/200K/240K
+        tokens, 1 output token, sequential; end-to-end rate = prompt tokens / client TTFT.
 
 usage: headline_inkling.py code|prefill OUTDIR [--url URL] [--corpus PATH] [--prompts PATH]
 Raw per-request records (request body sizes, SSE receipt timestamps, usage) are written under OUTDIR.
@@ -37,7 +39,8 @@ def post(url, path, body, timeout=900):
 
 def count(url, messages):
     """Prompt tokens of a chat request, template included (vLLM /tokenize)."""
-    r = post(url, "/tokenize", {"model": MODEL, "messages": messages, "add_generation_prompt": True})
+    r = post(url, "/tokenize", {"model": MODEL, "messages": messages, "add_generation_prompt": True,
+                                "chat_template_kwargs": {"reasoning_effort": "none"}})
     return r["count"]
 
 
@@ -57,13 +60,13 @@ def fit(url, make, target, lo, hi):
 def stream(url, messages, n, key, out, barrier=None):
     body = {"model": MODEL, "messages": messages, "temperature": 0, "max_tokens": n, "min_tokens": n,
             "ignore_eos": True, "reasoning_effort": "none", "stream": True,
-            "stream_options": {"include_usage": True, "continuous_usage_stats": False}}
+            "stream_options": {"include_usage": True, "continuous_usage_stats": True}}
     req = urllib.request.Request(url + "/v1/chat/completions", json.dumps(body).encode(),
                                  {"Content-Type": "application/json"})
     if barrier is not None:
         barrier.wait(timeout=60)
     start = time.perf_counter()
-    times, chunks, usage, finish = [], [], None, None
+    marks, usage, finish = [], None, None   # (receipt time, completion tokens so far, chunk carries text)
     with urllib.request.urlopen(req, timeout=1800) as resp:
         for raw in resp:
             line = raw.decode().strip()
@@ -73,26 +76,44 @@ def stream(url, messages, n, key, out, barrier=None):
             if payload == "[DONE]":
                 break
             d = json.loads(payload)
+            now = time.perf_counter()
             if d.get("usage"):
                 usage = d["usage"]
-            if d.get("choices"):
-                chunks.append(time.perf_counter())   # vLLM streams choices only once a token exists
+            text = False
             for ch in d.get("choices") or []:
                 delta = ch.get("delta") or {}
-                if delta.get("content") or delta.get("reasoning_content") or delta.get("reasoning"):
-                    times.append(time.perf_counter())
+                text = text or bool(delta.get("content") or delta.get("reasoning_content") or delta.get("reasoning"))
                 if ch.get("finish_reason"):
                     finish = ch["finish_reason"]
-    assert usage and usage["completion_tokens"] == n, f"{key}: usage {usage}"
-    # TTFT = first streamed choice (a structural token such as Inkling's content marker carries no text); decode is
-    # timed on text-bearing chunks only.
-    times = times or chunks
+            if d.get("choices") and usage:
+                marks.append((now, usage["completion_tokens"], text))
+    if not (usage and usage["completion_tokens"] == n and marks):
+        raise RuntimeError(f"{key}: usage {usage}, {len(marks)} chunks")
+    # TTFT = the first chunk with a generated token (Inkling's first token can be a structural marker with no text).
+    # Decode = tokens after the first text-bearing chunk / time from that chunk to the last one, using the server's
+    # per-chunk token counts (a speculative step can emit several tokens in one chunk).
+    tx = [m for m in marks if m[2]] or marks
+    first, last = tx[0], tx[-1]
     rec = {"key": key, "prompt_tokens": usage["prompt_tokens"], "completion_tokens": n, "finish": finish,
            "cached_tokens": (usage.get("prompt_tokens_details") or {}).get("cached_tokens"),
-           "ttft_s": chunks[0] - start, "first_s": times[0], "last_s": times[-1], "chunks": len(times),
-           "decode_tok_s": (n - 1) / (times[-1] - times[0]) if n > 1 and times[-1] > times[0] else None}
+           "ttft_s": marks[0][0] - start, "first_s": first[0], "last_s": last[0], "chunks": len(marks),
+           "marks": [[round(m[0], 6), m[1]] for m in marks],
+           "decode_tok_s": (last[1] - first[1]) / (last[0] - first[0]) if last[0] > first[0] else None}
     (out / f"{key}.json").write_text(json.dumps(rec) + "\n")
     return rec
+
+
+def window_aggregate(recs):
+    """Tokens decoded by all streams together during the window in which every stream is decoding (from the latest
+    first-text chunk to the earliest last chunk), divided by its length. None when the streams do not overlap."""
+    t0 = max(r["first_s"] for r in recs)
+    t1 = min(r["last_s"] for r in recs)
+    if t1 - t0 < 0.05:
+        return None
+
+    def at(r, ts):
+        return max((m[1] for m in r["marks"] if m[0] <= ts), default=0)
+    return round(sum(at(r, t1) - at(r, t0) for r in recs) / (t1 - t0), 1)
 
 
 def code(args):
@@ -131,10 +152,16 @@ def code(args):
                     recs = list(pool.map(lambda s: stream(args.url, s[1], 400, f"measure-{cell}-s{s[0]}", out, gate),
                                          msgs))
                 rates = [r["decode_tok_s"] for r in recs]
+                for (slot, _, total), r in zip(msgs, recs):
+                    if abs(r["prompt_tokens"] - total) > 8 or abs(total - (ctx_tokens + append)) > 0.02 * append:
+                        raise RuntimeError(f"{cell} slot {slot}: prompt {r['prompt_tokens']} vs calibrated {total}")
+                cached_ok = all(r["cached_tokens"] is not None and r["cached_tokens"] >= ctx_tokens - 256 for r in recs)
                 row = {"cell": cell, "depth": depth, "context_tokens": ctx_tokens, "append": append, "c": c,
                        "prompt_tokens": [r["prompt_tokens"] for r in recs], "cached": [r["cached_tokens"] for r in recs],
+                       "context_cached": cached_ok,
                        "ttft_s": [round(r["ttft_s"], 3) for r in recs], "decode_tok_s": [round(x, 1) for x in rates],
-                       "per_stream_mean": round(sum(rates) / c, 1), "aggregate": round(sum(rates), 1)}
+                       "per_stream_mean": round(sum(rates) / c, 1), "aggregate_sum_of_rates": round(sum(rates), 1),
+                       "aggregate_shared_window": window_aggregate(recs)}
                 rows.append(row)
                 print(json.dumps(row), flush=True)
     (out / "code-summary.json").write_text(json.dumps(rows, indent=1) + "\n")
@@ -154,8 +181,13 @@ def prefill(args):
             return [{"role": "user", "content": salt + corpus[:n] + "\n\nSummarize the code above in one sentence."}]
         chars, tokens = fit(args.url, mk, target, 0, min(len(corpus), target * 8))
         r = stream(args.url, mk(chars), 1, f"prefill-{target}", out)
+        if r["cached_tokens"]:
+            raise RuntimeError(f"prefill {target}: {r['cached_tokens']} cached tokens on a salted prompt")
+        if abs(r["prompt_tokens"] - target) > 0.02 * target:
+            raise RuntimeError(f"prefill {target}: got {r['prompt_tokens']} prompt tokens")
+        # End to end: request upload, queueing, prefill and the first token, as a client sees it.
         row = {"target": target, "prompt_tokens": r["prompt_tokens"], "cached": r["cached_tokens"],
-               "ttft_s": round(r["ttft_s"], 3), "prefill_tok_s": round(r["prompt_tokens"] / r["ttft_s"], 1)}
+               "ttft_s": round(r["ttft_s"], 3), "e2e_prefill_tok_s": round(r["prompt_tokens"] / r["ttft_s"], 1)}
         rows.append(row)
         print(json.dumps(row), flush=True)
     (out / "prefill-summary.json").write_text(json.dumps(rows, indent=1) + "\n")
