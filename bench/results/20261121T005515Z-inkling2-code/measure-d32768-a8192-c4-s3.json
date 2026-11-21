@@ -1,0 +1,1 @@
+{"key": "measure-d32768-a8192-c4-s3", "prompt_tokens": 40956, "completion_tokens": 400, "finish": "length", "cached_tokens": null, "ttft_s": 1.9297793559962884, "first_s": 84886.474806676, "last_s": 84888.387763959, "chunks": 108, "decode_tok_s": 208.57757961614055}

@@ -1,0 +1,1 @@
+{"key": "measure-d65536-a2048-c8-s0", "prompt_tokens": 67578, "completion_tokens": 400, "finish": "length", "cached_tokens": null, "ttft_s": 0.23812807998911012, "first_s": 84916.540893211, "last_s": 84920.439141885, "chunks": 141, "decode_tok_s": 102.35365503009669}

@@ -1,0 +1,414 @@
+{
+  "source": {
+    "repository": "https://github.com/openai/human-eval",
+    "commit": "b9453e8f1865df0a0057a1383767caa400acfbcf",
+    "files_sha256": {
+      "data/HumanEval.jsonl.gz": "b796127e635a67f93fb35c04f4cb03cf06f38c8072ee7cee8833d7bee06979ef",
+      "LICENSE": "bcba3de214851cce46ed5af42d6698044616eeace887c3231bc7a20474ab639e"
+    },
+    "license": "MIT",
+    "tasks": 57
+  },
+  "protocol": {
+    "max_tokens": 400,
+    "seed": 15,
+    "temperature": 0,
+    "ignore_eos": true
+  },
+  "sets": {
+    "1": {
+      "warmup": [
+        [
+          {
+            "id": "HumanEval/0",
+            "source_prompt": "from typing import List\n\n\ndef has_close_elements(numbers: List[float], threshold: float) -> bool:\n    \"\"\" Check if in given list of numbers, are any two numbers closer to each other than\n    given threshold.\n    >>> has_close_elements([1.0, 2.0, 3.0], 0.5)\n    False\n    >>> has_close_elements([1.0, 2.8, 3.0, 4.0, 5.0, 2.0], 0.3)\n    True\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\nfrom typing import List\n\n\ndef has_close_elements(numbers: List[float], threshold: float) -> bool:\n    \"\"\" Check if in given list of numbers, are any two numbers closer to each other than\n    given threshold.\n    >>> has_close_elements([1.0, 2.0, 3.0], 0.5)\n    False\n    >>> has_close_elements([1.0, 2.8, 3.0, 4.0, 5.0, 2.0], 0.3)\n    True\n    \"\"\"\n\n```",
+            "sha256": "37df6ba92b93e711789c04cf392236bba91fa48b5538662451c31de1ed27656a"
+          }
+        ]
+      ],
+      "batches": [
+        [
+          {
+            "id": "HumanEval/1",
+            "source_prompt": "from typing import List\n\n\ndef separate_paren_groups(paren_string: str) -> List[str]:\n    \"\"\" Input to this function is a string containing multiple groups of nested parentheses. Your goal is to\n    separate those group into separate strings and return the list of those.\n    Separate groups are balanced (each open brace is properly closed) and not nested within each other\n    Ignore any spaces in the input string.\n    >>> separate_paren_groups('( ) (( )) (( )( ))')\n    ['()', '(())', '(()())']\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\nfrom typing import List\n\n\ndef separate_paren_groups(paren_string: str) -> List[str]:\n    \"\"\" Input to this function is a string containing multiple groups of nested parentheses. Your goal is to\n    separate those group into separate strings and return the list of those.\n    Separate groups are balanced (each open brace is properly closed) and not nested within each other\n    Ignore any spaces in the input string.\n    >>> separate_paren_groups('( ) (( )) (( )( ))')\n    ['()', '(())', '(()())']\n    \"\"\"\n\n```",
+            "sha256": "29a65718f8ed2bdc6e05b54b53c4f9b8d406af92ac338706d1cdc5df2d147c20"
+          }
+        ],
+        [
+          {
+            "id": "HumanEval/2",
+            "source_prompt": "\n\ndef truncate_number(number: float) -> float:\n    \"\"\" Given a positive floating point number, it can be decomposed into\n    and integer part (largest integer smaller than given number) and decimals\n    (leftover part always smaller than 1).\n\n    Return the decimal part of the number.\n    >>> truncate_number(3.5)\n    0.5\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef truncate_number(number: float) -> float:\n    \"\"\" Given a positive floating point number, it can be decomposed into\n    and integer part (largest integer smaller than given number) and decimals\n    (leftover part always smaller than 1).\n\n    Return the decimal part of the number.\n    >>> truncate_number(3.5)\n    0.5\n    \"\"\"\n\n```",
+            "sha256": "f1fbd2c3f9a09497eeadbd6b7b2b97ef769f76c0f89f9d907d8d0ce87adc3f5f"
+          }
+        ],
+        [
+          {
+            "id": "HumanEval/3",
+            "source_prompt": "from typing import List\n\n\ndef below_zero(operations: List[int]) -> bool:\n    \"\"\" You're given a list of deposit and withdrawal operations on a bank account that starts with\n    zero balance. Your task is to detect if at any point the balance of account fallls below zero, and\n    at that point function should return True. Otherwise it should return False.\n    >>> below_zero([1, 2, 3])\n    False\n    >>> below_zero([1, 2, -4, 5])\n    True\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\nfrom typing import List\n\n\ndef below_zero(operations: List[int]) -> bool:\n    \"\"\" You're given a list of deposit and withdrawal operations on a bank account that starts with\n    zero balance. Your task is to detect if at any point the balance of account fallls below zero, and\n    at that point function should return True. Otherwise it should return False.\n    >>> below_zero([1, 2, 3])\n    False\n    >>> below_zero([1, 2, -4, 5])\n    True\n    \"\"\"\n\n```",
+            "sha256": "a2f4a43d6ed3c836bda50ddfede1127017daf1308de055f3d7cb1abdfd68387e"
+          }
+        ],
+        [
+          {
+            "id": "HumanEval/4",
+            "source_prompt": "from typing import List\n\n\ndef mean_absolute_deviation(numbers: List[float]) -> float:\n    \"\"\" For a given list of input numbers, calculate Mean Absolute Deviation\n    around the mean of this dataset.\n    Mean Absolute Deviation is the average absolute difference between each\n    element and a centerpoint (mean in this case):\n    MAD = average | x - x_mean |\n    >>> mean_absolute_deviation([1.0, 2.0, 3.0, 4.0])\n    1.0\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\nfrom typing import List\n\n\ndef mean_absolute_deviation(numbers: List[float]) -> float:\n    \"\"\" For a given list of input numbers, calculate Mean Absolute Deviation\n    around the mean of this dataset.\n    Mean Absolute Deviation is the average absolute difference between each\n    element and a centerpoint (mean in this case):\n    MAD = average | x - x_mean |\n    >>> mean_absolute_deviation([1.0, 2.0, 3.0, 4.0])\n    1.0\n    \"\"\"\n\n```",
+            "sha256": "a8e1d970c067db69a61f889679d8e6ef0e4cd79078150cbbee46e91f63a39a42"
+          }
+        ],
+        [
+          {
+            "id": "HumanEval/5",
+            "source_prompt": "from typing import List\n\n\ndef intersperse(numbers: List[int], delimeter: int) -> List[int]:\n    \"\"\" Insert a number 'delimeter' between every two consecutive elements of input list `numbers'\n    >>> intersperse([], 4)\n    []\n    >>> intersperse([1, 2, 3], 4)\n    [1, 4, 2, 4, 3]\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\nfrom typing import List\n\n\ndef intersperse(numbers: List[int], delimeter: int) -> List[int]:\n    \"\"\" Insert a number 'delimeter' between every two consecutive elements of input list `numbers'\n    >>> intersperse([], 4)\n    []\n    >>> intersperse([1, 2, 3], 4)\n    [1, 4, 2, 4, 3]\n    \"\"\"\n\n```",
+            "sha256": "b796c8f14c5be440ea3730947aa4d6d0f5d2594a8bfebcfeb20a0381ea43184b"
+          }
+        ],
+        [
+          {
+            "id": "HumanEval/6",
+            "source_prompt": "from typing import List\n\n\ndef parse_nested_parens(paren_string: str) -> List[int]:\n    \"\"\" Input to this function is a string represented multiple groups for nested parentheses separated by spaces.\n    For each of the group, output the deepest level of nesting of parentheses.\n    E.g. (()()) has maximum two levels of nesting while ((())) has three.\n\n    >>> parse_nested_parens('(()()) ((())) () ((())()())')\n    [2, 3, 1, 3]\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\nfrom typing import List\n\n\ndef parse_nested_parens(paren_string: str) -> List[int]:\n    \"\"\" Input to this function is a string represented multiple groups for nested parentheses separated by spaces.\n    For each of the group, output the deepest level of nesting of parentheses.\n    E.g. (()()) has maximum two levels of nesting while ((())) has three.\n\n    >>> parse_nested_parens('(()()) ((())) () ((())()())')\n    [2, 3, 1, 3]\n    \"\"\"\n\n```",
+            "sha256": "4ba54a747def5ca4dc5ba283251fb006a2e0849e068475f4c3527293ff9dfae5"
+          }
+        ],
+        [
+          {
+            "id": "HumanEval/7",
+            "source_prompt": "from typing import List\n\n\ndef filter_by_substring(strings: List[str], substring: str) -> List[str]:\n    \"\"\" Filter an input list of strings only for ones that contain given substring\n    >>> filter_by_substring([], 'a')\n    []\n    >>> filter_by_substring(['abc', 'bacd', 'cde', 'array'], 'a')\n    ['abc', 'bacd', 'array']\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\nfrom typing import List\n\n\ndef filter_by_substring(strings: List[str], substring: str) -> List[str]:\n    \"\"\" Filter an input list of strings only for ones that contain given substring\n    >>> filter_by_substring([], 'a')\n    []\n    >>> filter_by_substring(['abc', 'bacd', 'cde', 'array'], 'a')\n    ['abc', 'bacd', 'array']\n    \"\"\"\n\n```",
+            "sha256": "7fa3d69452c2327129134c77e4bd5941af00117f37f57782660238a10d2bac2b"
+          }
+        ],
+        [
+          {
+            "id": "HumanEval/8",
+            "source_prompt": "from typing import List, Tuple\n\n\ndef sum_product(numbers: List[int]) -> Tuple[int, int]:\n    \"\"\" For a given list of integers, return a tuple consisting of a sum and a product of all the integers in a list.\n    Empty sum should be equal to 0 and empty product should be equal to 1.\n    >>> sum_product([])\n    (0, 1)\n    >>> sum_product([1, 2, 3, 4])\n    (10, 24)\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\nfrom typing import List, Tuple\n\n\ndef sum_product(numbers: List[int]) -> Tuple[int, int]:\n    \"\"\" For a given list of integers, return a tuple consisting of a sum and a product of all the integers in a list.\n    Empty sum should be equal to 0 and empty product should be equal to 1.\n    >>> sum_product([])\n    (0, 1)\n    >>> sum_product([1, 2, 3, 4])\n    (10, 24)\n    \"\"\"\n\n```",
+            "sha256": "d721f7ad2fc99a4ee28477903ea428127e7c02b3a4dcc99666b2f4bc393659e8"
+          }
+        ]
+      ]
+    },
+    "4": {
+      "warmup": [
+        [
+          {
+            "id": "HumanEval/9",
+            "source_prompt": "from typing import List, Tuple\n\n\ndef rolling_max(numbers: List[int]) -> List[int]:\n    \"\"\" From a given list of integers, generate a list of rolling maximum element found until given moment\n    in the sequence.\n    >>> rolling_max([1, 2, 3, 2, 3, 4, 2])\n    [1, 2, 3, 3, 3, 4, 4]\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\nfrom typing import List, Tuple\n\n\ndef rolling_max(numbers: List[int]) -> List[int]:\n    \"\"\" From a given list of integers, generate a list of rolling maximum element found until given moment\n    in the sequence.\n    >>> rolling_max([1, 2, 3, 2, 3, 4, 2])\n    [1, 2, 3, 3, 3, 4, 4]\n    \"\"\"\n\n```",
+            "sha256": "eaa34509dc21c71370dcb9388acc3ad5705e35761233945587131517c2caac4b"
+          },
+          {
+            "id": "HumanEval/10",
+            "source_prompt": "\n\ndef is_palindrome(string: str) -> bool:\n    \"\"\" Test if given string is a palindrome \"\"\"\n    return string == string[::-1]\n\n\ndef make_palindrome(string: str) -> str:\n    \"\"\" Find the shortest palindrome that begins with a supplied string.\n    Algorithm idea is simple:\n    - Find the longest postfix of supplied string that is a palindrome.\n    - Append to the end of the string reverse of a string prefix that comes before the palindromic suffix.\n    >>> make_palindrome('')\n    ''\n    >>> make_palindrome('cat')\n    'catac'\n    >>> make_palindrome('cata')\n    'catac'\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef is_palindrome(string: str) -> bool:\n    \"\"\" Test if given string is a palindrome \"\"\"\n    return string == string[::-1]\n\n\ndef make_palindrome(string: str) -> str:\n    \"\"\" Find the shortest palindrome that begins with a supplied string.\n    Algorithm idea is simple:\n    - Find the longest postfix of supplied string that is a palindrome.\n    - Append to the end of the string reverse of a string prefix that comes before the palindromic suffix.\n    >>> make_palindrome('')\n    ''\n    >>> make_palindrome('cat')\n    'catac'\n    >>> make_palindrome('cata')\n    'catac'\n    \"\"\"\n\n```",
+            "sha256": "cba7ce7aaad59d4e9a08e40f06d8b70d88e46ad1d38f674db2de08c628b88d1c"
+          },
+          {
+            "id": "HumanEval/11",
+            "source_prompt": "from typing import List\n\n\ndef string_xor(a: str, b: str) -> str:\n    \"\"\" Input are two strings a and b consisting only of 1s and 0s.\n    Perform binary XOR on these inputs and return result also as a string.\n    >>> string_xor('010', '110')\n    '100'\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\nfrom typing import List\n\n\ndef string_xor(a: str, b: str) -> str:\n    \"\"\" Input are two strings a and b consisting only of 1s and 0s.\n    Perform binary XOR on these inputs and return result also as a string.\n    >>> string_xor('010', '110')\n    '100'\n    \"\"\"\n\n```",
+            "sha256": "f2f3c9d104f0f77d95287d73ed2e374722c707a34d0fb420eae81e65a54825f7"
+          },
+          {
+            "id": "HumanEval/12",
+            "source_prompt": "from typing import List, Optional\n\n\ndef longest(strings: List[str]) -> Optional[str]:\n    \"\"\" Out of list of strings, return the longest one. Return the first one in case of multiple\n    strings of the same length. Return None in case the input list is empty.\n    >>> longest([])\n\n    >>> longest(['a', 'b', 'c'])\n    'a'\n    >>> longest(['a', 'bb', 'ccc'])\n    'ccc'\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\nfrom typing import List, Optional\n\n\ndef longest(strings: List[str]) -> Optional[str]:\n    \"\"\" Out of list of strings, return the longest one. Return the first one in case of multiple\n    strings of the same length. Return None in case the input list is empty.\n    >>> longest([])\n\n    >>> longest(['a', 'b', 'c'])\n    'a'\n    >>> longest(['a', 'bb', 'ccc'])\n    'ccc'\n    \"\"\"\n\n```",
+            "sha256": "4ff3bb2f16f06bee6c4dd9e149ac64938c33d5bf150fa53115722ba5b3a6f8dd"
+          }
+        ]
+      ],
+      "batches": [
+        [
+          {
+            "id": "HumanEval/13",
+            "source_prompt": "\n\ndef greatest_common_divisor(a: int, b: int) -> int:\n    \"\"\" Return a greatest common divisor of two integers a and b\n    >>> greatest_common_divisor(3, 5)\n    1\n    >>> greatest_common_divisor(25, 15)\n    5\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef greatest_common_divisor(a: int, b: int) -> int:\n    \"\"\" Return a greatest common divisor of two integers a and b\n    >>> greatest_common_divisor(3, 5)\n    1\n    >>> greatest_common_divisor(25, 15)\n    5\n    \"\"\"\n\n```",
+            "sha256": "37bfbd4c847d996d27320cd14ae97c428b61d64065662c97668fa9277458807b"
+          },
+          {
+            "id": "HumanEval/14",
+            "source_prompt": "from typing import List\n\n\ndef all_prefixes(string: str) -> List[str]:\n    \"\"\" Return list of all prefixes from shortest to longest of the input string\n    >>> all_prefixes('abc')\n    ['a', 'ab', 'abc']\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\nfrom typing import List\n\n\ndef all_prefixes(string: str) -> List[str]:\n    \"\"\" Return list of all prefixes from shortest to longest of the input string\n    >>> all_prefixes('abc')\n    ['a', 'ab', 'abc']\n    \"\"\"\n\n```",
+            "sha256": "d5bb87b52b453238663a87df8698cfbbe2f310294548836c607beb97f94fac1c"
+          },
+          {
+            "id": "HumanEval/15",
+            "source_prompt": "\n\ndef string_sequence(n: int) -> str:\n    \"\"\" Return a string containing space-delimited numbers starting from 0 upto n inclusive.\n    >>> string_sequence(0)\n    '0'\n    >>> string_sequence(5)\n    '0 1 2 3 4 5'\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef string_sequence(n: int) -> str:\n    \"\"\" Return a string containing space-delimited numbers starting from 0 upto n inclusive.\n    >>> string_sequence(0)\n    '0'\n    >>> string_sequence(5)\n    '0 1 2 3 4 5'\n    \"\"\"\n\n```",
+            "sha256": "d31b4c34d777ffda452854d25cb90a4224f6e3b38ae0505d686fe221dd067ef4"
+          },
+          {
+            "id": "HumanEval/16",
+            "source_prompt": "\n\ndef count_distinct_characters(string: str) -> int:\n    \"\"\" Given a string, find out how many distinct characters (regardless of case) does it consist of\n    >>> count_distinct_characters('xyzXYZ')\n    3\n    >>> count_distinct_characters('Jerry')\n    4\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef count_distinct_characters(string: str) -> int:\n    \"\"\" Given a string, find out how many distinct characters (regardless of case) does it consist of\n    >>> count_distinct_characters('xyzXYZ')\n    3\n    >>> count_distinct_characters('Jerry')\n    4\n    \"\"\"\n\n```",
+            "sha256": "4b30de9e5e2b414a18f5fcc52d0ff6cfcdc8754062cc36a0fe7309000e6d7f32"
+          }
+        ],
+        [
+          {
+            "id": "HumanEval/17",
+            "source_prompt": "from typing import List\n\n\ndef parse_music(music_string: str) -> List[int]:\n    \"\"\" Input to this function is a string representing musical notes in a special ASCII format.\n    Your task is to parse this string and return list of integers corresponding to how many beats does each\n    not last.\n\n    Here is a legend:\n    'o' - whole note, lasts four beats\n    'o|' - half note, lasts two beats\n    '.|' - quater note, lasts one beat\n\n    >>> parse_music('o o| .| o| o| .| .| .| .| o o')\n    [4, 2, 1, 2, 2, 1, 1, 1, 1, 4, 4]\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\nfrom typing import List\n\n\ndef parse_music(music_string: str) -> List[int]:\n    \"\"\" Input to this function is a string representing musical notes in a special ASCII format.\n    Your task is to parse this string and return list of integers corresponding to how many beats does each\n    not last.\n\n    Here is a legend:\n    'o' - whole note, lasts four beats\n    'o|' - half note, lasts two beats\n    '.|' - quater note, lasts one beat\n\n    >>> parse_music('o o| .| o| o| .| .| .| .| o o')\n    [4, 2, 1, 2, 2, 1, 1, 1, 1, 4, 4]\n    \"\"\"\n\n```",
+            "sha256": "e5a0a857f61e9628336b1bf887c8269fda7a3ea9f43e4f1ab7b6bc3cd37f3783"
+          },
+          {
+            "id": "HumanEval/18",
+            "source_prompt": "\n\ndef how_many_times(string: str, substring: str) -> int:\n    \"\"\" Find how many times a given substring can be found in the original string. Count overlaping cases.\n    >>> how_many_times('', 'a')\n    0\n    >>> how_many_times('aaa', 'a')\n    3\n    >>> how_many_times('aaaa', 'aa')\n    3\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef how_many_times(string: str, substring: str) -> int:\n    \"\"\" Find how many times a given substring can be found in the original string. Count overlaping cases.\n    >>> how_many_times('', 'a')\n    0\n    >>> how_many_times('aaa', 'a')\n    3\n    >>> how_many_times('aaaa', 'aa')\n    3\n    \"\"\"\n\n```",
+            "sha256": "324f2b2604a9fa41086186913f92871ac61b8989f6a31ba9f91ba9e9e8846972"
+          },
+          {
+            "id": "HumanEval/19",
+            "source_prompt": "from typing import List\n\n\ndef sort_numbers(numbers: str) -> str:\n    \"\"\" Input is a space-delimited string of numberals from 'zero' to 'nine'.\n    Valid choices are 'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight' and 'nine'.\n    Return the string with numbers sorted from smallest to largest\n    >>> sort_numbers('three one five')\n    'one three five'\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\nfrom typing import List\n\n\ndef sort_numbers(numbers: str) -> str:\n    \"\"\" Input is a space-delimited string of numberals from 'zero' to 'nine'.\n    Valid choices are 'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight' and 'nine'.\n    Return the string with numbers sorted from smallest to largest\n    >>> sort_numbers('three one five')\n    'one three five'\n    \"\"\"\n\n```",
+            "sha256": "63fb0e8ee706c5175948c9729cfe8dfaf72fa4f608376834253d063d819ad5d1"
+          },
+          {
+            "id": "HumanEval/20",
+            "source_prompt": "from typing import List, Tuple\n\n\ndef find_closest_elements(numbers: List[float]) -> Tuple[float, float]:\n    \"\"\" From a supplied list of numbers (of length at least two) select and return two that are the closest to each\n    other and return them in order (smaller number, larger number).\n    >>> find_closest_elements([1.0, 2.0, 3.0, 4.0, 5.0, 2.2])\n    (2.0, 2.2)\n    >>> find_closest_elements([1.0, 2.0, 3.0, 4.0, 5.0, 2.0])\n    (2.0, 2.0)\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\nfrom typing import List, Tuple\n\n\ndef find_closest_elements(numbers: List[float]) -> Tuple[float, float]:\n    \"\"\" From a supplied list of numbers (of length at least two) select and return two that are the closest to each\n    other and return them in order (smaller number, larger number).\n    >>> find_closest_elements([1.0, 2.0, 3.0, 4.0, 5.0, 2.2])\n    (2.0, 2.2)\n    >>> find_closest_elements([1.0, 2.0, 3.0, 4.0, 5.0, 2.0])\n    (2.0, 2.0)\n    \"\"\"\n\n```",
+            "sha256": "54ce7ae66ab4ecde1f87e83affe2f24df495f1fea2dc1bdbb4878626e712bda2"
+          }
+        ],
+        [
+          {
+            "id": "HumanEval/21",
+            "source_prompt": "from typing import List\n\n\ndef rescale_to_unit(numbers: List[float]) -> List[float]:\n    \"\"\" Given list of numbers (of at least two elements), apply a linear transform to that list,\n    such that the smallest number will become 0 and the largest will become 1\n    >>> rescale_to_unit([1.0, 2.0, 3.0, 4.0, 5.0])\n    [0.0, 0.25, 0.5, 0.75, 1.0]\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\nfrom typing import List\n\n\ndef rescale_to_unit(numbers: List[float]) -> List[float]:\n    \"\"\" Given list of numbers (of at least two elements), apply a linear transform to that list,\n    such that the smallest number will become 0 and the largest will become 1\n    >>> rescale_to_unit([1.0, 2.0, 3.0, 4.0, 5.0])\n    [0.0, 0.25, 0.5, 0.75, 1.0]\n    \"\"\"\n\n```",
+            "sha256": "b4ae977a315996b6a8bd04c90cfdd9fe3fc3c5269357da3a19432ac35efa7f84"
+          },
+          {
+            "id": "HumanEval/22",
+            "source_prompt": "from typing import List, Any\n\n\ndef filter_integers(values: List[Any]) -> List[int]:\n    \"\"\" Filter given list of any python values only for integers\n    >>> filter_integers(['a', 3.14, 5])\n    [5]\n    >>> filter_integers([1, 2, 3, 'abc', {}, []])\n    [1, 2, 3]\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\nfrom typing import List, Any\n\n\ndef filter_integers(values: List[Any]) -> List[int]:\n    \"\"\" Filter given list of any python values only for integers\n    >>> filter_integers(['a', 3.14, 5])\n    [5]\n    >>> filter_integers([1, 2, 3, 'abc', {}, []])\n    [1, 2, 3]\n    \"\"\"\n\n```",
+            "sha256": "84d0cc277a52050ad43c3fd6ba16e404692c96b32f5f64067454034c80af7e87"
+          },
+          {
+            "id": "HumanEval/23",
+            "source_prompt": "\n\ndef strlen(string: str) -> int:\n    \"\"\" Return length of given string\n    >>> strlen('')\n    0\n    >>> strlen('abc')\n    3\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef strlen(string: str) -> int:\n    \"\"\" Return length of given string\n    >>> strlen('')\n    0\n    >>> strlen('abc')\n    3\n    \"\"\"\n\n```",
+            "sha256": "0acb5916c46f0dede41fa07f370ab1a9ef04c929cf0f8eed27542363da29f436"
+          },
+          {
+            "id": "HumanEval/24",
+            "source_prompt": "\n\ndef largest_divisor(n: int) -> int:\n    \"\"\" For a given number n, find the largest number that divides n evenly, smaller than n\n    >>> largest_divisor(15)\n    5\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef largest_divisor(n: int) -> int:\n    \"\"\" For a given number n, find the largest number that divides n evenly, smaller than n\n    >>> largest_divisor(15)\n    5\n    \"\"\"\n\n```",
+            "sha256": "223d7028f535b8fccbf07a4045d74f318a82c6106e3f1f2c1353734d73e27d77"
+          }
+        ]
+      ]
+    },
+    "8": {
+      "warmup": [
+        [
+          {
+            "id": "HumanEval/25",
+            "source_prompt": "from typing import List\n\n\ndef factorize(n: int) -> List[int]:\n    \"\"\" Return list of prime factors of given integer in the order from smallest to largest.\n    Each of the factors should be listed number of times corresponding to how many times it appeares in factorization.\n    Input number should be equal to the product of all factors\n    >>> factorize(8)\n    [2, 2, 2]\n    >>> factorize(25)\n    [5, 5]\n    >>> factorize(70)\n    [2, 5, 7]\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\nfrom typing import List\n\n\ndef factorize(n: int) -> List[int]:\n    \"\"\" Return list of prime factors of given integer in the order from smallest to largest.\n    Each of the factors should be listed number of times corresponding to how many times it appeares in factorization.\n    Input number should be equal to the product of all factors\n    >>> factorize(8)\n    [2, 2, 2]\n    >>> factorize(25)\n    [5, 5]\n    >>> factorize(70)\n    [2, 5, 7]\n    \"\"\"\n\n```",
+            "sha256": "ff391a0e1b0edf4fdf74c766e7f87ca82c3e02f076886c78251d307d19d4f805"
+          },
+          {
+            "id": "HumanEval/26",
+            "source_prompt": "from typing import List\n\n\ndef remove_duplicates(numbers: List[int]) -> List[int]:\n    \"\"\" From a list of integers, remove all elements that occur more than once.\n    Keep order of elements left the same as in the input.\n    >>> remove_duplicates([1, 2, 3, 2, 4])\n    [1, 3, 4]\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\nfrom typing import List\n\n\ndef remove_duplicates(numbers: List[int]) -> List[int]:\n    \"\"\" From a list of integers, remove all elements that occur more than once.\n    Keep order of elements left the same as in the input.\n    >>> remove_duplicates([1, 2, 3, 2, 4])\n    [1, 3, 4]\n    \"\"\"\n\n```",
+            "sha256": "7a0ea64ecc0d7d4f65899b70569297cdd83de97fdb75106b31dcf1faf0e7eb5f"
+          },
+          {
+            "id": "HumanEval/27",
+            "source_prompt": "\n\ndef flip_case(string: str) -> str:\n    \"\"\" For a given string, flip lowercase characters to uppercase and uppercase to lowercase.\n    >>> flip_case('Hello')\n    'hELLO'\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef flip_case(string: str) -> str:\n    \"\"\" For a given string, flip lowercase characters to uppercase and uppercase to lowercase.\n    >>> flip_case('Hello')\n    'hELLO'\n    \"\"\"\n\n```",
+            "sha256": "5ad3160016c27f2282b0e37330344188c3fa84cb6099a82729ae40f6af762266"
+          },
+          {
+            "id": "HumanEval/28",
+            "source_prompt": "from typing import List\n\n\ndef concatenate(strings: List[str]) -> str:\n    \"\"\" Concatenate list of strings into a single string\n    >>> concatenate([])\n    ''\n    >>> concatenate(['a', 'b', 'c'])\n    'abc'\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\nfrom typing import List\n\n\ndef concatenate(strings: List[str]) -> str:\n    \"\"\" Concatenate list of strings into a single string\n    >>> concatenate([])\n    ''\n    >>> concatenate(['a', 'b', 'c'])\n    'abc'\n    \"\"\"\n\n```",
+            "sha256": "6e9a3e0d59192321f99027a5a4eb21cb35190596a77d724012718b9811ab972a"
+          },
+          {
+            "id": "HumanEval/29",
+            "source_prompt": "from typing import List\n\n\ndef filter_by_prefix(strings: List[str], prefix: str) -> List[str]:\n    \"\"\" Filter an input list of strings only for ones that start with a given prefix.\n    >>> filter_by_prefix([], 'a')\n    []\n    >>> filter_by_prefix(['abc', 'bcd', 'cde', 'array'], 'a')\n    ['abc', 'array']\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\nfrom typing import List\n\n\ndef filter_by_prefix(strings: List[str], prefix: str) -> List[str]:\n    \"\"\" Filter an input list of strings only for ones that start with a given prefix.\n    >>> filter_by_prefix([], 'a')\n    []\n    >>> filter_by_prefix(['abc', 'bcd', 'cde', 'array'], 'a')\n    ['abc', 'array']\n    \"\"\"\n\n```",
+            "sha256": "ba5a7cf6337129e4d0e9f6b5c0de28f32b9cdb02a789ad5df222e07a94365348"
+          },
+          {
+            "id": "HumanEval/30",
+            "source_prompt": "\n\ndef get_positive(l: list):\n    \"\"\"Return only positive numbers in the list.\n    >>> get_positive([-1, 2, -4, 5, 6])\n    [2, 5, 6]\n    >>> get_positive([5, 3, -5, 2, -3, 3, 9, 0, 123, 1, -10])\n    [5, 3, 2, 3, 9, 123, 1]\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef get_positive(l: list):\n    \"\"\"Return only positive numbers in the list.\n    >>> get_positive([-1, 2, -4, 5, 6])\n    [2, 5, 6]\n    >>> get_positive([5, 3, -5, 2, -3, 3, 9, 0, 123, 1, -10])\n    [5, 3, 2, 3, 9, 123, 1]\n    \"\"\"\n\n```",
+            "sha256": "03b224c8225ce5c1b5b2947a554e55d9fb3a3db7cb1fec73b80d1c9998a14e01"
+          },
+          {
+            "id": "HumanEval/31",
+            "source_prompt": "\n\ndef is_prime(n):\n    \"\"\"Return true if a given number is prime, and false otherwise.\n    >>> is_prime(6)\n    False\n    >>> is_prime(101)\n    True\n    >>> is_prime(11)\n    True\n    >>> is_prime(13441)\n    True\n    >>> is_prime(61)\n    True\n    >>> is_prime(4)\n    False\n    >>> is_prime(1)\n    False\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef is_prime(n):\n    \"\"\"Return true if a given number is prime, and false otherwise.\n    >>> is_prime(6)\n    False\n    >>> is_prime(101)\n    True\n    >>> is_prime(11)\n    True\n    >>> is_prime(13441)\n    True\n    >>> is_prime(61)\n    True\n    >>> is_prime(4)\n    False\n    >>> is_prime(1)\n    False\n    \"\"\"\n\n```",
+            "sha256": "54d40a8daf1329d99d75d9d99687650f2614c2888094fa10286c01d7a3c68c7e"
+          },
+          {
+            "id": "HumanEval/32",
+            "source_prompt": "import math\n\n\ndef poly(xs: list, x: float):\n    \"\"\"\n    Evaluates polynomial with coefficients xs at point x.\n    return xs[0] + xs[1] * x + xs[1] * x^2 + .... xs[n] * x^n\n    \"\"\"\n    return sum([coeff * math.pow(x, i) for i, coeff in enumerate(xs)])\n\n\ndef find_zero(xs: list):\n    \"\"\" xs are coefficients of a polynomial.\n    find_zero find x such that poly(x) = 0.\n    find_zero returns only only zero point, even if there are many.\n    Moreover, find_zero only takes list xs having even number of coefficients\n    and largest non zero coefficient as it guarantees\n    a solution.\n    >>> round(find_zero([1, 2]), 2) # f(x) = 1 + 2x\n    -0.5\n    >>> round(find_zero([-6, 11, -6, 1]), 2) # (x - 1) * (x - 2) * (x - 3) = -6 + 11x - 6x^2 + x^3\n    1.0\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\nimport math\n\n\ndef poly(xs: list, x: float):\n    \"\"\"\n    Evaluates polynomial with coefficients xs at point x.\n    return xs[0] + xs[1] * x + xs[1] * x^2 + .... xs[n] * x^n\n    \"\"\"\n    return sum([coeff * math.pow(x, i) for i, coeff in enumerate(xs)])\n\n\ndef find_zero(xs: list):\n    \"\"\" xs are coefficients of a polynomial.\n    find_zero find x such that poly(x) = 0.\n    find_zero returns only only zero point, even if there are many.\n    Moreover, find_zero only takes list xs having even number of coefficients\n    and largest non zero coefficient as it guarantees\n    a solution.\n    >>> round(find_zero([1, 2]), 2) # f(x) = 1 + 2x\n    -0.5\n    >>> round(find_zero([-6, 11, -6, 1]), 2) # (x - 1) * (x - 2) * (x - 3) = -6 + 11x - 6x^2 + x^3\n    1.0\n    \"\"\"\n\n```",
+            "sha256": "37d5734ca755d3f5a3131f4a9fe2417e5b3b1c62d9438516c3d50da346b2d5e3"
+          }
+        ]
+      ],
+      "batches": [
+        [
+          {
+            "id": "HumanEval/33",
+            "source_prompt": "\n\ndef sort_third(l: list):\n    \"\"\"This function takes a list l and returns a list l' such that\n    l' is identical to l in the indicies that are not divisible by three, while its values at the indicies that are divisible by three are equal\n    to the values of the corresponding indicies of l, but sorted.\n    >>> sort_third([1, 2, 3])\n    [1, 2, 3]\n    >>> sort_third([5, 6, 3, 4, 8, 9, 2])\n    [2, 6, 3, 4, 8, 9, 5]\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef sort_third(l: list):\n    \"\"\"This function takes a list l and returns a list l' such that\n    l' is identical to l in the indicies that are not divisible by three, while its values at the indicies that are divisible by three are equal\n    to the values of the corresponding indicies of l, but sorted.\n    >>> sort_third([1, 2, 3])\n    [1, 2, 3]\n    >>> sort_third([5, 6, 3, 4, 8, 9, 2])\n    [2, 6, 3, 4, 8, 9, 5]\n    \"\"\"\n\n```",
+            "sha256": "27878e726bdd69855a47f0ed40711f79cb37bcb0c469ee25f666f7753a31312e"
+          },
+          {
+            "id": "HumanEval/34",
+            "source_prompt": "\n\ndef unique(l: list):\n    \"\"\"Return sorted unique elements in a list\n    >>> unique([5, 3, 5, 2, 3, 3, 9, 0, 123])\n    [0, 2, 3, 5, 9, 123]\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef unique(l: list):\n    \"\"\"Return sorted unique elements in a list\n    >>> unique([5, 3, 5, 2, 3, 3, 9, 0, 123])\n    [0, 2, 3, 5, 9, 123]\n    \"\"\"\n\n```",
+            "sha256": "278b93439eefac8c0ee90ed34e644421c676e8a466063d0e35d5649b4fd37227"
+          },
+          {
+            "id": "HumanEval/35",
+            "source_prompt": "\n\ndef max_element(l: list):\n    \"\"\"Return maximum element in the list.\n    >>> max_element([1, 2, 3])\n    3\n    >>> max_element([5, 3, -5, 2, -3, 3, 9, 0, 123, 1, -10])\n    123\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef max_element(l: list):\n    \"\"\"Return maximum element in the list.\n    >>> max_element([1, 2, 3])\n    3\n    >>> max_element([5, 3, -5, 2, -3, 3, 9, 0, 123, 1, -10])\n    123\n    \"\"\"\n\n```",
+            "sha256": "1d3529161f9ce510403c2e1b996e75e577d1425a86f4cb948da9fef78c071777"
+          },
+          {
+            "id": "HumanEval/36",
+            "source_prompt": "\n\ndef fizz_buzz(n: int):\n    \"\"\"Return the number of times the digit 7 appears in integers less than n which are divisible by 11 or 13.\n    >>> fizz_buzz(50)\n    0\n    >>> fizz_buzz(78)\n    2\n    >>> fizz_buzz(79)\n    3\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef fizz_buzz(n: int):\n    \"\"\"Return the number of times the digit 7 appears in integers less than n which are divisible by 11 or 13.\n    >>> fizz_buzz(50)\n    0\n    >>> fizz_buzz(78)\n    2\n    >>> fizz_buzz(79)\n    3\n    \"\"\"\n\n```",
+            "sha256": "b3cd0acedea6a8b99a5919bcf290d0ab0d367413ac8942b1e7ae9ec18b147879"
+          },
+          {
+            "id": "HumanEval/37",
+            "source_prompt": "\n\ndef sort_even(l: list):\n    \"\"\"This function takes a list l and returns a list l' such that\n    l' is identical to l in the odd indicies, while its values at the even indicies are equal\n    to the values of the even indicies of l, but sorted.\n    >>> sort_even([1, 2, 3])\n    [1, 2, 3]\n    >>> sort_even([5, 6, 3, 4])\n    [3, 6, 5, 4]\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef sort_even(l: list):\n    \"\"\"This function takes a list l and returns a list l' such that\n    l' is identical to l in the odd indicies, while its values at the even indicies are equal\n    to the values of the even indicies of l, but sorted.\n    >>> sort_even([1, 2, 3])\n    [1, 2, 3]\n    >>> sort_even([5, 6, 3, 4])\n    [3, 6, 5, 4]\n    \"\"\"\n\n```",
+            "sha256": "562871eea9b748ca886839b0635a81e18aec83207f0a52c04203742fe58afa77"
+          },
+          {
+            "id": "HumanEval/38",
+            "source_prompt": "\n\ndef encode_cyclic(s: str):\n    \"\"\"\n    returns encoded string by cycling groups of three characters.\n    \"\"\"\n    # split string to groups. Each of length 3.\n    groups = [s[(3 * i):min((3 * i + 3), len(s))] for i in range((len(s) + 2) // 3)]\n    # cycle elements in each group. Unless group has fewer elements than 3.\n    groups = [(group[1:] + group[0]) if len(group) == 3 else group for group in groups]\n    return \"\".join(groups)\n\n\ndef decode_cyclic(s: str):\n    \"\"\"\n    takes as input string encoded with encode_cyclic function. Returns decoded string.\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef encode_cyclic(s: str):\n    \"\"\"\n    returns encoded string by cycling groups of three characters.\n    \"\"\"\n    # split string to groups. Each of length 3.\n    groups = [s[(3 * i):min((3 * i + 3), len(s))] for i in range((len(s) + 2) // 3)]\n    # cycle elements in each group. Unless group has fewer elements than 3.\n    groups = [(group[1:] + group[0]) if len(group) == 3 else group for group in groups]\n    return \"\".join(groups)\n\n\ndef decode_cyclic(s: str):\n    \"\"\"\n    takes as input string encoded with encode_cyclic function. Returns decoded string.\n    \"\"\"\n\n```",
+            "sha256": "53fd38787eb998033cbeb3b41d0f973ba27850da2aa8134ac16ec48d80e9b94d"
+          },
+          {
+            "id": "HumanEval/39",
+            "source_prompt": "\n\ndef prime_fib(n: int):\n    \"\"\"\n    prime_fib returns n-th number that is a Fibonacci number and it's also prime.\n    >>> prime_fib(1)\n    2\n    >>> prime_fib(2)\n    3\n    >>> prime_fib(3)\n    5\n    >>> prime_fib(4)\n    13\n    >>> prime_fib(5)\n    89\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef prime_fib(n: int):\n    \"\"\"\n    prime_fib returns n-th number that is a Fibonacci number and it's also prime.\n    >>> prime_fib(1)\n    2\n    >>> prime_fib(2)\n    3\n    >>> prime_fib(3)\n    5\n    >>> prime_fib(4)\n    13\n    >>> prime_fib(5)\n    89\n    \"\"\"\n\n```",
+            "sha256": "32fdcc026e8fb02d8b19659b71c852acd8589b0aa44f25f7031b7daedfa94cf0"
+          },
+          {
+            "id": "HumanEval/40",
+            "source_prompt": "\n\ndef triples_sum_to_zero(l: list):\n    \"\"\"\n    triples_sum_to_zero takes a list of integers as an input.\n    it returns True if there are three distinct elements in the list that\n    sum to zero, and False otherwise.\n\n    >>> triples_sum_to_zero([1, 3, 5, 0])\n    False\n    >>> triples_sum_to_zero([1, 3, -2, 1])\n    True\n    >>> triples_sum_to_zero([1, 2, 3, 7])\n    False\n    >>> triples_sum_to_zero([2, 4, -5, 3, 9, 7])\n    True\n    >>> triples_sum_to_zero([1])\n    False\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef triples_sum_to_zero(l: list):\n    \"\"\"\n    triples_sum_to_zero takes a list of integers as an input.\n    it returns True if there are three distinct elements in the list that\n    sum to zero, and False otherwise.\n\n    >>> triples_sum_to_zero([1, 3, 5, 0])\n    False\n    >>> triples_sum_to_zero([1, 3, -2, 1])\n    True\n    >>> triples_sum_to_zero([1, 2, 3, 7])\n    False\n    >>> triples_sum_to_zero([2, 4, -5, 3, 9, 7])\n    True\n    >>> triples_sum_to_zero([1])\n    False\n    \"\"\"\n\n```",
+            "sha256": "cba0afeb8b45b312a3b04df70300e7ee73d7e349424481d388e4a3c05abc909d"
+          }
+        ],
+        [
+          {
+            "id": "HumanEval/41",
+            "source_prompt": "\n\ndef car_race_collision(n: int):\n    \"\"\"\n    Imagine a road that's a perfectly straight infinitely long line.\n    n cars are driving left to right;  simultaneously, a different set of n cars\n    are driving right to left.   The two sets of cars start out being very far from\n    each other.  All cars move in the same speed.  Two cars are said to collide\n    when a car that's moving left to right hits a car that's moving right to left.\n    However, the cars are infinitely sturdy and strong; as a result, they continue moving\n    in their trajectory as if they did not collide.\n\n    This function outputs the number of such collisions.\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef car_race_collision(n: int):\n    \"\"\"\n    Imagine a road that's a perfectly straight infinitely long line.\n    n cars are driving left to right;  simultaneously, a different set of n cars\n    are driving right to left.   The two sets of cars start out being very far from\n    each other.  All cars move in the same speed.  Two cars are said to collide\n    when a car that's moving left to right hits a car that's moving right to left.\n    However, the cars are infinitely sturdy and strong; as a result, they continue moving\n    in their trajectory as if they did not collide.\n\n    This function outputs the number of such collisions.\n    \"\"\"\n\n```",
+            "sha256": "881c0e13679ac83eb788585bc25e29d65479817c1f1abe62c08b970c938eeaa5"
+          },
+          {
+            "id": "HumanEval/42",
+            "source_prompt": "\n\ndef incr_list(l: list):\n    \"\"\"Return list with elements incremented by 1.\n    >>> incr_list([1, 2, 3])\n    [2, 3, 4]\n    >>> incr_list([5, 3, 5, 2, 3, 3, 9, 0, 123])\n    [6, 4, 6, 3, 4, 4, 10, 1, 124]\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef incr_list(l: list):\n    \"\"\"Return list with elements incremented by 1.\n    >>> incr_list([1, 2, 3])\n    [2, 3, 4]\n    >>> incr_list([5, 3, 5, 2, 3, 3, 9, 0, 123])\n    [6, 4, 6, 3, 4, 4, 10, 1, 124]\n    \"\"\"\n\n```",
+            "sha256": "3c8470ace6f1e339f86e589b7dc217a6b7d084b8ecb02d91728b8abbb13d4c02"
+          },
+          {
+            "id": "HumanEval/43",
+            "source_prompt": "\n\ndef pairs_sum_to_zero(l):\n    \"\"\"\n    pairs_sum_to_zero takes a list of integers as an input.\n    it returns True if there are two distinct elements in the list that\n    sum to zero, and False otherwise.\n    >>> pairs_sum_to_zero([1, 3, 5, 0])\n    False\n    >>> pairs_sum_to_zero([1, 3, -2, 1])\n    False\n    >>> pairs_sum_to_zero([1, 2, 3, 7])\n    False\n    >>> pairs_sum_to_zero([2, 4, -5, 3, 5, 7])\n    True\n    >>> pairs_sum_to_zero([1])\n    False\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef pairs_sum_to_zero(l):\n    \"\"\"\n    pairs_sum_to_zero takes a list of integers as an input.\n    it returns True if there are two distinct elements in the list that\n    sum to zero, and False otherwise.\n    >>> pairs_sum_to_zero([1, 3, 5, 0])\n    False\n    >>> pairs_sum_to_zero([1, 3, -2, 1])\n    False\n    >>> pairs_sum_to_zero([1, 2, 3, 7])\n    False\n    >>> pairs_sum_to_zero([2, 4, -5, 3, 5, 7])\n    True\n    >>> pairs_sum_to_zero([1])\n    False\n    \"\"\"\n\n```",
+            "sha256": "523d6d0d1b47a0559790cf394e3a24cf5f34cfe0e8c678c17f8329db21722420"
+          },
+          {
+            "id": "HumanEval/44",
+            "source_prompt": "\n\ndef change_base(x: int, base: int):\n    \"\"\"Change numerical base of input number x to base.\n    return string representation after the conversion.\n    base numbers are less than 10.\n    >>> change_base(8, 3)\n    '22'\n    >>> change_base(8, 2)\n    '1000'\n    >>> change_base(7, 2)\n    '111'\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef change_base(x: int, base: int):\n    \"\"\"Change numerical base of input number x to base.\n    return string representation after the conversion.\n    base numbers are less than 10.\n    >>> change_base(8, 3)\n    '22'\n    >>> change_base(8, 2)\n    '1000'\n    >>> change_base(7, 2)\n    '111'\n    \"\"\"\n\n```",
+            "sha256": "5afb0352a5850a3dec30101b9e01744e4d4cfff65a145937a866b60cc2386cb0"
+          },
+          {
+            "id": "HumanEval/45",
+            "source_prompt": "\n\ndef triangle_area(a, h):\n    \"\"\"Given length of a side and high return area for a triangle.\n    >>> triangle_area(5, 3)\n    7.5\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef triangle_area(a, h):\n    \"\"\"Given length of a side and high return area for a triangle.\n    >>> triangle_area(5, 3)\n    7.5\n    \"\"\"\n\n```",
+            "sha256": "c5a43f9aeb091a3d6f820a5992ee869eca872d8186d8d415b5e7d579937ca020"
+          },
+          {
+            "id": "HumanEval/46",
+            "source_prompt": "\n\ndef fib4(n: int):\n    \"\"\"The Fib4 number sequence is a sequence similar to the Fibbonacci sequnece that's defined as follows:\n    fib4(0) -> 0\n    fib4(1) -> 0\n    fib4(2) -> 2\n    fib4(3) -> 0\n    fib4(n) -> fib4(n-1) + fib4(n-2) + fib4(n-3) + fib4(n-4).\n    Please write a function to efficiently compute the n-th element of the fib4 number sequence.  Do not use recursion.\n    >>> fib4(5)\n    4\n    >>> fib4(6)\n    8\n    >>> fib4(7)\n    14\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef fib4(n: int):\n    \"\"\"The Fib4 number sequence is a sequence similar to the Fibbonacci sequnece that's defined as follows:\n    fib4(0) -> 0\n    fib4(1) -> 0\n    fib4(2) -> 2\n    fib4(3) -> 0\n    fib4(n) -> fib4(n-1) + fib4(n-2) + fib4(n-3) + fib4(n-4).\n    Please write a function to efficiently compute the n-th element of the fib4 number sequence.  Do not use recursion.\n    >>> fib4(5)\n    4\n    >>> fib4(6)\n    8\n    >>> fib4(7)\n    14\n    \"\"\"\n\n```",
+            "sha256": "8636edccee37b300037705cb5f98220e9d00eaa304384ec4417ff794918f5f12"
+          },
+          {
+            "id": "HumanEval/47",
+            "source_prompt": "\n\ndef median(l: list):\n    \"\"\"Return median of elements in the list l.\n    >>> median([3, 1, 2, 4, 5])\n    3\n    >>> median([-10, 4, 6, 1000, 10, 20])\n    15.0\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef median(l: list):\n    \"\"\"Return median of elements in the list l.\n    >>> median([3, 1, 2, 4, 5])\n    3\n    >>> median([-10, 4, 6, 1000, 10, 20])\n    15.0\n    \"\"\"\n\n```",
+            "sha256": "877af3e8e51702689affc1119952ce8644dcb8568135167d5f7dae22761e956f"
+          },
+          {
+            "id": "HumanEval/48",
+            "source_prompt": "\n\ndef is_palindrome(text: str):\n    \"\"\"\n    Checks if given string is a palindrome\n    >>> is_palindrome('')\n    True\n    >>> is_palindrome('aba')\n    True\n    >>> is_palindrome('aaaaa')\n    True\n    >>> is_palindrome('zbcd')\n    False\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef is_palindrome(text: str):\n    \"\"\"\n    Checks if given string is a palindrome\n    >>> is_palindrome('')\n    True\n    >>> is_palindrome('aba')\n    True\n    >>> is_palindrome('aaaaa')\n    True\n    >>> is_palindrome('zbcd')\n    False\n    \"\"\"\n\n```",
+            "sha256": "2f3da00f414d7f2fe42f42b794035a355bf22d749b51395657145b05123626b8"
+          }
+        ],
+        [
+          {
+            "id": "HumanEval/49",
+            "source_prompt": "\n\ndef modp(n: int, p: int):\n    \"\"\"Return 2^n modulo p (be aware of numerics).\n    >>> modp(3, 5)\n    3\n    >>> modp(1101, 101)\n    2\n    >>> modp(0, 101)\n    1\n    >>> modp(3, 11)\n    8\n    >>> modp(100, 101)\n    1\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef modp(n: int, p: int):\n    \"\"\"Return 2^n modulo p (be aware of numerics).\n    >>> modp(3, 5)\n    3\n    >>> modp(1101, 101)\n    2\n    >>> modp(0, 101)\n    1\n    >>> modp(3, 11)\n    8\n    >>> modp(100, 101)\n    1\n    \"\"\"\n\n```",
+            "sha256": "f18d781ff1388d798ccea29594d08d2a6d830cb0490066af9240b4543666f747"
+          },
+          {
+            "id": "HumanEval/50",
+            "source_prompt": "\n\ndef encode_shift(s: str):\n    \"\"\"\n    returns encoded string by shifting every character by 5 in the alphabet.\n    \"\"\"\n    return \"\".join([chr(((ord(ch) + 5 - ord(\"a\")) % 26) + ord(\"a\")) for ch in s])\n\n\ndef decode_shift(s: str):\n    \"\"\"\n    takes as input string encoded with encode_shift function. Returns decoded string.\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef encode_shift(s: str):\n    \"\"\"\n    returns encoded string by shifting every character by 5 in the alphabet.\n    \"\"\"\n    return \"\".join([chr(((ord(ch) + 5 - ord(\"a\")) % 26) + ord(\"a\")) for ch in s])\n\n\ndef decode_shift(s: str):\n    \"\"\"\n    takes as input string encoded with encode_shift function. Returns decoded string.\n    \"\"\"\n\n```",
+            "sha256": "98351a3ff31e5ad10012e4bf05629e9be2d2a6090db122e286c6d297b35122ef"
+          },
+          {
+            "id": "HumanEval/51",
+            "source_prompt": "\n\ndef remove_vowels(text):\n    \"\"\"\n    remove_vowels is a function that takes string and returns string without vowels.\n    >>> remove_vowels('')\n    ''\n    >>> remove_vowels(\"abcdef\\nghijklm\")\n    'bcdf\\nghjklm'\n    >>> remove_vowels('abcdef')\n    'bcdf'\n    >>> remove_vowels('aaaaa')\n    ''\n    >>> remove_vowels('aaBAA')\n    'B'\n    >>> remove_vowels('zbcd')\n    'zbcd'\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef remove_vowels(text):\n    \"\"\"\n    remove_vowels is a function that takes string and returns string without vowels.\n    >>> remove_vowels('')\n    ''\n    >>> remove_vowels(\"abcdef\\nghijklm\")\n    'bcdf\\nghjklm'\n    >>> remove_vowels('abcdef')\n    'bcdf'\n    >>> remove_vowels('aaaaa')\n    ''\n    >>> remove_vowels('aaBAA')\n    'B'\n    >>> remove_vowels('zbcd')\n    'zbcd'\n    \"\"\"\n\n```",
+            "sha256": "a9506d468dab8999120579e203317c58ab83ff7ac56fed3c31fd04ff8e037e19"
+          },
+          {
+            "id": "HumanEval/52",
+            "source_prompt": "\n\ndef below_threshold(l: list, t: int):\n    \"\"\"Return True if all numbers in the list l are below threshold t.\n    >>> below_threshold([1, 2, 4, 10], 100)\n    True\n    >>> below_threshold([1, 20, 4, 10], 5)\n    False\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef below_threshold(l: list, t: int):\n    \"\"\"Return True if all numbers in the list l are below threshold t.\n    >>> below_threshold([1, 2, 4, 10], 100)\n    True\n    >>> below_threshold([1, 20, 4, 10], 5)\n    False\n    \"\"\"\n\n```",
+            "sha256": "b550f8bc707f6c35ffb0136bc9c878a0a77acf2f719a4b7c9a40c24458b74e9d"
+          },
+          {
+            "id": "HumanEval/53",
+            "source_prompt": "\n\ndef add(x: int, y: int):\n    \"\"\"Add two numbers x and y\n    >>> add(2, 3)\n    5\n    >>> add(5, 7)\n    12\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef add(x: int, y: int):\n    \"\"\"Add two numbers x and y\n    >>> add(2, 3)\n    5\n    >>> add(5, 7)\n    12\n    \"\"\"\n\n```",
+            "sha256": "54a17482017dacace1137cc60dc6f2295f4c3d9b014310492f777f7d445e35f7"
+          },
+          {
+            "id": "HumanEval/54",
+            "source_prompt": "\n\ndef same_chars(s0: str, s1: str):\n    \"\"\"\n    Check if two words have the same characters.\n    >>> same_chars('eabcdzzzz', 'dddzzzzzzzddeddabc')\n    True\n    >>> same_chars('abcd', 'dddddddabc')\n    True\n    >>> same_chars('dddddddabc', 'abcd')\n    True\n    >>> same_chars('eabcd', 'dddddddabc')\n    False\n    >>> same_chars('abcd', 'dddddddabce')\n    False\n    >>> same_chars('eabcdzzzz', 'dddzzzzzzzddddabc')\n    False\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef same_chars(s0: str, s1: str):\n    \"\"\"\n    Check if two words have the same characters.\n    >>> same_chars('eabcdzzzz', 'dddzzzzzzzddeddabc')\n    True\n    >>> same_chars('abcd', 'dddddddabc')\n    True\n    >>> same_chars('dddddddabc', 'abcd')\n    True\n    >>> same_chars('eabcd', 'dddddddabc')\n    False\n    >>> same_chars('abcd', 'dddddddabce')\n    False\n    >>> same_chars('eabcdzzzz', 'dddzzzzzzzddddabc')\n    False\n    \"\"\"\n\n```",
+            "sha256": "59334f31bdbdfdd3e64f9b66a1dc46ba2b1d37852612b9904e4cf90666f1bdee"
+          },
+          {
+            "id": "HumanEval/55",
+            "source_prompt": "\n\ndef fib(n: int):\n    \"\"\"Return n-th Fibonacci number.\n    >>> fib(10)\n    55\n    >>> fib(1)\n    1\n    >>> fib(8)\n    21\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef fib(n: int):\n    \"\"\"Return n-th Fibonacci number.\n    >>> fib(10)\n    55\n    >>> fib(1)\n    1\n    >>> fib(8)\n    21\n    \"\"\"\n\n```",
+            "sha256": "12c471426633e2db7fdc880bdc0929afd43d4dadcfaaeabf7ffb2540206c9c30"
+          },
+          {
+            "id": "HumanEval/56",
+            "source_prompt": "\n\ndef correct_bracketing(brackets: str):\n    \"\"\" brackets is a string of \"<\" and \">\".\n    return True if every opening bracket has a corresponding closing bracket.\n\n    >>> correct_bracketing(\"<\")\n    False\n    >>> correct_bracketing(\"<>\")\n    True\n    >>> correct_bracketing(\"<<><>>\")\n    True\n    >>> correct_bracketing(\"><<>\")\n    False\n    \"\"\"\n",
+            "text": "Write or edit the Python function below to satisfy its specification. Return the implementation and concise tests.\n\n```python\n\n\ndef correct_bracketing(brackets: str):\n    \"\"\" brackets is a string of \"<\" and \">\".\n    return True if every opening bracket has a corresponding closing bracket.\n\n    >>> correct_bracketing(\"<\")\n    False\n    >>> correct_bracketing(\"<>\")\n    True\n    >>> correct_bracketing(\"<<><>>\")\n    True\n    >>> correct_bracketing(\"><<>\")\n    False\n    \"\"\"\n\n```",
+            "sha256": "90aad6d74c4748f3bf94bf2a6157a72dbb2bdf8a753a9063f7b94e96fa4c3929"
+          }
+        ]
+      ]
+    }
+  }
+}
