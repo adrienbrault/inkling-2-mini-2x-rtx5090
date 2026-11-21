@@ -15,6 +15,11 @@ stock power limits. **Decode rate** is one stream's output tokens per second fro
 server's per-chunk token counts; **aggregate** is the total decode rate of the streams running together. Time to first
 token (TTFT) is separate.
 
+![Decode: aggregate and per-stream rate at 1, 4 and 8 streams for code at depth, Spec-Bench, and Spec-Bench without the drafter](docs/img/decode.svg)
+
+Blue: code with a 2K append, averaged over the 1K / 32K / 64K cached depths. Brown: Spec-Bench. Grey dashed: Spec-Bench
+without the drafter (NCCL all-reduce, [docs/CONFIGURATION.md](docs/CONFIGURATION.md)). Drawn by `bench/plot.py`.
+
 **Spec-Bench** (120-prompt stratified subset per concurrency, temperature 0, 256 forced output tokens, `vllm bench serve`;
 [results](bench/results/20261121T021530Z-inkling2-specbench-served-r4), `bench/specbench.sh`,
 `bench/specbench_summary.py`):
@@ -51,6 +56,8 @@ by the client's TTFT; [results](bench/results/20261121T022131Z-inkling2-prefill-
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | TTFT | 0.11 s | 0.44 s | 1.83 s | 4.14 s | 10.2 s | 21.4 s | 28.3 s |
 | Prefill rate | 18,796 | 18,534 | 16,821 | 14,841 | 12,017 | 9,563 | 8,685 tok/s |
+
+![Cold prefill rate and time to first token versus prompt length](docs/img/prefill.svg)
 
 A second pass on the same boot is within 2 % on every cell ([results](bench/results/20261121T022245Z-inkling2-prefill-r4b)).
 
