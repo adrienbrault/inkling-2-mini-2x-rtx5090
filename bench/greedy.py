@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Greedy capture for the Inkling drafter identity check: 8 fixed prompts, temperature 0, 512 tokens, default effort.
 Speculative decoding is lossless under greedy sampling, so drafter-on and drafter-off runs must match token for token
-(text compared; reasoning and content separately).  usage: greedy.py OUT.json [--long]
+(text compared; reasoning and content separately).  usage: greedy.py OUT.json [--long] [--seeded]
+--seeded samples at temperature 1.0 with a fixed seed per prompt (the sampled-path identity check).
 --long adds three code prompts of ~3K / ~10K / ~30K tokens (256 tokens out, distinct first line so none shares a cached
 prefix with another) whose prefill spans several scheduler chunks: the identity check for chunk-size changes."""
 import json
@@ -30,6 +31,8 @@ if "--long" in sys.argv[2:]:
 out = []
 for p, n in jobs:
     body = {"model": "inkling-2-mini", "temperature": 0, "max_tokens": n, "messages": [{"role": "user", "content": p}]}
+    if "--seeded" in sys.argv[2:]:   # sampled path: temperature 1.0, a fixed seed per prompt
+        body.update(temperature=1.0, seed=2000 + len(out))
     req = urllib.request.Request(URL, json.dumps(body).encode(),
                                  {"Content-Type": "application/json"})
     r = json.load(urllib.request.urlopen(req, timeout=600))

@@ -60,8 +60,9 @@ sampling, each request is sampled on one card from the two cards' vocabulary sha
 Inkling ("does not implement compute_logits_local"). The overlay's `patch_bss.py` adds that method: the same head and
 soft-cap without the gather. The drafter's logits cache stays replicated. Spec-Bench at eight streams, paired boots, both
 with the step budget: 167 / 169 → 182 / 180 tok/s per stream (+7.6 %), TTFT unchanged
-([results](../bench/results/20261121T212103Z-inkling2-sharded-sampling-specbench)). Greedy output one request at a time is
-identical.
+([results](../bench/results/20261121T212103Z-inkling2-sharded-sampling-specbench)). One request at a time, output is
+identical with and without it: at temperature 0, and at temperature 1.0 with a fixed seed per request, on 11 prompts
+over four boots ([results](../bench/results/20261121T231722Z-inkling2-seeded-identity)).
 
 ## Output under concurrency
 

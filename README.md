@@ -52,8 +52,8 @@ decoded by all streams during the window in which every stream is decoding, divi
 One stream's rate varies with the task and the appended code: each cell is one request, and the drafter accepts more
 on predictable code. Over three more boots the six one-stream cells ranged from 381 to 628 tok/s, mean 524
 ([paired results](bench/results/20261121T224848Z-inkling2-code-paired-r5-r8)). Median TTFT is 0.14–0.80 s for one
-stream. With eight streams and 8K appends it reaches up to 6.6 s, because the prefills queue together behind the
-decoding streams.
+stream. With eight streams and 8K appends it reaches 3.7 s, because the prefills queue together behind the decoding
+streams.
 
 **Cold prefill** (fresh salted prompts with no cached prefix, verified, one at a time; end to end: prompt tokens divided
 by the client's TTFT; [results](bench/results/20261121T222811Z-inkling2-prefill-r8a), `bench/headline_inkling.py prefill`):
@@ -67,12 +67,9 @@ by the client's TTFT; [results](bench/results/20261121T222811Z-inkling2-prefill-
 
 A second pass on the same boot is within 1 % on every cell ([results](bench/results/20261121T222926Z-inkling2-prefill-r8b)).
 
-**Quality** (same boot; [results](bench/results/20261121T222320Z-inkling2-quality-r8)):
-
-| Benchmark | Setting | Score |
-| --- | --- | ---: |
-| tool-eval-bench 2.1.0 | 69 scenarios, temperature 1.0 (the checkpoint's default), 8 in parallel | 85 / 100 |
-| GSM8K (lm-eval 0.4.12) | 5-shot, first 200 problems, temperature 0, `reasoning_effort` none | 53.5 % flexible, 32.0 % strict |
+**Tool calling** (same boot; tool-eval-bench 2.1.0, 69 scenarios, 4 trials, temperature 1.0 (the checkpoint's
+default), 8 in parallel; [results](bench/results/20261121T222320Z-inkling2-quality-r8)): final score 85 / 100, mean
+over the trials 84.2 (standard deviation 2.2).
 
 ## Served configuration
 
