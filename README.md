@@ -1,6 +1,6 @@
 # Inkling-2-Mini on two RTX 5090s
 
-![Recipe card: decode at 1 to 16 agents, cold prefill, KV pool and memory on two RTX 5090s, 2026-11-22](docs/img/recipe-card-e18ea566.png)
+![Recipe card: decode at 1 to 16 agents, cold prefill, KV pool and memory on two RTX 5090s, 2026-11-22](docs/img/recipe-card-b9d9098d.png)
 
 Serving configuration, vLLM overlay, launch scripts and measurements for [Inkling-2-Mini](https://huggingface.co/thinkingmachines/Inkling-2-Mini) on two RTX 5090 cards.
 
@@ -8,7 +8,7 @@ Serving configuration, vLLM overlay, launch scripts and measurements for [Inklin
 
 - **Model**: [Inkling-2-Mini](https://huggingface.co/thinkingmachines/Inkling-2-Mini) (Thinking Machines; 26B total, 3.4B active; text and images in), the official checkpoint and its own DSpark drafter (7 draft tokens).
 - **Engine**: vLLM's Inkling day-0 image plus a small overlay ([`docker/`](docker/README.md)) that makes it run on the RTX 5090 and speeds up serving. A request served alone gets bitwise the same output with or without the overlay and the scheduler settings.
-- **Window and KV pool**: 262,144 tokens per request; an 818,388-token fp8 KV pool shared by 16 sequences, tensor parallel over both cards.
+- **Window and KV pool**: 262,144 tokens per request; the fp8 KV pool holds about 1.49M tokens of context at once, measured, shared by 16 sequences (vLLM logs 818,388, a worst-case estimate), tensor parallel over both cards.
 - **Enabled**: images, reasoning, tool calls.
 
 Every number was measured on one machine on the date given and links its raw results under [`bench/results/`](bench/results/).
@@ -31,7 +31,9 @@ Blue: code with a 2K append, averaged over the 1K / 32K / 64K cached depths. Bro
 - **Cold prefill**: 18,636 tok/s at 2K prompt tokens, 14,700 at 61K and 8,676 at 246K (28.3 s to the first token).
 - **Quality**: tool-eval 82.8 ± 2.5 over 4 trials of 69 scenarios; GSM8K 95.5 % (5-shot, 200 problems).
 
-Sources: Spec-Bench [`specbench-served-r10-fair`](bench/results/20261122T122338Z-inkling2-specbench-served-r10-fair), code [`code-r10-fair`](bench/results/20261122T122632Z-inkling2-code-r10-fair), prefill [`prefill-r10-fair-a`](bench/results/20261122T122925Z-inkling2-prefill-r10-fair-a), agent sessions [`pi-r10-fair`](bench/results/20261122T122255Z-inkling2-pi-r10-fair), newcomers [`fair-prefill-768`](bench/results/20261122T092118Z-inkling2-fair-prefill-768), tool-eval and GSM8K [`quality-r10-fair`](bench/results/20261122T122255Z-inkling2-quality-r10-fair), memory [`memory-r10`](bench/results/20261122T053020Z-inkling2-memory-r10). Full tables: [details](#all-numbers).
+- **KV pool**: 14 agents with 80K-token prompts decoding together used 88 % of it, nothing preempted: about 1.49M tokens of context fit at once.
+
+Sources: KV pool [`kv-capacity`](bench/results/20261122T124729Z-inkling2-kv-capacity), Spec-Bench [`specbench-served-r10-fair`](bench/results/20261122T122338Z-inkling2-specbench-served-r10-fair), code [`code-r10-fair`](bench/results/20261122T122632Z-inkling2-code-r10-fair), prefill [`prefill-r10-fair-a`](bench/results/20261122T122925Z-inkling2-prefill-r10-fair-a), agent sessions [`pi-r10-fair`](bench/results/20261122T122255Z-inkling2-pi-r10-fair), newcomers [`fair-prefill-768`](bench/results/20261122T092118Z-inkling2-fair-prefill-768), tool-eval and GSM8K [`quality-r10-fair`](bench/results/20261122T122255Z-inkling2-quality-r10-fair), memory [`memory-r10`](bench/results/20261122T053020Z-inkling2-memory-r10). Full tables: [details](#all-numbers).
 
 ## Quick start
 
@@ -66,7 +68,8 @@ Reasoning (`reasoning_effort` from `none` to `max`), tool calls, image inputs an
 | | value | source |
 | --- | --- | --- |
 | context window | 262,144 tokens | [`scripts/serve.sh`](scripts/serve.sh) |
-| KV pool on the GPUs | 818,388 tokens, fp8 target KV (unit-scale E4M3), bf16 drafter KV, 16 sequences | 2026-11-22, [`r10-combined`](bench/results/20261122T032748Z-inkling2-r10-combined) |
+| KV pool on the GPUs, measured | about 1.49–1.51M tokens held at once (8, 12 and 14 long distinct requests, 0 preemptions); vLLM logs 818,388 | 2026-11-22, [`kv-capacity`](bench/results/20261122T124729Z-inkling2-kv-capacity) |
+| KV cache | fp8 target KV (unit-scale E4M3), bf16 drafter KV, 16 sequences | [`scripts/serve.sh`](scripts/serve.sh) |
 | Spec-Bench decode, 1 / 4 / 8 / 16 streams (mean per stream; median) | 415 / 257 / 200 / 149 tok/s; 378 / 245 / 188 / 138 tok/s | 2026-11-22, [`specbench-served-r10-fair`](bench/results/20261122T122338Z-inkling2-specbench-served-r10-fair) |
 | Spec-Bench decode aggregate, 1 / 4 / 8 / 16 streams | 415 / 1,028 / 1,600 / 2,381 tok/s | 2026-11-22, [`specbench-served-r10-fair`](bench/results/20261122T122338Z-inkling2-specbench-served-r10-fair) |
 | Spec-Bench wall-clock output, 1 / 4 / 8 / 16 streams | 366.67 / 901.81 / 1,378.28 / 2,005.83 tok/s | 2026-11-22, [`specbench-served-r10-fair`](bench/results/20261122T122338Z-inkling2-specbench-served-r10-fair) |
@@ -84,7 +87,7 @@ Reasoning (`reasoning_effort` from `none` to `max`), tool calls, image inputs an
 
 Served-path smoke checks on the same boot passed a tool call, an image input and four sampled generations at temperature 0.8 with the drafter (2026-11-22, [`quality-r10-fair`](bench/results/20261122T122255Z-inkling2-quality-r10-fair)).
 
-Memory per card (2026-11-22, boot without the fair-prefill flags, which do not change allocation, [`memory-r10`](bench/results/20261122T053020Z-inkling2-memory-r10)): 10.27 GiB weights and non-torch memory, 15.38 GiB KV cache, 2.42 GiB kept for activations and 0.58 GiB CUDA graphs, within the 28.88 GiB budget of `--gpu-memory-utilization 0.92`. The 818,388-token figure is vLLM's admission estimate (3.12 requests at the full window); it charges every windowed and short-conv layer for its window plus the tokens in flight.
+Memory per card (2026-11-22, boot without the fair-prefill flags, which do not change allocation, [`memory-r10`](bench/results/20261122T053020Z-inkling2-memory-r10)): 10.27 GiB weights and non-torch memory, 15.38 GiB KV cache, 2.42 GiB kept for activations and 0.58 GiB CUDA graphs, within the 28.88 GiB budget of `--gpu-memory-utilization 0.92`. The 818,388-token figure vLLM logs is its admission estimate for full-window requests (3.12 requests at 262,144 tokens); it charges every windowed and short-conv cache for its window plus the tokens in flight. At run time only the full-attention history grows with the context: the 25,200 blocks hold 64 tokens of it each (1,612,800 tokens), less about 10K tokens of window state per running request, and the pool measured 1,486,835–1,508,118 tokens held at once ([`kv-capacity`](bench/results/20261122T124729Z-inkling2-kv-capacity)).
 
 ## Served configuration
 
@@ -92,7 +95,7 @@ Memory per card (2026-11-22, boot without the fair-prefill flags, which do not c
 - Engine and image: `vllm/vllm-openai:inkling-2-mini` (vLLM `0.1.dev25855+g7cb5dae22`, pinned by digest in [`docker/Dockerfile`](docker/Dockerfile)) plus the [`docker/`](docker/README.md) overlay (`inkling2-rtx5090:sm120-r10`), built by [`scripts/build-image.sh`](scripts/build-image.sh) and started by [`scripts/serve.sh`](scripts/serve.sh) on port 8000 as `inkling-2-mini`.
 - Parallelism and all-reduce: tensor parallel 2 (`--tensor-parallel-size 2`), FlashInfer PCIe IPC all-reduce (`VLLM_ALLREDUCE_USE_FLASHINFER_PCIE_IPC=1`) with NCCL fallback, and vLLM's custom all-reduce off (`--disable-custom-all-reduce`).
 - Drafter: DSpark (`"method":"dspark","num_speculative_tokens":7,"draft_sample_method":"probabilistic","kv_cache_dtype":"auto"`), 7 draft tokens per step (the only value the checkpoint accepts), bf16 drafter KV cache, and draft sampling sharded across both cards (`VLLM_INKLING_DRAFT_SHARD=1`, overlay).
-- Context and KV pool: 262,144 tokens (`--max-model-len 262144`), 16 concurrent sequences (`--max-num-seqs 16`), `--gpu-memory-utilization 0.92`, fp8 target KV cache in unit-scale E4M3 (`--kv-cache-dtype fp8`), and exact-size short-conv pages (`VLLM_INKLING_CONV_PAGE=1 --block-size 64`, overlay), giving an 818,388-token KV pool (2026-11-22, [`r10-combined`](bench/results/20261122T032748Z-inkling2-r10-combined)).
+- Context and KV pool: 262,144 tokens (`--max-model-len 262144`), 16 concurrent sequences (`--max-num-seqs 16`), `--gpu-memory-utilization 0.92`, fp8 target KV cache in unit-scale E4M3 (`--kv-cache-dtype fp8`), and exact-size short-conv pages (`VLLM_INKLING_CONV_PAGE=1 --block-size 64`, overlay), giving a KV pool that holds about 1.49M tokens of context at once (vLLM logs 818,388; 2026-11-22, [`kv-capacity`](bench/results/20261122T124729Z-inkling2-kv-capacity)).
 - Scheduler: `VLLM_DECODE_STEP_BUDGET=1024` (overlay): at most 1,024 tokens per step while any request is decoding, and 2,048 otherwise. Fair prefill (`--long-prefill-token-threshold 768 --long-prefill-token-threshold-adaptive`, stock vLLM): while several requests prefill, each gets at most max(768, 2,048 / their number) tokens per step.
 - Sampling: `--enable-batch-sharded-sampling` (overlay): each request is sampled on one card from both cards' vocabulary shards.
 - API, warmup and caches: `--reasoning-parser inkling --tool-call-parser inkling --enable-auto-tool-choice` (`reasoning_effort` `none` to `max`), `--enable-prompt-tokens-details` (reports cached prompt tokens in `usage`), FlashInfer warmup autotune off (`--kernel-config '{"enable_flashinfer_autotune":false}'`), and persisted Triton cache (`TRITON_CACHE_DIR=/root/.cache/triton`).
@@ -106,7 +109,7 @@ Memory per card (2026-11-22, boot without the fair-prefill flags, which do not c
   - Two small bf16 decode products (loop controllers' down projection and short-conv dynamic taps) moved off cuBLAS onto bitwise-identical Triton kernels on the decode shapes where cuBLAS rounding matches (`docker/decode_sm120.py`, `docker/patch_decode.py`).
   - Decode-aware scheduler step budget (`VLLM_DECODE_STEP_BUDGET=1024`, `docker/patch_sched.py`): caps steps to 1,024 tokens while any stream is decoding and keeps 2,048-token chunks when no stream is decoding.
   - Local logits computation (`compute_logits_local`, `docker/patch_bss.py`), enabling `--enable-batch-sharded-sampling` without gathering full target logits on both cards.
-  - Exact-size 8-token short-conv pages in vLLM's `BLNHC` block-outer layout (`VLLM_INKLING_CONV_PAGE=1` with `--block-size 64`, `docker/patch_convpage.py`), enlarging the KV pool by 17 % (from 699,885 to 818,388 tokens as served, 2026-11-22, [`r10-combined`](bench/results/20261122T032748Z-inkling2-r10-combined)).
+  - Exact-size 8-token short-conv pages in vLLM's `BLNHC` block-outer layout (`VLLM_INKLING_CONV_PAGE=1` with `--block-size 64`, `docker/patch_convpage.py`), enlarging the pool by 17 % in vLLM's logged estimate (from 699,885 to 818,388 tokens as served, 2026-11-22, [`r10-combined`](bench/results/20261122T032748Z-inkling2-r10-combined)).
   - Sharded DSpark draft sampling (`VLLM_INKLING_DRAFT_SHARD=1`, `docker/patch_draftshard.py`): each card samples from its vocabulary shard with Gumbel noise keyed by global token id and exchanges one small winner packet per draft position instead of all-gathering full-vocabulary draft logits seven times per step.
   - Patch details, guard checks, microbenchmarks and credits: [`docker/README.md`](docker/README.md).
 
@@ -159,6 +162,7 @@ Measured 2026-11-22 ([`prefill-r10-fair-a`](bench/results/20261122T122925Z-inkli
 ## Output checks and caveats
 
 - **Serving changes are lossless for a lone request**: every serving change (Triton decode GEMVs, decode-aware step budget, batch-sharded sampling, exact-size short-conv pages, DSpark draft sharding, and fair prefill) leaves the output of a request served alone bitwise identical. Paired boots of r8 against r10 matched on all 11 prompts of [`bench/greedy.py`](bench/greedy.py) (`--long`, 8 short and 3 long) at temperature 0 and at temperature 1.0 with a fixed seed per prompt (2026-11-22, [`r10-combined`](bench/results/20261122T032748Z-inkling2-r10-combined); earlier component checks on 2026-11-21 in [`stepbudget-identity`](bench/results/20261121T192820Z-inkling2-stepbudget-identity) and [`seeded-identity`](bench/results/20261121T231722Z-inkling2-seeded-identity), and 2026-11-22 in [`draftshard`](bench/results/20261122T012901Z-inkling2-draftshard)), alongside 20-trial GPU gates on the conv-page and draft-sharding kernels. Fair prefill kept the same 11 outputs on four alternating boots (2026-11-22, [`fair-prefill-768`](bench/results/20261122T092118Z-inkling2-fair-prefill-768)).
+- **Admission**: vLLM admits a request only when its whole prompt fits (`--scheduler-reserve-full-isl`, the default). With 16 distinct 96K prompts it ran 12 and queued the rest without preempting anything; with `--no-scheduler-reserve-full-isl` it admitted all 16 and then preempted requests 326 times as their outputs outgrew the pool (2026-11-22, [`kv-capacity`](bench/results/20261122T124729Z-inkling2-kv-capacity)).
 - **Batched output varies run to run**: with several requests in flight, output is not reproducible on this engine because which requests share a step changes batch-variant kernels' arithmetic, as on the stock image. Two passes of the same 22 concurrent requests ([`bench/batched.py`](bench/batched.py)) on one boot produced 0 of 22 identical outputs in every configuration tried on image r8, and batch-sharded sampling diverged from the unsharded configuration no sooner than either configuration diverged from itself (2026-11-21, [`batched-parity`](bench/results/20261121T221734Z-inkling2-batched-parity)).
 - **fp8 target KV cache**: `--kv-cache-dtype fp8` changes arithmetic relative to bf16 KV (greedy text diverges after 0–204 characters). On image r5, paired NLL difference (fp8 minus bf16) was −0.00099 nats/token (se 0.00148) on an 8,191-token code text and +0.00109 (se 0.00073) on a 32,767-token code text (2026-11-21, [`fp8kv`](bench/results/20261121T131647Z-inkling2-fp8kv)).
 - **Drafter versus no drafter**: greedy output with the drafter is deterministic for a lone request across runs and restarts, but diverges from drafter-off greedy output after a few hundred characters because decode and prefill take different kernel paths. Replaying greedy generations as prompts ([`bench/teacher_check.py`](bench/teacher_check.py)) on image r3 gave the same non-top-1 rate with and without the drafter: 136 of 3,781 tokens (3.6 %, median / max log-prob gap 0.20 / 1.16) with the drafter on against 131 of 3,602 (3.6 %, 0.17 / 1.24) with it off (2026-11-21, [`teacher-check`](bench/results/20261121T0022Z-inkling2-teacher-check)).
@@ -183,6 +187,7 @@ Full progression from r4 to r10, paired A/B boots and all-reduce comparisons are
 | [`docs/CONFIGURATION.md`](docs/CONFIGURATION.md) | r4-to-r10 progression, paired comparisons, all-reduce and one-card measurements, and SM120 day-0 failure modes |
 | [`bench/specbench.sh`](bench/specbench.sh), [`bench/specbench_summary.py`](bench/specbench_summary.py) | Spec-Bench `vllm bench serve` driver and per-stream / aggregate summary script |
 | [`bench/headline_inkling.py`](bench/headline_inkling.py) | code-at-depth and cold-prefill benchmark driver |
+| [`bench/kv_capacity.py`](bench/kv_capacity.py), [`bench/kv_probe.py`](bench/kv_probe.py) | measures the KV tokens actually held at once against vLLM's own usage metric |
 | [`bench/inkling_replay.py`](bench/inkling_replay.py), [`bench/newcomer.py`](bench/newcomer.py) | coding-agent session replay and the newcomer-behind-a-long-prefill probe |
 | [`bench/greedy.py`](bench/greedy.py), [`bench/batched.py`](bench/batched.py), [`bench/teacher_check.py`](bench/teacher_check.py) | single-request greedy/seeded identity, concurrent batched parity, and drafter teacher-replay checks |
 | [`bench/plot.py`](bench/plot.py) | draws [`docs/img/decode.svg`](docs/img/decode.svg) and [`docs/img/prefill.svg`](docs/img/prefill.svg) from committed raw results |
