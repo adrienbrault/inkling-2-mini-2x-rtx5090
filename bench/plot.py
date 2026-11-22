@@ -31,12 +31,12 @@ CS_OFF = (1, 4, 8)   # the drafter-off run predates the c16 cell
 
 
 def specbench(d, cs=CS):
-    """Per-stream median decode rate and aggregate (c x mean request rate) per concurrency."""
+    """Per-stream mean decode rate and aggregate (c x mean request rate) per concurrency."""
     per, agg = [], []
     for c in cs:
         r = json.loads((d / f"specbench-c{c}.json").read_text())
         rates = [(n - 1) / sum(i) for n, i in zip(r["output_lens"], r["itls"]) if n > 1 and sum(i) > 0]
-        per.append(st.median(rates))
+        per.append(st.mean(rates))
         agg.append(c * st.mean(rates))
     return per, agg
 
@@ -53,7 +53,7 @@ def decode():
     code_a = [st.mean(x[1] for x in code[c]) for c in CS]
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
     for ax, data, title in ((ax1, (code_a, on_a, off_a), "Aggregate decode (tok/s)"),
-                            (ax2, (code_p, on_p, off_p), "Decode rate per stream (tok/s)")):
+                            (ax2, (code_p, on_p, off_p), "Decode rate per stream, mean (tok/s)")):
         ax.plot(CS, data[0], "o-", color="#2563eb", label="code, 1K-64K cached + 2K append (mean of 3 depths)")
         ax.plot(CS, data[1], "o-", color="#b45309", label="Spec-Bench")
         ax.plot(CS_OFF, data[2], "o--", color="#9ca3af", label="Spec-Bench, drafter off (NCCL all-reduce, image r3, 2026-11-21)")

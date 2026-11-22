@@ -1,6 +1,6 @@
 # Inkling-2-Mini on two RTX 5090s
 
-![Recipe card: decode at 1 to 16 agents, cold prefill, KV pool and memory on two RTX 5090s, 2026-11-22](docs/img/recipe-card-3e8c7610.png)
+![Recipe card: decode at 1 to 16 agents, cold prefill, KV pool and memory on two RTX 5090s, 2026-11-22](docs/img/recipe-card-e18ea566.png)
 
 Serving configuration, vLLM overlay, launch scripts and measurements for [Inkling-2-Mini](https://huggingface.co/thinkingmachines/Inkling-2-Mini) on two RTX 5090 cards.
 
@@ -15,14 +15,14 @@ Every number was measured on one machine on the date given and links its raw res
 
 ## Numbers
 
-Measured 2026-11-22 on the served configuration ([`scripts/serve.sh`](scripts/serve.sh), image `sm120-r10`, fair prefill), one boot, stock power limits. Decode rate is one stream's output tokens per second from its first to its last token; the aggregate is the sum over the streams running together ([how the numbers are measured](#how-the-numbers-are-measured)).
+Measured 2026-11-22 on the served configuration ([`scripts/serve.sh`](scripts/serve.sh), image `sm120-r10`, fair prefill), one boot, stock power limits. Decode rate is one stream's output tokens per second from its first to its last token, averaged over the requests (the median is in the tables below); the aggregate is the sum over the streams running together ([how the numbers are measured](#how-the-numbers-are-measured)).
 
 ![Decode: aggregate and per-stream rate at 1, 4, 8 and 16 streams for code at depth, Spec-Bench, and Spec-Bench without the drafter](docs/img/decode.svg)
 
 Blue: code with a 2K append, averaged over the 1K / 32K / 64K cached depths. Brown: Spec-Bench. Grey dashed: Spec-Bench without the drafter, on an earlier image ([`docs/CONFIGURATION.md`](docs/CONFIGURATION.md)).
 
-- **1 agent**: 378 tok/s on Spec-Bench, 500 on code with a cached context; first token in 32 ms.
-- **16 agents**: 2,381 tok/s summed on Spec-Bench (138 each, first token 101 ms); 2,662 on cached code (145 each). At 64K cached context: 113 each, 2,283 summed.
+- **1 agent**: 415 tok/s on Spec-Bench, 500 on code with a cached context; first token in 32 ms.
+- **16 agents**: 2,381 tok/s summed on Spec-Bench (149 each, first token 101 ms); 2,662 on cached code (145 each). At 64K cached context: 113 each, 2,283 summed.
 - **Agent sessions**: 697 tok/s summed with 10 coding-agent sessions replayed at once (prompts of about 39K–202K tokens, p10–p90, mostly cached), first token 0.29 s median and 0.72 s p90; 517 tok/s with 6 sessions.
 - **Newcomers**: a short request arriving behind a long cold prompt gets its first token in 0.5 s instead of 20 s (fair prefill).
 
@@ -67,7 +67,7 @@ Reasoning (`reasoning_effort` from `none` to `max`), tool calls, image inputs an
 | --- | --- | --- |
 | context window | 262,144 tokens | [`scripts/serve.sh`](scripts/serve.sh) |
 | KV pool on the GPUs | 818,388 tokens, fp8 target KV (unit-scale E4M3), bf16 drafter KV, 16 sequences | 2026-11-22, [`r10-combined`](bench/results/20261122T032748Z-inkling2-r10-combined) |
-| Spec-Bench decode, 1 / 4 / 8 / 16 streams (median per stream) | 378 / 245 / 188 / 138 tok/s | 2026-11-22, [`specbench-served-r10-fair`](bench/results/20261122T122338Z-inkling2-specbench-served-r10-fair) |
+| Spec-Bench decode, 1 / 4 / 8 / 16 streams (mean per stream; median) | 415 / 257 / 200 / 149 tok/s; 378 / 245 / 188 / 138 tok/s | 2026-11-22, [`specbench-served-r10-fair`](bench/results/20261122T122338Z-inkling2-specbench-served-r10-fair) |
 | Spec-Bench decode aggregate, 1 / 4 / 8 / 16 streams | 415 / 1,028 / 1,600 / 2,381 tok/s | 2026-11-22, [`specbench-served-r10-fair`](bench/results/20261122T122338Z-inkling2-specbench-served-r10-fair) |
 | Spec-Bench wall-clock output, 1 / 4 / 8 / 16 streams | 366.67 / 901.81 / 1,378.28 / 2,005.83 tok/s | 2026-11-22, [`specbench-served-r10-fair`](bench/results/20261122T122338Z-inkling2-specbench-served-r10-fair) |
 | Spec-Bench TTFT (median), 1 / 4 / 8 / 16 streams | 32 / 54 / 69 / 101 ms | 2026-11-22, [`specbench-served-r10-fair`](bench/results/20261122T122338Z-inkling2-specbench-served-r10-fair) |
@@ -121,14 +121,14 @@ Memory per card (2026-11-22, boot without the fair-prefill flags, which do not c
 
 ### Spec-Bench (`vllm bench serve`)
 
-Measured 2026-11-22 ([`specbench-served-r10-fair`](bench/results/20261122T122338Z-inkling2-specbench-served-r10-fair), driver [`bench/specbench.sh`](bench/specbench.sh), summary [`bench/specbench_summary.py`](bench/specbench_summary.py)): 120-prompt stratified subsets of [Spec-Bench](https://github.com/hemingkx/Spec-Bench) per concurrency ([`bench/inputs/SPEC-BENCH.md`](bench/inputs/SPEC-BENCH.md)), temperature 0, 256 forced output tokens (`--ignore-eos`), 0 failed requests at every concurrency (38,963 input tokens, 30,720 generated tokens per cell). Decode aggregate is stream count times mean request decode rate (the benchmark keeps every stream busy); wall-clock output throughput is vLLM's total generated tokens divided by benchmark duration, including prefill, TTFT and request turnover.
+Measured 2026-11-22 ([`specbench-served-r10-fair`](bench/results/20261122T122338Z-inkling2-specbench-served-r10-fair), driver [`bench/specbench.sh`](bench/specbench.sh), summary [`bench/specbench_summary.py`](bench/specbench_summary.py)): 120-prompt stratified subsets of [Spec-Bench](https://github.com/hemingkx/Spec-Bench) per concurrency ([`bench/inputs/SPEC-BENCH.md`](bench/inputs/SPEC-BENCH.md)), temperature 0, 256 forced output tokens (`--ignore-eos`), 0 failed requests at every concurrency (38,963 input tokens, 30,720 generated tokens per cell). Per-request decode rates are skewed by the drafter's acceptance (at 1 stream, p10 / p90 296 / 580 tok/s), so the mean exceeds the median. Decode aggregate is stream count times the mean request decode rate (the benchmark keeps every stream busy); wall-clock output throughput is vLLM's total generated tokens divided by benchmark duration, including prefill, TTFT and request turnover.
 
-| Streams | Decode per stream (median) | Decode aggregate | Wall-clock output | Req/s | TTFT p50 / p99 | TPOT p50 / p99 | E2E p50 | Acceptance length |
+| Streams | Decode per stream (median / mean) | Decode aggregate | Wall-clock output | Req/s | TTFT p50 / p99 | TPOT p50 / p99 | E2E p50 | Acceptance length |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 1 | 378 tok/s | 415 tok/s | 366.67 tok/s | 1.43 | 31.75 / 105.04 ms | 2.64 / 4.08 ms | 706.58 ms | 2.97 |
-| 4 | 245 tok/s | 1,028 tok/s | 901.81 tok/s | 3.52 | 53.63 / 135.65 ms | 4.08 / 6.19 ms | 1,110.52 ms | 3.00 |
-| 8 | 188 tok/s | 1,600 tok/s | 1,378.28 tok/s | 5.38 | 69.19 / 201.57 ms | 5.31 / 8.24 ms | 1,429.71 ms | 3.00 |
-| 16 | 138 tok/s | 2,381 tok/s | 2,005.83 tok/s | 7.84 | 101.23 / 470.23 ms | 7.22 / 11.12 ms | 1,939.91 ms | 2.95 |
+| 1 | 378 / 415 tok/s | 415 tok/s | 366.67 tok/s | 1.43 | 31.75 / 105.04 ms | 2.64 / 4.08 ms | 706.58 ms | 2.97 |
+| 4 | 245 / 257 tok/s | 1,028 tok/s | 901.81 tok/s | 3.52 | 53.63 / 135.65 ms | 4.08 / 6.19 ms | 1,110.52 ms | 3.00 |
+| 8 | 188 / 200 tok/s | 1,600 tok/s | 1,378.28 tok/s | 5.38 | 69.19 / 201.57 ms | 5.31 / 8.24 ms | 1,429.71 ms | 3.00 |
+| 16 | 138 / 149 tok/s | 2,381 tok/s | 2,005.83 tok/s | 7.84 | 101.23 / 470.23 ms | 7.22 / 11.12 ms | 1,939.91 ms | 2.95 |
 
 ### Code at depth
 
@@ -168,7 +168,7 @@ Measured 2026-11-22 ([`prefill-r10-fair-a`](bench/results/20261122T122925Z-inkli
 Full progression from r4 to r10, paired A/B boots and all-reduce comparisons are in [`docs/CONFIGURATION.md`](docs/CONFIGURATION.md); kernel microbenchmarks and rejected kernel changes are in [`docker/README.md`](docker/README.md).
 
 - **One card / data parallel 2**: tensor parallel 1 leaves 7.65 GiB of KV per 32 GB card without the drafter (fits a 94,208-token context) and 5.2 GiB with it (even a 45,056-token context needs 5.96 GiB; [`docs/CONFIGURATION.md`](docs/CONFIGURATION.md#one-model-copy-per-card)). Drafter-off TP1 at 32K context measured 177 tok/s per stream at 1 stream and 418 tok/s aggregate at 4 streams on Spec-Bench (2026-11-21, [`specbench-tp1-nospec-32k`](bench/results/20261121T014555Z-inkling2-specbench-tp1-nospec-32k)).
-- **Drafter off**: tensor parallel 2 with NCCL all-reduce measured 206 / 128 / 114 tok/s per stream and 203 / 492 / 905 tok/s aggregate at 1 / 4 / 8 streams on Spec-Bench, with 2.1 s median TTFT at 8 streams (2026-11-21, [`specbench-nospec-r3`](bench/results/20261121T012150Z-inkling2-specbench-nospec-r3)).
+- **Drafter off**: tensor parallel 2 with NCCL all-reduce measured 203 / 123 / 113 tok/s per stream (mean; median 206 / 128 / 114) and 203 / 492 / 905 tok/s aggregate at 1 / 4 / 8 streams on Spec-Bench, with 2.1 s median TTFT at 8 streams (2026-11-21, [`specbench-nospec-r3`](bench/results/20261121T012150Z-inkling2-specbench-nospec-r3)).
 - **bf16 target KV cache**: 481,529-token pool against 699,259 with fp8 KV on image r5, at 373 / 225 / 171 vs 369 / 226 / 171 tok/s per stream on Spec-Bench and 18,577 / 8,680 vs 18,160 / 8,559 tok/s cold prefill at 8K / 246K (2026-11-21, [`fp8kv`](bench/results/20261121T131647Z-inkling2-fp8kv)).
 - **Global `--max-num-batched-tokens 1024`**: changed greedy output on all three long prompts and cost 5–10 % cold prefill on image r5 (2026-11-21, [`global-batch-1024`](bench/results/20261121T173337Z-inkling2-global-batch-1024)); replaced by `VLLM_DECODE_STEP_BUDGET=1024`.
 - **Fused one-pass logit soft-cap and shorter DSpark drafts (3–6 tokens)**: not adopted; the soft-cap is not bitwise equal to PyTorch's three passes, and shorter drafts lost 3–5 % at one stream and changed greedy text (2026-11-21, [`docker/README.md`](docker/README.md#decode-products-moved-off-cublas)).
