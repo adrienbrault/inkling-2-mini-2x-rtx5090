@@ -151,14 +151,16 @@ def code(args):
                 with ThreadPoolExecutor(c) as pool:
                     recs = list(pool.map(lambda s: stream(args.url, s[1], 400, f"measure-{cell}-s{s[0]}", out, gate),
                                          msgs))
-                rates = [r["decode_tok_s"] for r in recs]
                 for (slot, _, total), r in zip(msgs, recs):
                     if abs(r["prompt_tokens"] - total) > 8 or abs(total - (ctx_tokens + append)) > 0.02 * append:
                         raise RuntimeError(f"{cell} slot {slot}: prompt {r['prompt_tokens']} vs calibrated {total}")
-                cached_ok = all(r["cached_tokens"] is not None and r["cached_tokens"] >= ctx_tokens - 256 for r in recs)
+                    if r["cached_tokens"] is None or r["cached_tokens"] < ctx_tokens - 256:
+                        raise RuntimeError(f"{cell} slot {slot}: shared context cache hit failed "
+                                           f"({r['cached_tokens']} cached tokens for {ctx_tokens} context tokens)")
+                rates = [r["decode_tok_s"] for r in recs]
                 row = {"cell": cell, "depth": depth, "context_tokens": ctx_tokens, "append": append, "c": c,
                        "prompt_tokens": [r["prompt_tokens"] for r in recs], "cached": [r["cached_tokens"] for r in recs],
-                       "context_cached": cached_ok,
+                       "context_cached": True, "completion_tokens": [r["completion_tokens"] for r in recs],
                        "ttft_s": [round(r["ttft_s"], 3) for r in recs], "decode_tok_s": [round(x, 1) for x in rates],
                        "per_stream_mean": round(sum(rates) / c, 1), "aggregate_sum_of_rates": round(sum(rates), 1),
                        "aggregate_shared_window": window_aggregate(recs)}
@@ -181,8 +183,8 @@ def prefill(args):
             return [{"role": "user", "content": salt + corpus[:n] + "\n\nSummarize the code above in one sentence."}]
         chars, tokens = fit(args.url, mk, target, 0, min(len(corpus), target * 8))
         r = stream(args.url, mk(chars), 1, f"prefill-{target}", out)
-        if r["cached_tokens"]:
-            raise RuntimeError(f"prefill {target}: {r['cached_tokens']} cached tokens on a salted prompt")
+        if r["cached_tokens"] != 0:
+            raise RuntimeError(f"prefill {target}: expected zero cached tokens on a salted prompt, got {r['cached_tokens']}")
         if abs(r["prompt_tokens"] - target) > 0.02 * target:
             raise RuntimeError(f"prefill {target}: got {r['prompt_tokens']} prompt tokens")
         # End to end: request upload, queueing, prefill and the first token, as a client sees it.

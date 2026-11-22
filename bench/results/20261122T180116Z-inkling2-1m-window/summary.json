@@ -1,0 +1,247 @@
+{
+ "run1_262k_vs_1m": {
+  "A1": {
+   "greedy": "11/11",
+   "seeded": "11/11",
+   "specbench": [
+    {
+     "c": 1,
+     "requests": 120,
+     "per_stream_decode_median": 374.4,
+     "aggregate": 410.8,
+     "ttft_median_ms": 32.8,
+     "wall_output_tok_s": 362.9
+    },
+    {
+     "c": 8,
+     "requests": 120,
+     "per_stream_decode_median": 187.1,
+     "aggregate": 1557.2,
+     "ttft_median_ms": 69.4,
+     "wall_output_tok_s": 1353.7
+    },
+    {
+     "c": 16,
+     "requests": 120,
+     "per_stream_decode_median": 139.2,
+     "aggregate": 2372.1,
+     "ttft_median_ms": 111.4,
+     "wall_output_tok_s": 1993.0
+    }
+   ],
+   "pi10": {
+    "errors": 0,
+    "per_stream_decode": 146.2,
+    "aggregate_decode": 697.7,
+    "ttft_p50_s": 0.2172398567199707,
+    "ttft_p90_s": 0.6681222915649414,
+    "acceptance_length": 3.781
+   },
+   "kv_log": "798,512"
+  },
+  "M1": {
+   "greedy": "11/11",
+   "seeded": "11/11",
+   "specbench": [
+    {
+     "c": 1,
+     "requests": 120,
+     "per_stream_decode_median": 374.1,
+     "aggregate": 410.6,
+     "ttft_median_ms": 32.8,
+     "wall_output_tok_s": 363.1
+    },
+    {
+     "c": 8,
+     "requests": 120,
+     "per_stream_decode_median": 180.9,
+     "aggregate": 1561.1,
+     "ttft_median_ms": 70.5,
+     "wall_output_tok_s": 1353.2
+    },
+    {
+     "c": 16,
+     "requests": 120,
+     "per_stream_decode_median": 133.9,
+     "aggregate": 2367.7,
+     "ttft_median_ms": 110.7,
+     "wall_output_tok_s": 1989.7
+    }
+   ],
+   "pi10": {
+    "errors": 0,
+    "per_stream_decode": 145.9,
+    "aggregate_decode": 705.5,
+    "ttft_p50_s": 0.2064352035522461,
+    "ttft_p90_s": 0.7167251110076904,
+    "acceptance_length": 3.762
+   },
+   "kv_log": "1,219,355"
+  }
+ },
+ "run2_1m_request_rust": {
+  "longctx": {
+   "chars_per_token": 3.115,
+   "retrieval": [
+    {
+     "len": "1M",
+     "name": "inkling-2-mini",
+     "prompt_tokens": 1017210,
+     "cold_ttft_s": 417.33,
+     "recalled": 0,
+     "by_depth": {
+      "Amber": false,
+      "Cobalt": false,
+      "Juniper": false,
+      "Saffron": false,
+      "Tundra": false
+     },
+     "error": null
+    }
+   ],
+   "decode_depth": [],
+   "beside": {
+    "short_alone_rate": 198.2,
+    "short_during_prefill_n": 115,
+    "short_during_prefill_rate": 57.6,
+    "short_during_prefill_ttft_p50": 0.95,
+    "short_during_prefill_ttft_max": 2.32,
+    "long_1M_decode_rate": 171.2,
+    "long_cached": 1017152,
+    "short_with_1M_decode_rate": 109.9,
+    "errors": []
+   },
+   "chars_per_token_slices": [
+    3.202,
+    3.459,
+    3.016,
+    3.525,
+    3.553,
+    3.147,
+    3.5,
+    2.134
+   ]
+  },
+  "structured": {
+   "passed": 78,
+   "of": 84,
+   "failed": [
+    [
+     "-mini",
+     "json_object",
+     false
+    ],
+    [
+     "-mini",
+     "json_object",
+     true
+    ],
+    [
+     "ablit",
+     "json_object",
+     false
+    ],
+    [
+     "ablit",
+     "json_object",
+     false
+    ],
+    [
+     "ablit",
+     "json_object",
+     true
+    ],
+    [
+     "ablit",
+     "tool_auto",
+     false
+    ]
+   ],
+   "mixed": {
+    "schema_rows_valid": 7,
+    "of": 8,
+    "plain_rows_nonempty": 8
+   }
+  }
+ },
+ "run2_1m_request_python": {
+  "longctx": {
+   "chars_per_token": 3.115,
+   "retrieval": [
+    {
+     "len": "1M",
+     "name": "inkling-2-mini",
+     "prompt_tokens": 1017210,
+     "cold_ttft_s": 418.58,
+     "recalled": 0,
+     "by_depth": {
+      "Amber": false,
+      "Cobalt": false,
+      "Juniper": false,
+      "Saffron": false,
+      "Tundra": false
+     },
+     "error": null
+    }
+   ],
+   "decode_depth": [],
+   "beside": {
+    "short_alone_rate": 210.4,
+    "short_during_prefill_n": 122,
+    "short_during_prefill_rate": 67.5,
+    "short_during_prefill_ttft_p50": 0.93,
+    "short_during_prefill_ttft_max": 2.34,
+    "long_1M_decode_rate": 193.7,
+    "long_cached": 1017152,
+    "short_with_1M_decode_rate": 107.0,
+    "errors": []
+   },
+   "chars_per_token_slices": [
+    3.202,
+    3.459,
+    3.016,
+    3.525,
+    3.553,
+    3.147,
+    3.5,
+    2.134
+   ]
+  },
+  "structured": {
+   "passed": 79,
+   "of": 84,
+   "failed": [
+    [
+     "-mini",
+     "json_object",
+     false
+    ],
+    [
+     "-mini",
+     "json_object",
+     true
+    ],
+    [
+     "ablit",
+     "json_object",
+     false
+    ],
+    [
+     "ablit",
+     "json_object",
+     true
+    ],
+    [
+     "ablit",
+     "json_object",
+     true
+    ]
+   ],
+   "mixed": {
+    "schema_rows_valid": 8,
+    "of": 8,
+    "plain_rows_nonempty": 8
+   }
+  }
+ }
+}

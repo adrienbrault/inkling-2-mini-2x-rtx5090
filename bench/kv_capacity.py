@@ -7,7 +7,7 @@ kv_cache_usage: for N cohorts of simultaneous requests (default 8, 12, 16 x 96K 
 tokens each, long enough that every request is still decoding after the last prefill, salted so nothing is shared), during the window in which every request is decoding, live tokens =
 sum(prompt + tokens generated so far) and capacity = live tokens / usage. Also records running / waiting / preemptions
 (admission limits). Reuses kv_probe.py (same directory) for HTTP, metrics and salting.
-usage: kv_capacity.py TEXT_FILE OUTPUT_DIR [--cohorts 8,12,16] [--prompt-tokens 96000] [--output-tokens 24576]"""
+usage: kv_capacity.py TEXT_FILE OUTPUT_DIR [--url URL] [--cohorts 8,12,16] [--prompt-tokens 96000] [--output-tokens 24576]"""
 import argparse
 import json
 import statistics
@@ -103,6 +103,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("text_file", type=Path)
     ap.add_argument("output_dir", type=Path)
+    ap.add_argument("--url", default=kp.BASE)
     ap.add_argument("--model", default="inkling-2-mini")
     ap.add_argument("--cohorts", default="8,12,16")
     ap.add_argument("--prompt-tokens", type=int, default=96_000)
@@ -110,6 +111,7 @@ def main():
     ap.add_argument("--interval", type=float, default=0.5)
     ap.add_argument("--timeout", type=float, default=1800)
     args = ap.parse_args()
+    kp.BASE = args.url.rstrip("/")
     out = args.output_dir / (datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + "-kvcap-" + uuid.uuid4().hex[:6])
     out.mkdir(parents=True)
     corpus = kp.tokenize(args, args.text_file.read_text()[:1_000_000])

@@ -1,0 +1,52 @@
+{
+ "tool_call": {
+  "status": 200,
+  "ok": true,
+  "detail": [
+   {
+    "id": "call_2a06edb53dc84f729b47db3d",
+    "type": "function",
+    "function": {
+     "name": "get_weather",
+     "arguments": "{\"city\":\"Paris\"}"
+    }
+   }
+  ]
+ },
+ "image": {
+  "status": 200,
+  "ok": true,
+  "detail": "Red"
+ },
+ "t08": [
+  {
+   "status": 200,
+   "ok": true,
+   "tokens": 696,
+   "finish": "stop",
+   "head": "Silicon chorus, thousands strong,  \neach core a tiny worker’"
+  },
+  {
+   "status": 200,
+   "ok": true,
+   "tokens": 911,
+   "finish": "stop",
+   "head": "Short poem:\nA thousand lanes hum in the dark,  \ncores ignite"
+  },
+  {
+   "status": 200,
+   "ok": true,
+   "tokens": 1072,
+   "finish": "stop",
+   "head": "Short poem about GPUs:\nThousands of tiny engines hum in para"
+  },
+  {
+   "status": 200,
+   "ok": true,
+   "tokens": 820,
+   "finish": "stop",
+   "head": "A million lanes of light,\neach core a tiny mind;\nrivers of d"
+  }
+ ],
+ "all_ok": true
+}

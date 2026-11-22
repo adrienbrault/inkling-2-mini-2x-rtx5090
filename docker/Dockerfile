@@ -37,3 +37,14 @@ RUN python3 /tmp/patch_draftshard.py "$VLLM_DIR" && \
     grep -Fq 'tensor_model_parallel_all_gather(packet, dim=0)' "$VLLM_DIR/v1/worker/gpu/sample/inkling_draftshard.py" && \
     grep -Fq 'draft_shard_cache.materialize(' "$VLLM_DIR/v1/worker/gpu/model_runner.py" && \
     rm /tmp/patch_draftshard.py
+
+# r13 candidate: skip empty attention LoRA deltas and restore the Inkling head independently.
+COPY patch_lora.py /tmp/patch_lora.py
+RUN grep -Fq 'self.token_mapping_meta.prepare_tensors(self.token_lora_indices)' "$VLLM_DIR/lora/punica_wrapper/punica_gpu.py" && \
+    grep -Fq 'no_lora_flag_cpu = torch.tensor([False], dtype=torch.bool, device="cpu")' "$VLLM_DIR/lora/ops/triton_ops/lora_kernel_metadata.py" && \
+    grep -Fq 'no_lora = torch.all(token_lora_mapping == -1)' "$VLLM_DIR/lora/ops/triton_ops/lora_kernel_metadata.py" && \
+    grep -Fq 'self.no_lora_flag_cpu[0] = no_lora' "$VLLM_DIR/lora/ops/triton_ops/lora_kernel_metadata.py" && \
+    python3 /tmp/patch_lora.py "$VLLM_DIR" && \
+    grep -Fq 'VLLM_INKLING_LORA_SKIP' "$V/lora.py" && \
+    grep -Fq 'VLLM_INKLING_LORA_HEAD' "$V/model.py" && \
+    rm /tmp/patch_lora.py

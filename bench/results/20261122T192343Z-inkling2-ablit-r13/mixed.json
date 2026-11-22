@@ -1,0 +1,1105 @@
+{
+ "isolation": {
+  "requests": [
+   {
+    "model": "inkling-2-mini",
+    "prompt_tokens": 18999,
+    "cached_tokens": 0
+   },
+   {
+    "model": "inkling-2-mini-ablit",
+    "prompt_tokens": 18999,
+    "cached_tokens": 0
+   },
+   {
+    "model": "inkling-2-mini-ablit",
+    "prompt_tokens": 18999,
+    "cached_tokens": 18944
+   },
+   {
+    "model": "inkling-2-mini",
+    "prompt_tokens": 18999,
+    "cached_tokens": 18944
+   }
+  ],
+  "pass": true
+ },
+ "lone_determinism": {
+  "inkling-2-mini": {
+   "warm_vs_warm": 4,
+   "cold_vs_warm": 0,
+   "of": 4
+  },
+  "inkling-2-mini-ablit": {
+   "warm_vs_warm": 2,
+   "cold_vs_warm": 0,
+   "of": 4
+  }
+ },
+ "decode": [
+  {
+   "c": 8,
+   "comp": "B",
+   "block": "c8-B-0",
+   "per_name": {
+    "inkling-2-mini": {
+     "n": 8,
+     "mean_rate": 177.8,
+     "sum_rate": 1422.7
+    }
+   },
+   "acceptance_length": 2.575,
+   "requests": [
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.279,
+     "rate": 151.4
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.404,
+     "rate": 185.7
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.279,
+     "rate": 199.0
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.341,
+     "rate": 199.6
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.279,
+     "rate": 152.3
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.465,
+     "rate": 174.2
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.341,
+     "rate": 189.3
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.451,
+     "rate": 171.2
+    }
+   ]
+  },
+  {
+   "c": 8,
+   "comp": "A",
+   "block": "c8-A-1",
+   "per_name": {
+    "inkling-2-mini-ablit": {
+     "n": 8,
+     "mean_rate": 195.7,
+     "sum_rate": 1565.6
+    }
+   },
+   "acceptance_length": 3.139,
+   "requests": [
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.529,
+     "rate": 222.2
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.091,
+     "rate": 168.9
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.278,
+     "rate": 184.2
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.278,
+     "rate": 179.0
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.405,
+     "rate": 198.3
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.405,
+     "rate": 185.0
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.467,
+     "rate": 202.9
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.514,
+     "rate": 225.1
+    }
+   ]
+  },
+  {
+   "c": 8,
+   "comp": "M",
+   "block": "c8-M-2",
+   "per_name": {
+    "inkling-2-mini": {
+     "n": 4,
+     "mean_rate": 177.9,
+     "sum_rate": 711.7
+    },
+    "inkling-2-mini-ablit": {
+     "n": 4,
+     "mean_rate": 212.7,
+     "sum_rate": 850.7
+    }
+   },
+   "acceptance_length": 2.943,
+   "requests": [
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.281,
+     "rate": 185.7
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.281,
+     "rate": 202.7
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.281,
+     "rate": 158.0
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.344,
+     "rate": 171.4
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.344,
+     "rate": 183.7
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.453,
+     "rate": 220.2
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.407,
+     "rate": 184.3
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.467,
+     "rate": 256.4
+    }
+   ]
+  },
+  {
+   "c": 8,
+   "comp": "M",
+   "block": "c8-M-3",
+   "per_name": {
+    "inkling-2-mini": {
+     "n": 4,
+     "mean_rate": 170.9,
+     "sum_rate": 683.6
+    },
+    "inkling-2-mini-ablit": {
+     "n": 4,
+     "mean_rate": 187.8,
+     "sum_rate": 751.1
+    }
+   },
+   "acceptance_length": 2.761,
+   "requests": [
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.281,
+     "rate": 152.9
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.281,
+     "rate": 180.5
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.281,
+     "rate": 167.3
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.344,
+     "rate": 197.9
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.344,
+     "rate": 167.4
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.453,
+     "rate": 181.9
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.407,
+     "rate": 196.0
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.467,
+     "rate": 190.8
+    }
+   ]
+  },
+  {
+   "c": 8,
+   "comp": "A",
+   "block": "c8-A-4",
+   "per_name": {
+    "inkling-2-mini-ablit": {
+     "n": 8,
+     "mean_rate": 214.5,
+     "sum_rate": 1715.9
+    }
+   },
+   "acceptance_length": 3.392,
+   "requests": [
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.123,
+     "rate": 170.9
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.249,
+     "rate": 244.4
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.312,
+     "rate": 186.8
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.312,
+     "rate": 202.3
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.439,
+     "rate": 261.7
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.439,
+     "rate": 209.8
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.506,
+     "rate": 212.9
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.492,
+     "rate": 227.1
+    }
+   ]
+  },
+  {
+   "c": 8,
+   "comp": "B",
+   "block": "c8-B-5",
+   "per_name": {
+    "inkling-2-mini": {
+     "n": 8,
+     "mean_rate": 190.9,
+     "sum_rate": 1527.0
+    }
+   },
+   "acceptance_length": 2.762,
+   "requests": [
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.341,
+     "rate": 163.6
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.279,
+     "rate": 213.6
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.279,
+     "rate": 163.5
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.278,
+     "rate": 176.7
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.34,
+     "rate": 182.8
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.448,
+     "rate": 241.8
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.402,
+     "rate": 193.4
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.461,
+     "rate": 191.6
+    }
+   ]
+  },
+  {
+   "c": 16,
+   "comp": "B",
+   "block": "c16-B-6",
+   "per_name": {
+    "inkling-2-mini": {
+     "n": 16,
+     "mean_rate": 135.7,
+     "sum_rate": 2171.2
+    }
+   },
+   "acceptance_length": 2.784,
+   "requests": [
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.277,
+     "rate": 105.9
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.277,
+     "rate": 114.1
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.277,
+     "rate": 111.7
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.339,
+     "rate": 117.4
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.339,
+     "rate": 132.4
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.401,
+     "rate": 128.0
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.463,
+     "rate": 140.0
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.524,
+     "rate": 131.7
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.65,
+     "rate": 132.7
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.587,
+     "rate": 130.3
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.839,
+     "rate": 149.6
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.712,
+     "rate": 126.2
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.775,
+     "rate": 157.8
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.958,
+     "rate": 143.7
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.9,
+     "rate": 187.1
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 1.002,
+     "rate": 162.6
+    }
+   ]
+  },
+  {
+   "c": 16,
+   "comp": "A",
+   "block": "c16-A-7",
+   "per_name": {
+    "inkling-2-mini-ablit": {
+     "n": 16,
+     "mean_rate": 153.8,
+     "sum_rate": 2460.0
+    }
+   },
+   "acceptance_length": 3.304,
+   "requests": [
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.281,
+     "rate": 131.5
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.345,
+     "rate": 124.6
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.281,
+     "rate": 123.5
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.281,
+     "rate": 136.7
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.344,
+     "rate": 160.2
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.408,
+     "rate": 123.3
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.598,
+     "rate": 147.4
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.534,
+     "rate": 133.6
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.47,
+     "rate": 131.9
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.661,
+     "rate": 159.8
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.789,
+     "rate": 171.6
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.853,
+     "rate": 231.5
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.724,
+     "rate": 159.1
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.976,
+     "rate": 150.8
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.916,
+     "rate": 193.1
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 1.022,
+     "rate": 181.4
+    }
+   ]
+  },
+  {
+   "c": 16,
+   "comp": "M",
+   "block": "c16-M-8",
+   "per_name": {
+    "inkling-2-mini": {
+     "n": 8,
+     "mean_rate": 135.2,
+     "sum_rate": 1082.0
+    },
+    "inkling-2-mini-ablit": {
+     "n": 8,
+     "mean_rate": 144.9,
+     "sum_rate": 1158.9
+    }
+   },
+   "acceptance_length": 2.928,
+   "requests": [
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.119,
+     "rate": 96.2
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.434,
+     "rate": 113.6
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.307,
+     "rate": 122.3
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.434,
+     "rate": 138.3
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.181,
+     "rate": 99.4
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.371,
+     "rate": 122.8
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.56,
+     "rate": 122.7
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.751,
+     "rate": 159.3
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.687,
+     "rate": 142.1
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.687,
+     "rate": 145.0
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.559,
+     "rate": 126.2
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.878,
+     "rate": 152.7
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 1.003,
+     "rate": 224.0
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.942,
+     "rate": 149.3
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 1.046,
+     "rate": 149.1
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 1.064,
+     "rate": 177.9
+    }
+   ]
+  },
+  {
+   "c": 16,
+   "comp": "M",
+   "block": "c16-M-9",
+   "per_name": {
+    "inkling-2-mini": {
+     "n": 8,
+     "mean_rate": 147.1,
+     "sum_rate": 1176.6
+    },
+    "inkling-2-mini-ablit": {
+     "n": 8,
+     "mean_rate": 153.7,
+     "sum_rate": 1229.4
+    }
+   },
+   "acceptance_length": 3.15,
+   "requests": [
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.28,
+     "rate": 133.4
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.343,
+     "rate": 129.2
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.28,
+     "rate": 124.1
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.469,
+     "rate": 160.1
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.279,
+     "rate": 107.6
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.343,
+     "rate": 119.3
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.406,
+     "rate": 119.8
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.533,
+     "rate": 173.4
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.596,
+     "rate": 125.3
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.66,
+     "rate": 136.1
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.852,
+     "rate": 150.4
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.723,
+     "rate": 151.9
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.787,
+     "rate": 240.4
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.974,
+     "rate": 180.8
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.915,
+     "rate": 175.6
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 1.02,
+     "rate": 178.6
+    }
+   ]
+  },
+  {
+   "c": 16,
+   "comp": "A",
+   "block": "c16-A-10",
+   "per_name": {
+    "inkling-2-mini-ablit": {
+     "n": 16,
+     "mean_rate": 149.6,
+     "sum_rate": 2393.9
+    }
+   },
+   "acceptance_length": 3.215,
+   "requests": [
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.281,
+     "rate": 130.5
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.281,
+     "rate": 159.6
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.344,
+     "rate": 123.7
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.281,
+     "rate": 150.5
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.344,
+     "rate": 132.4
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.407,
+     "rate": 143.9
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.47,
+     "rate": 143.1
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.533,
+     "rate": 128.4
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.597,
+     "rate": 141.1
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.66,
+     "rate": 135.3
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.724,
+     "rate": 147.8
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.852,
+     "rate": 166.1
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.788,
+     "rate": 139.2
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.916,
+     "rate": 159.2
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 0.976,
+     "rate": 229.8
+    },
+    {
+     "model": "inkling-2-mini-ablit",
+     "tokens": 256,
+     "ttft": 1.022,
+     "rate": 163.3
+    }
+   ]
+  },
+  {
+   "c": 16,
+   "comp": "B",
+   "block": "c16-B-11",
+   "per_name": {
+    "inkling-2-mini": {
+     "n": 16,
+     "mean_rate": 137.1,
+     "sum_rate": 2193.2
+    }
+   },
+   "acceptance_length": 2.815,
+   "requests": [
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.121,
+     "rate": 109.4
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.244,
+     "rate": 131.6
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.306,
+     "rate": 122.8
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.306,
+     "rate": 116.1
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.493,
+     "rate": 136.2
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.431,
+     "rate": 147.2
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.43,
+     "rate": 125.1
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.554,
+     "rate": 127.0
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.617,
+     "rate": 128.4
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.679,
+     "rate": 123.5
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.742,
+     "rate": 136.1
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.868,
+     "rate": 150.7
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.868,
+     "rate": 154.7
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 1.018,
+     "rate": 187.2
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 0.989,
+     "rate": 152.5
+    },
+    {
+     "model": "inkling-2-mini",
+     "tokens": 256,
+     "ttft": 1.036,
+     "rate": 144.7
+    }
+   ]
+  }
+ ]
+}

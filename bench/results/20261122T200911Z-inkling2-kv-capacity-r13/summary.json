@@ -1,0 +1,24 @@
+[
+ {
+  "cohort": 8,
+  "issues": [],
+  "all_decoding_window_s": 59.21,
+  "peak_running": 8.0,
+  "peak_waiting": 5.0,
+  "peak_kv_usage": 0.6618210929928792,
+  "preemption_delta": 0.0,
+  "capacity_tokens_median": 1420624,
+  "live_tokens_at_start": 768000
+ },
+ {
+  "cohort": 12,
+  "issues": [],
+  "all_decoding_window_s": -20.64,
+  "peak_running": 11.0,
+  "peak_waiting": 9.0,
+  "peak_kv_usage": 0.8949985252601862,
+  "preemption_delta": 0.0,
+  "capacity_tokens_median": null,
+  "live_tokens_at_start": 1152000
+ }
+]

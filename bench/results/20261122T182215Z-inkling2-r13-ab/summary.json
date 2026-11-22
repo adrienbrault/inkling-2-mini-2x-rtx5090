@@ -1,0 +1,119 @@
+{
+ "A1": {
+  "greedy": "11/11",
+  "seeded": "11/11",
+  "specbench": [
+   {
+    "c": 1,
+    "requests": 120,
+    "per_stream_decode_median": 375.4,
+    "aggregate": 411.9,
+    "ttft_median_ms": 31.9,
+    "wall_output_tok_s": 364.4
+   },
+   {
+    "c": 8,
+    "requests": 120,
+    "per_stream_decode_median": 183.7,
+    "aggregate": 1594.9,
+    "ttft_median_ms": 69.2,
+    "wall_output_tok_s": 1375.2
+   },
+   {
+    "c": 16,
+    "requests": 120,
+    "per_stream_decode_median": 142.3,
+    "aggregate": 2450.0,
+    "ttft_median_ms": 109.1,
+    "wall_output_tok_s": 2030.6
+   }
+  ],
+  "pi10": {
+   "errors": 0,
+   "per_stream_decode": 147.3,
+   "aggregate_decode": 693.9,
+   "ttft_p50_s": 0.22444653511047363,
+   "ttft_p90_s": 0.732414722442627,
+   "acceptance_length": 3.764
+  },
+  "kv_log": "818,388"
+ },
+ "L1": {
+  "greedy": "11/11",
+  "seeded": "11/11",
+  "specbench": [
+   {
+    "c": 1,
+    "requests": 120,
+    "per_stream_decode_median": 373.9,
+    "aggregate": 410.2,
+    "ttft_median_ms": 32.8,
+    "wall_output_tok_s": 362.7
+   },
+   {
+    "c": 8,
+    "requests": 120,
+    "per_stream_decode_median": 180.5,
+    "aggregate": 1568.2,
+    "ttft_median_ms": 72.8,
+    "wall_output_tok_s": 1348.1
+   },
+   {
+    "c": 16,
+    "requests": 120,
+    "per_stream_decode_median": 133.9,
+    "aggregate": 2360.1,
+    "ttft_median_ms": 111.6,
+    "wall_output_tok_s": 1973.4
+   }
+  ],
+  "pi10": {
+   "errors": 0,
+   "per_stream_decode": 141.4,
+   "aggregate_decode": 675.9,
+   "ttft_p50_s": 0.20943140983581543,
+   "ttft_p90_s": 0.7757320404052734,
+   "acceptance_length": 3.704
+  },
+  "kv_log": "798,512"
+ },
+ "R1": {
+  "greedy": "11/11",
+  "seeded": "11/11",
+  "specbench": [
+   {
+    "c": 1,
+    "requests": 120,
+    "per_stream_decode_median": 377.7,
+    "aggregate": 414.3,
+    "ttft_median_ms": 32.4,
+    "wall_output_tok_s": 366.5
+   },
+   {
+    "c": 8,
+    "requests": 120,
+    "per_stream_decode_median": 184.4,
+    "aggregate": 1581.0,
+    "ttft_median_ms": 71.8,
+    "wall_output_tok_s": 1358.7
+   },
+   {
+    "c": 16,
+    "requests": 120,
+    "per_stream_decode_median": 138.6,
+    "aggregate": 2405.4,
+    "ttft_median_ms": 111.4,
+    "wall_output_tok_s": 2023.0
+   }
+  ],
+  "pi10": {
+   "errors": 0,
+   "per_stream_decode": 145.1,
+   "aggregate_decode": 703.2,
+   "ttft_p50_s": 0.20401263236999512,
+   "ttft_p90_s": 0.6279993057250977,
+   "acceptance_length": 3.945
+  },
+  "kv_log": "798,935"
+ }
+}

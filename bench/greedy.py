@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Greedy capture for the Inkling drafter identity check: 8 fixed prompts, temperature 0, 512 tokens, default effort.
-Speculative decoding is lossless under greedy sampling, so drafter-on and drafter-off runs must match token for token
-(text compared; reasoning and content separately).  usage: greedy.py OUT.json [--long] [--seeded]
+"""Capture Inkling output for overlay identity checks: 8 fixed prompts, temperature 0, 512 tokens, default effort.
+Compare reasoning and content separately. Keep drafter mode, KV dtype and frontend fixed for overlay comparisons.
+The recipe records greedy text divergence when switching the drafter on or off.
+Usage: greedy.py OUT.json [--long] [--seeded]
 --seeded samples at temperature 1.0 with a fixed seed per prompt (the sampled-path identity check).
 --long adds three code prompts of ~3K / ~10K / ~30K tokens (256 tokens out, distinct first line so none shares a cached
 prefix with another) whose prefill spans several scheduler chunks: the identity check for chunk-size changes."""

@@ -3,6 +3,77 @@
 All measured 2026-11-21 and 2026-11-22 on two RTX 5090s with the same checkpoint. The served image is `sm120-r10`.
 Each section names the image it was measured on; one request at a time, r10's output is bitwise identical to r8's.
 
+## Knobs
+
+Set these variables before running [`scripts/serve.sh`](../scripts/serve.sh). It prints every effective value. The defaults below describe the served TP2 profile. A switch set to `0` omits the associated Docker environment variable or serving flag, except for the decode budget, which passes `0` to the scheduler.
+
+| Variable or flag | Default | Effect | Cost | Tested values | What breaks |
+| --- | --- | --- | --- | --- | --- |
+| `MODEL_DIR` | Required | Mounts the official checkpoint read-only. | Disk for weights and the drafter. | Official Inkling-2-Mini checkpoint. | Needs an absolute path, readable config and tokenizer files, target weight shards and `mtp.safetensors`. |
+| `CACHE_DIR` | `$HOME/.cache/inkling2-vllm` | Mounts a writable cache and persists Triton kernels between boots. | Disk and container-written files. | Cold cache and reused cache on the served launch. | An inaccessible path stops launch. An empty cache recompiles the kernels. |
+| `IMAGE` | `inkling2-rtx5090:sm120-r13` | Selects the local serving image. | A new build may pull the base image and recompile kernels at startup. | r10 in the headline results. Earlier runs name their images below. | Build with the same tag before serving. Other builds may lack the required SM120 paths. |
+| `PORT` | `8000` | Sets the published host port. The container listens on 8000. | Update client URLs when it changes. | Host ports `8000` and `8022` appear in the recipe and archived launch commands. | Docker fails to publish an occupied port. |
+| `BIND` | `127.0.0.1` | Sets the host IPv4 address. Use `0.0.0.0` for all interfaces. | Exposing the port gives reachable clients access to the API. | Untested as a launcher override. | Docker must be able to bind the address. The recipe provides no API key. |
+| `GPUS` | `0,1` | Selects devices by index and derives tensor parallelism from their count. | TP2 communicates over PCIe and leaves more room for KV. | TP2 on two RTX 5090s. TP1 at 32K without DSpark on an earlier image. | Unknown device IDs fail in Docker. TP1 requires `DSPARK=0` and disables TP-only switches. |
+| `MAX_MODEL_LEN` | `1048576` | Caps the total prompt plus output tokens per request. | 3.6 % of the KV pool against `262144` (0.55 GiB per card, mostly the DSpark drafter's fp32 position table sized for the window); output and speed unchanged while requests stay short (2026-11-22). While a request near 1M runs, the other requests slow down: during its cold prefill (about 7 min) they decode at about a third of their speed, and while it decodes at about 55 % (attention over 1M tokens in every shared step). One such request fits at a time (about two thirds of the KV pool). | `1048576` and `262144` on served TP2; 32,768 on historical TP1 without DSpark. | Startup rejects a window that cannot fit. Prompts beyond the window get HTTP 400. |
+| `MAX_NUM_SEQS` | `16` | Caps concurrently scheduled sequences. Admission also needs enough free KV. | Larger limits can change activation and CUDA graph reserves. | 16 on r10. Earlier runs also used the engine default. | Too many slots can reduce the KV pool or run out of memory. |
+| `GPU_MEMORY_UTILIZATION` | `0.92` | Sets the vLLM device memory fraction. | `0.96` yielded only 0.3% more blocks on the measured r10 boot. | `0.92`, `0.96` in the [memory results](../bench/results/20261122T053020Z-inkling2-memory-r10). | The launcher accepts values above 0 and up to 1. A valid fraction can still leave too little memory to start or serve the workload. |
+| `ABLIT_DIR` | `MODEL_DIR-ablit` when that directory exists | Mounts the abliteration LoRA read-only and adds the request name `inkling-2-mini-ablit`. Empty turns it off. | With overlay r13 (`VLLM_INKLING_LORA_SKIP`, `VLLM_INKLING_LORA_HEAD`, set automatically), requests to `inkling-2-mini` run as without LoRA: same output, speed within noise. The LoRA's extra CUDA graphs take about 0.4 GiB per card of KV pool. | The pinned OpenUncensored rank-2 adapter on `attn.wo_ud` (`scripts/fetch-adapter.sh`). | `--specialize-active-lora` must stay off: its capture drops the adapter in batches that mix both names. |
+| `DSPARK` | `1` | Enables DSpark with 7 draft tokens, probabilistic drafts and `auto` drafter KV. | Drafter weights and KV take memory. Low-concurrency decode was faster with DSpark. | `1` on r10. `0` on earlier TP1 and TP2 boots. | With DSpark off, omit both conv pages and draft sharding. SM12x rejects fp8 drafter KV. The checkpoint requires 7 draft tokens. |
+| `KV_CACHE_DTYPE` | `fp8` | Chooses target KV dtype only. Use `auto` to let the engine select the dtype. | bf16 held a smaller pool and produced different greedy text in the r5 comparison. | fp8 on r10. bf16 on r5. Confirm the resolved dtype in logs for `auto`. | Compact conv pages require fp8 target KV. |
+| `VLLM_INKLING_CONV_PAGE` | `1` | Selects compact short-conv pages and passes `--block-size 64`. | Disabling it gives up the pool gain. | On in r9/r10. Off in the r8 baseline. | Requires SM120 TP2, the checkpoint's conv geometry, fp8 target and bf16 DSpark KV, hybrid KV management, BLNHC or automatic layout, and no KV connector, PP or CP. |
+| `VLLM_INKLING_DRAFT_SHARD` | `1` | Samples draft tokens from the two local vocabulary shards. | Extra buffers reduce the logged pool from 819,427 to 818,388. See [the draft-shard comparison](#conv-pages-and-draft-sharding-overlay-r10). | `0` and `1` in the paired draft-sharding boots. | Needs DSpark, TP2 and batch-sharded sampling. Unsupported communicator, head or draft layouts can fall back to dense drafting. Check for `Inkling2 DSpark vocab-sharded draft sampling enabled (TP2).` |
+| `VLLM_DECODE_STEP_BUDGET` | `1024` | Caps a step while a request decodes. `0` disables the cap. | Smaller budgets can slow prefills under load. | Off and 1024 in the r8 comparison. 512 slowed loaded prefills. | The overlay expects an integer. A value at or above the current step budget has no effect. |
+| `VLLM_ALLREDUCE_USE_FLASHINFER_PCIE_IPC` | `1` | Enables FlashInfer PCIe IPC for TP all-reduce with NCCL fallback. | FlashInfer improved decode by about 10% over NCCL in the measured comparison. | Enabled and omitted on two RTX 5090s. See [all-reduce](#all-reduce-and-one-card-versus-two). | Requires TP2 in this launcher. Keep `--disable-custom-all-reduce` on the pinned base. |
+| `VLLM_USE_RUST_FRONTEND` | `1` | Selects the Rust frontend. `0` keeps Python. | Python adds about 0.1 s to median TTFT on long replay prompts. The frontends differ in reported trailing reasoning whitespace. | Both in the [paired boots](#rust-frontend). | Keep the frontend fixed when comparing TTFT or exact reasoning text. |
+| `FAIR_PREFILL` / `--long-prefill-token-threshold 768` and `--long-prefill-token-threshold-adaptive` | `1` | Caps each prefill chunk when multiple requests prefill. `0` drops both flags. | Faster newcomer TTFT with 2–4% lower aggregate decode at 10 agent sessions in the paired experiment. | The pair on and off. See [fair prefill](#fair-prefill---long-prefill-token-threshold-768---long-prefill-token-threshold-adaptive). | A single flag changes the experiment. The 768 threshold and adaptive mode were tested together. |
+| `BATCH_SHARDED_SAMPLING` / `--enable-batch-sharded-sampling` | `1` | Samples each target request on one TP rank from both vocabulary shards. | Turning it off gathers full logits and disables draft sharding. | The flag on and off in the [r8 comparison](#batch-sharded-sampling---enable-batch-sharded-sampling-image-r8). | Needs TP2 and `compute_logits_local` from the overlay. |
+| `VLLM_INKLING_CONVPAGE_PROBE` | `0` | Enables diagnostic queue, scheduler and KV layout messages for probe requests. | Adds diagnostic log output. | Used by [`bench/kv_probe.py`](../bench/kv_probe.py) for admission probes. | Admission analysis needs a readable, continuously captured log with the probe events. |
+| `TRITON_CACHE_DIR` | `/root/.cache/triton` | Fixed container path inside the `CACHE_DIR` mount. | A cold cache takes about 3 min 15 s to boot. A warm cache takes about 40 s. | Both cache states in the [launch notes](../scripts/serve.sh). | Losing the persisted cache makes subsequent boots recompile. |
+
+Use `docker logs -f inkling > scheduler.log 2>&1` in another terminal with `VLLM_INKLING_CONVPAGE_PROBE=1`. Pass `--scheduler-log scheduler.log` to [`bench/kv_probe.py`](../bench/kv_probe.py) for admission analysis. Its `INKLING_KV_PROBE_CONFIG` entry records the layout. Check the boot log for the engine's KV estimate and check preemptions under load before comparing a new setting.
+
+## Compatibility profiles
+
+Start from the repository root with `MODEL_DIR` exported as in [Quick start](../README.md#quick-start). Run one profile at a time and stop the container before starting the next.
+
+| Profile | Block size | Evidence |
+| --- | --- | --- |
+| Default TP2 with DSpark | Explicit 64 with compact conv pages. | Served r10 headline configuration. |
+| TP2 without DSpark | vLLM selects the block size. Both conv pages and draft sharding are omitted along with speculative config. | Drafter-off TP2 was measured on earlier images. This exact r10 combination is untested. |
+| One card, 32K, without DSpark | vLLM selects the block size. Conv pages, draft sharding, batch-sharded sampling and FlashInfer PCIe IPC are off. | [Historical TP1 run](../bench/results/20261121T014555Z-inkling2-specbench-tp1-nospec-32k/server.txt) used a 32,768-token window and vLLM's default target KV dtype. This r10 combination is untested. |
+
+```bash
+# Default TP2
+scripts/serve.sh
+
+# TP2 without DSpark
+GPUS=0,1 DSPARK=0 VLLM_INKLING_CONV_PAGE=0 VLLM_INKLING_DRAFT_SHARD=0 scripts/serve.sh
+
+# One GPU with a 32K window, without DSpark
+GPUS=0 DSPARK=0 MAX_MODEL_LEN=32768 KV_CACHE_DTYPE=auto VLLM_USE_RUST_FRONTEND=0 \
+  VLLM_DECODE_STEP_BUDGET=0 FAIR_PREFILL=0 BATCH_SHARDED_SAMPLING=0 \
+  VLLM_ALLREDUCE_USE_FLASHINFER_PCIE_IPC=0 VLLM_INKLING_CONV_PAGE=0 VLLM_INKLING_DRAFT_SHARD=0 scripts/serve.sh
+```
+
+For TP2 with bf16 target KV, use `KV_CACHE_DTYPE=auto VLLM_INKLING_CONV_PAGE=0 scripts/serve.sh` and verify bf16 in the boot log. The bf16 comparison below used r5. This r10 combination is untested. All profiles keep custom all-reduce and FlashInfer warmup autotune disabled for SM120.
+
+## Reasoning effort
+
+The recipe records `none` and `max` as the endpoints. It exercises `none` in GSM8K and uses the checkpoint default in agent replay. The archived results do not contain the template's complete accepted-value list or its literal default. Check the selected checkpoint's `chat_template.jinja` or the `chat_template` field in `tokenizer_config.json` for intermediate values. The launcher leaves the default to that template.
+
+Send the setting in `chat_template_kwargs`, as [`bench/headline_inkling.py`](../bench/headline_inkling.py) does for tokenization.
+
+```bash
+curl -fsS http://127.0.0.1:8000/v1/chat/completions -H 'Content-Type: application/json' -d '{
+  "model": "inkling-2-mini",
+  "messages": [{"role": "user", "content": "What is 2 plus 2?"}],
+  "chat_template_kwargs": {"reasoning_effort": "none"}
+}'
+```
+
+Set this field in your client for requests that should use the same effort. Even `none` can spend generation tokens on reasoning. Leave enough output budget for the answer. The [GSM8K reference](../bench/results/20261122T143310Z-inkling2-quality-rustfe) uses 4,096 generation tokens and a non-matching stop string.
+
 ## How the served configuration got here
 
 Spec-Bench per stream (median), one boot each, README protocol:
