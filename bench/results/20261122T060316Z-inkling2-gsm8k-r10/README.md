@@ -5,6 +5,6 @@ first 200 problems, chat template, temperature 0, `reasoning_effort` none, concu
 string that never occurs (`<|inkling-eval-no-stop|>`). The model reasons briefly even at the lowest effort; with
 lm-eval's default budget and stop strings the answer is cut off (the r8 and r10 quality notes). Here no answer is empty.
 
-Score: 95.5 % flexible extract (standard error 1.5), 63.5 % strict match. Strict match expects the 5-shot "#### N" answer
-format, which the model's chat answers often do not follow. The local package path in `config_source` is shortened
+Score: 95.5 % flexible extract (standard error 1.5), 63.5 % strict match. Strict match counts only answers in the 5-shot
+examples' "#### N" format. The local package path in `config_source` is shortened
 to `<site-packages>`.
