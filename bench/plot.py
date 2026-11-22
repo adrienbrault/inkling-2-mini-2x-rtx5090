@@ -22,10 +22,10 @@ import matplotlib.pyplot as plt  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 RES = ROOT / "bench" / "results"
 OUT = ROOT / "docs" / "img"
-SPEC = RES / "20261122T122338Z-inkling2-specbench-served-r10-fair"
+SPEC = RES / "20261122T143353Z-inkling2-specbench-served-rustfe"
 SPEC_OFF = RES / "20261121T012150Z-inkling2-specbench-nospec-r3"
-CODE = RES / "20261122T122632Z-inkling2-code-r10-fair"
-PREFILL = RES / "20261122T122925Z-inkling2-prefill-r10-fair-a"
+CODE = RES / "20261122T143647Z-inkling2-code-rustfe"
+PREFILL = RES / "20261122T143852Z-inkling2-prefill-rustfe-a"
 CS = (1, 4, 8, 16)
 CS_OFF = (1, 4, 8)   # the drafter-off run predates the c16 cell
 
@@ -63,7 +63,7 @@ def decode():
         ax.set_ylim(bottom=0)
         ax.grid(alpha=0.3)
     ax1.legend(fontsize=7, loc="upper left")
-    fig.suptitle("Inkling-2-Mini, 2x RTX 5090, TP2 + DSpark, 2026-11-22 (r10, fair prefill)", fontsize=10)
+    fig.suptitle("Inkling-2-Mini, 2x RTX 5090, TP2 + DSpark, 2026-11-22 (r10, fair prefill, Rust frontend)", fontsize=10)
     fig.tight_layout()
     fig.savefig(OUT / "decode.svg")
     print("decode code agg", [round(x) for x in code_a], "per", [round(x) for x in code_p])
@@ -84,7 +84,7 @@ def prefill():
     ax2.set_ylabel("time to first token (s)", color="#b45309")
     ax2.set_ylim(bottom=0)
     ax1.grid(alpha=0.3)
-    ax1.set_title("Inkling-2-Mini cold prefill, 2x RTX 5090, 2026-11-22 (r10, fair prefill)", fontsize=10)
+    ax1.set_title("Inkling-2-Mini cold prefill, 2x RTX 5090, 2026-11-22 (r10, fair prefill, Rust frontend)", fontsize=10)
     fig.tight_layout()
     fig.savefig(OUT / "prefill.svg")
     print("prefill", [(r["prompt_tokens"], r["e2e_prefill_tok_s"], r["ttft_s"]) for r in rows])

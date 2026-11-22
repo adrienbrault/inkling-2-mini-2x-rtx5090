@@ -1,0 +1,74 @@
+{
+ "A1": [
+  {
+   "c": 8,
+   "requests": 120,
+   "per_stream_decode_median": 183.8,
+   "aggregate": 1585.9,
+   "ttft_median_ms": 68.2,
+   "wall_output_tok_s": 1369.5
+  },
+  {
+   "c": 16,
+   "requests": 120,
+   "per_stream_decode_median": 139.7,
+   "aggregate": 2420.3,
+   "ttft_median_ms": 94.9,
+   "wall_output_tok_s": 2038.2
+  }
+ ],
+ "F1": [
+  {
+   "c": 8,
+   "requests": 120,
+   "per_stream_decode_median": 189.0,
+   "aggregate": 1609.6,
+   "ttft_median_ms": 67.9,
+   "wall_output_tok_s": 1377.5
+  },
+  {
+   "c": 16,
+   "requests": 120,
+   "per_stream_decode_median": 134.6,
+   "aggregate": 2410.0,
+   "ttft_median_ms": 105.5,
+   "wall_output_tok_s": 2000.6
+  }
+ ],
+ "A2": [
+  {
+   "c": 8,
+   "requests": 120,
+   "per_stream_decode_median": 185.5,
+   "aggregate": 1610.5,
+   "ttft_median_ms": 67.1,
+   "wall_output_tok_s": 1372.4
+  },
+  {
+   "c": 16,
+   "requests": 120,
+   "per_stream_decode_median": 140.2,
+   "aggregate": 2456.1,
+   "ttft_median_ms": 114.5,
+   "wall_output_tok_s": 2038.3
+  }
+ ],
+ "F2": [
+  {
+   "c": 8,
+   "requests": 120,
+   "per_stream_decode_median": 188.3,
+   "aggregate": 1604.2,
+   "ttft_median_ms": 66.6,
+   "wall_output_tok_s": 1383.7
+  },
+  {
+   "c": 16,
+   "requests": 120,
+   "per_stream_decode_median": 140.2,
+   "aggregate": 2416.7,
+   "ttft_median_ms": 94.6,
+   "wall_output_tok_s": 2030.1
+  }
+ ]
+}

@@ -27,6 +27,9 @@
 #                                    prefill, each gets at most max(768, 2,048 / their number) tokens per step, so a short
 #                                    request behind a long cold prompt starts in 0.5 s instead of 20 s; a lone prefill is
 #                                    scheduled as before (same output); costs 2-4 % aggregate decode at 10 agent sessions
+#   VLLM_USE_RUST_FRONTEND=1        vLLM's Rust API server instead of the Python one: same output text and throughput,
+#                                    first token about 0.1 s sooner on long agent prompts; the streamed reasoning keeps
+#                                    its trailing whitespace
 #   --enable-batch-sharded-sampling  overlay r7: each request is sampled on one card from both cards' vocabulary shards
 #                                    instead of gathering the full logits on both
 #   TRITON_CACHE_DIR in CACHE_DIR    Inkling's kernels are Triton; without a persisted Triton cache every boot recompiles
@@ -47,7 +50,7 @@ CACHE_DIR=${CACHE_DIR:-$HOME/.cache/inkling2-vllm}
 mkdir -p "$CACHE_DIR"
 exec docker run --rm --name inkling --gpus '"device=0,1"' --ipc=host --stop-timeout 30 -p "$PORT:8000" \
   -e VLLM_ALLREDUCE_USE_FLASHINFER_PCIE_IPC=1 -e VLLM_DECODE_STEP_BUDGET=1024 -e TRITON_CACHE_DIR=/root/.cache/triton \
-  -e VLLM_INKLING_CONV_PAGE=1 -e VLLM_INKLING_DRAFT_SHARD=1 \
+  -e VLLM_INKLING_CONV_PAGE=1 -e VLLM_INKLING_DRAFT_SHARD=1 -e VLLM_USE_RUST_FRONTEND=1 \
   -v "$MODEL_DIR":/models/inkling-2-mini:ro -v "$CACHE_DIR":/root/.cache \
   "$IMAGE" /models/inkling-2-mini --served-model-name inkling-2-mini --port 8000 \
   --tensor-parallel-size 2 --max-model-len 262144 --gpu-memory-utilization 0.92 --max-num-seqs 16 \

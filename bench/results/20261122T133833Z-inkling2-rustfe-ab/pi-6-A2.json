@@ -1,0 +1,19 @@
+{
+ "preset": "pi",
+ "slots": 6,
+ "window_s": 150.0,
+ "dist": "lognormal",
+ "think_s": 11.0,
+ "errors": 0,
+ "valid": true,
+ "per_stream_decode": 227.9,
+ "request_decode_p50": 248.4,
+ "aggregate_decode": 514.4,
+ "mean_decoding": 2.25,
+ "ttft_p50_s": 0.227,
+ "ttft_p90_s": 0.701,
+ "acceptance_length": 3.927,
+ "stalls_ge_0_25s": 1,
+ "stall_s_total": 4.32,
+ "forced_length_bad": 0
+}

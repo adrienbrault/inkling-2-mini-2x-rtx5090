@@ -60,6 +60,19 @@ With the step budget alone, one long cold prompt takes most of every step until 
 
 On four boots in the order A G A G ([results](../bench/results/20261122T092118Z-inkling2-fair-prefill-768)), the short newcomer's first token came after 0.5 s instead of 20.4 s and a 16K newcomer's after 6.7 s instead of 21.5 s. The long prompt took 1.16x its time alone instead of 1.07x. Greedy output on 11 prompts stayed identical and cold prefill stayed within 1 %. The agent replay's aggregate decode at 10 sessions was 2–4 % lower (both G boots below both A boots); at 6 sessions it was within the A-to-A spread.
 
+## Rust frontend
+
+`VLLM_USE_RUST_FRONTEND=1` replaces vLLM's Python API server with its Rust one; the engine is unchanged. On four boots in the order A F A F (A: served configuration with the Python frontend, F: the same with the Rust frontend; [results](../bench/results/20261122T133833Z-inkling2-rustfe-ab)), the agent replay's median first token was 0.08–0.10 s sooner on both F boots at 6 and 10 sessions, with long prompts (median about 85–90K tokens) whose request handling the Python frontend does per request. Throughput stayed within the A-to-A spread.
+
+| Boot | 6 sessions: aggregate, first token p50 / p90 | 10 sessions: aggregate, first token p50 / p90 | Spec-Bench 8 / 16 streams aggregate |
+| --- | ---: | ---: | ---: |
+| A1 | 517 tok/s, 0.26 / 0.71 s | 695 tok/s, 0.32 / 0.84 s | 1,586 / 2,420 tok/s |
+| F1 | 533 tok/s, 0.16 / 0.58 s | 703 tok/s, 0.23 / 0.73 s | 1,610 / 2,410 tok/s |
+| A2 | 514 tok/s, 0.23 / 0.70 s | 708 tok/s, 0.30 / 0.87 s | 1,611 / 2,456 tok/s |
+| F2 | 517 tok/s, 0.15 / 0.55 s | 706 tok/s, 0.20 / 0.79 s | 1,604 / 2,417 tok/s |
+
+At temperature 0 the 11 `bench/greedy.py --long` outputs had the same content, reasoning text and completion token counts on all four boots, except one long prompt whose reasoning ends in `"\n  "` on the F boots: the Rust frontend returns the last whitespace characters of the reasoning that the Python frontend drops. Its `usage` also omits the empty `prompt_tokens_details.multimodal_tokens` field. The tool-call, image and sampled smoke checks passed on all four boots, and tool-eval on the served boot scored 83.5 ± 3.0 (82.8 ± 2.5 with the Python frontend).
+
 ## Batch-sharded sampling (`--enable-batch-sharded-sampling`, image r8)
 
 At tensor parallel 2, vLLM gathers the full logits on both cards and samples every request on both. With batch-sharded

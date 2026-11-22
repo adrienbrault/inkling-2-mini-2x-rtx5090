@@ -1,0 +1,1 @@
+{"key": "confirm-d65536-a8192-c16-s1", "prompt_tokens": 65534, "completion_tokens": 1, "finish": "length", "cached_tokens": 65472, "ttft_s": 0.19435399200301617, "first_s": 220637.316789779, "last_s": 220637.31680101, "chunks": 2, "marks": [[220637.31679, 0], [220637.316801, 1]], "decode_tok_s": 89039.31744986965}

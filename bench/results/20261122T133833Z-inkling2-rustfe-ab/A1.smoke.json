@@ -1,0 +1,52 @@
+{
+ "tool_call": {
+  "status": 200,
+  "ok": true,
+  "detail": [
+   {
+    "id": "chatcmpl-tool-865a05877978ca55",
+    "type": "function",
+    "function": {
+     "name": "get_weather",
+     "arguments": "{\"city\":\"Paris\"}"
+    }
+   }
+  ]
+ },
+ "image": {
+  "status": 200,
+  "ok": true,
+  "detail": "Red"
+ },
+ "t08": [
+  {
+   "status": 200,
+   "ok": true,
+   "tokens": 654,
+   "finish": "stop",
+   "head": "Silica seas fill with tiny lanterns,  \nA million cores lean "
+  },
+  {
+   "status": 200,
+   "ok": true,
+   "tokens": 536,
+   "finish": "stop",
+   "head": "In silicon halls, ten thousand lanes of light  \nreckon, divi"
+  },
+  {
+   "status": 200,
+   "ok": true,
+   "tokens": 349,
+   "finish": "stop",
+   "head": "Silicon streams, a thousand voices hum,  \nParallel heartbeat"
+  },
+  {
+   "status": 200,
+   "ok": true,
+   "tokens": 736,
+   "finish": "stop",
+   "head": "A short poem:\n\nThousands of little lanterns wake  \nin silico"
+  }
+ ],
+ "all_ok": true
+}
