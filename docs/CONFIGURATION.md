@@ -54,6 +54,12 @@ With the budget, greedy output on the same 11 prompts stays identical and cold p
 multi-turn agent sessions (6 and 10 concurrent sessions with long, mostly cached prompts). That replay is not in this
 repository. At 512 per step, prefills took too long under load there.
 
+## Fair prefill (`--long-prefill-token-threshold 768 --long-prefill-token-threshold-adaptive`)
+
+With the step budget alone, one long cold prompt takes most of every step until it is done, so a short request that arrives behind it waits for the whole prefill: 20 s behind a 196K-token prompt. With `-adaptive`, vLLM caps each prefilling request's chunk at max(768, 2,048 / number of prefilling requests) only while more than one request is prefilling. A request served alone is scheduled exactly as before, so its output and cold prefill rate do not change.
+
+On four boots in the order A G A G ([results](../bench/results/20261122T092118Z-inkling2-fair-prefill-768)), the short newcomer's first token came after 0.5 s instead of 20.4 s and a 16K newcomer's after 6.7 s instead of 21.5 s. The long prompt took 1.16x its time alone instead of 1.07x. Greedy output on 11 prompts stayed identical and cold prefill stayed within 1 %. The agent replay's aggregate decode at 10 sessions was 2–4 % lower (both G boots below both A boots); at 6 sessions it was within the A-to-A spread.
+
 ## Batch-sharded sampling (`--enable-batch-sharded-sampling`, image r8)
 
 At tensor parallel 2, vLLM gathers the full logits on both cards and samples every request on both. With batch-sharded

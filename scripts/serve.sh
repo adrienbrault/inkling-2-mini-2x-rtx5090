@@ -23,6 +23,10 @@
 #   VLLM_DECODE_STEP_BUDGET=1024     overlay r8: while any request is decoding, a step carries at most 1,024 tokens, so
 #                                    long prefills interleave with the decoding streams in smaller slices; a prefill with
 #                                    nobody decoding keeps vLLM's 2,048-token chunks (same output, same prefill rate)
+#   --long-prefill-token-threshold 768 --long-prefill-token-threshold-adaptive  fair prefill: while several requests
+#                                    prefill, each gets at most max(768, 2,048 / their number) tokens per step, so a short
+#                                    request behind a long cold prompt starts in 0.5 s instead of 20 s; a lone prefill is
+#                                    scheduled as before (same output); costs 2-4 % aggregate decode at 10 agent sessions
 #   --enable-batch-sharded-sampling  overlay r7: each request is sampled on one card from both cards' vocabulary shards
 #                                    instead of gathering the full logits on both
 #   TRITON_CACHE_DIR in CACHE_DIR    Inkling's kernels are Triton; without a persisted Triton cache every boot recompiles
@@ -50,4 +54,5 @@ exec docker run --rm --name inkling --gpus '"device=0,1"' --ipc=host --stop-time
   --reasoning-parser inkling --enable-auto-tool-choice --tool-call-parser inkling \
   --kernel-config '{"enable_flashinfer_autotune":false}' --disable-custom-all-reduce --enable-prompt-tokens-details \
   --speculative-config '{"method":"dspark","num_speculative_tokens":7,"draft_sample_method":"probabilistic","kv_cache_dtype":"auto"}' \
-  --kv-cache-dtype fp8 --enable-batch-sharded-sampling --block-size 64
+  --kv-cache-dtype fp8 --enable-batch-sharded-sampling --block-size 64 \
+  --long-prefill-token-threshold 768 --long-prefill-token-threshold-adaptive
