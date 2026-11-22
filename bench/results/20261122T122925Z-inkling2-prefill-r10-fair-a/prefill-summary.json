@@ -1,0 +1,51 @@
+[
+ {
+  "target": 2048,
+  "prompt_tokens": 2044,
+  "cached": 0,
+  "ttft_s": 0.11,
+  "e2e_prefill_tok_s": 18636.4
+ },
+ {
+  "target": 8192,
+  "prompt_tokens": 8191,
+  "cached": 0,
+  "ttft_s": 0.45,
+  "e2e_prefill_tok_s": 18200.6
+ },
+ {
+  "target": 30720,
+  "prompt_tokens": 30715,
+  "cached": 0,
+  "ttft_s": 1.847,
+  "e2e_prefill_tok_s": 16625.6
+ },
+ {
+  "target": 61440,
+  "prompt_tokens": 61437,
+  "cached": 0,
+  "ttft_s": 4.179,
+  "e2e_prefill_tok_s": 14700.2
+ },
+ {
+  "target": 122880,
+  "prompt_tokens": 122879,
+  "cached": 0,
+  "ttft_s": 10.287,
+  "e2e_prefill_tok_s": 11944.9
+ },
+ {
+  "target": 204800,
+  "prompt_tokens": 204799,
+  "cached": 0,
+  "ttft_s": 21.449,
+  "e2e_prefill_tok_s": 9548.2
+ },
+ {
+  "target": 245760,
+  "prompt_tokens": 245759,
+  "cached": 0,
+  "ttft_s": 28.325,
+  "e2e_prefill_tok_s": 8676.4
+ }
+]

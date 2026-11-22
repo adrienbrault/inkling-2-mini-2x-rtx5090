@@ -1,0 +1,52 @@
+{
+ "tool_call": {
+  "status": 200,
+  "ok": true,
+  "detail": [
+   {
+    "id": "chatcmpl-tool-acd779ccae409343",
+    "type": "function",
+    "function": {
+     "name": "get_weather",
+     "arguments": "{\"city\":\"Paris\"}"
+    }
+   }
+  ]
+ },
+ "image": {
+  "status": 200,
+  "ok": true,
+  "detail": "Red"
+ },
+ "t08": [
+  {
+   "status": 200,
+   "ok": true,
+   "tokens": 939,
+   "finish": "stop",
+   "head": "GPUs gather like beehives of light,  \nturning ordered data i"
+  },
+  {
+   "status": 200,
+   "ok": true,
+   "tokens": 709,
+   "finish": "stop",
+   "head": "Ten thousand lanes at once:  \nsilicon gardens bloom with lig"
+  },
+  {
+   "status": 200,
+   "ok": true,
+   "tokens": 654,
+   "finish": "stop",
+   "head": "Poem:\nTiny bright cores wake in parallel,\na forest of silico"
+  },
+  {
+   "status": 200,
+   "ok": true,
+   "tokens": 469,
+   "finish": "stop",
+   "head": "GPUs:\nThousands of tiny lanes awake,  \neach thread tracing t"
+  }
+ ],
+ "all_ok": true
+}
