@@ -6,7 +6,7 @@
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2026-11-22T06:57:02.241873</dc:date>
+    <dc:date>2026-11-22T13:10:24.322091</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
@@ -575,7 +575,7 @@ L 709.2 47.282344
    </g>
   </g>
   <g id="text_28">
-   <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="360" y="13.358437" transform="rotate(-0 360 13.358437)">Inkling-2-Mini, 2x RTX 5090, TP2 + DSpark, 2026-11-21</text>
+   <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="360" y="13.358437" transform="rotate(-0 360 13.358437)">Inkling-2-Mini, 2x RTX 5090, TP2 + DSpark, 2026-11-22 (r10)</text>
   </g>
  </g>
  <defs>
