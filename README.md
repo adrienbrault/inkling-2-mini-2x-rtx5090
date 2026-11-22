@@ -1,6 +1,6 @@
 # Inkling-2-Mini on two RTX 5090s
 
-![Recipe card: decode at 1 to 16 agents, cold prefill, KV pool and memory on two RTX 5090s, 2026-11-22](docs/img/recipe-card-b9d9098d.png)
+![Recipe card: decode at 1 to 16 agents, cold prefill, KV pool and memory on two RTX 5090s, 2026-11-22](docs/img/recipe-card-ad418c41.png)
 
 Serving configuration, vLLM overlay, launch scripts and measurements for [Inkling-2-Mini](https://huggingface.co/thinkingmachines/Inkling-2-Mini) on two RTX 5090 cards.
 
@@ -87,7 +87,7 @@ Reasoning (`reasoning_effort` from `none` to `max`), tool calls, image inputs an
 
 Served-path smoke checks on the same boot passed a tool call, an image input and four sampled generations at temperature 0.8 with the drafter (2026-11-22, [`quality-r10-fair`](bench/results/20261122T122255Z-inkling2-quality-r10-fair)).
 
-Memory per card (2026-11-22, boot without the fair-prefill flags, which do not change allocation, [`memory-r10`](bench/results/20261122T053020Z-inkling2-memory-r10)): 10.27 GiB weights and non-torch memory, 15.38 GiB KV cache, 2.42 GiB kept for activations and 0.58 GiB CUDA graphs, within the 28.88 GiB budget of `--gpu-memory-utilization 0.92`. The 818,388-token figure vLLM logs is its admission estimate for full-window requests (3.12 requests at 262,144 tokens); it charges every windowed and short-conv cache for its window plus the tokens in flight. At run time only the full-attention history grows with the context: the 25,200 blocks hold 64 tokens of it each (1,612,800 tokens), less about 10K tokens of window state per running request, and the pool measured 1,486,835–1,508,118 tokens held at once ([`kv-capacity`](bench/results/20261122T124729Z-inkling2-kv-capacity)).
+Memory per card (2026-11-22, boot without the fair-prefill flags, which do not change allocation, [`memory-r10`](bench/results/20261122T053020Z-inkling2-memory-r10)): 10.27 GiB weights and non-torch memory, 15.38 GiB KV cache, 2.42 GiB kept for activations and 0.58 GiB CUDA graphs, within the 28.88 GiB budget of `--gpu-memory-utilization 0.92`. About 3.9 GiB per card stays free on purpose: vLLM sizes the KV cache from the memory measured after warmup and keeps free the activation reserve (2.42 GiB) plus a margin of 75 % of the measured activation peak (1.46 GiB) against out-of-memory errors. That margin, not `--gpu-memory-utilization`, bounds the pool: 0.96 gave 25,270 blocks instead of 25,200 (+0.3 %). The 818,388-token figure vLLM logs is its admission estimate for full-window requests (3.12 requests at 262,144 tokens); it charges every windowed and short-conv cache for its window plus the tokens in flight. At run time only the full-attention history grows with the context: the 25,200 blocks hold 64 tokens of it each (1,612,800 tokens), less about 10K tokens of window state per running request, and the pool measured 1,486,835–1,508,118 tokens held at once ([`kv-capacity`](bench/results/20261122T124729Z-inkling2-kv-capacity)).
 
 ## Served configuration
 
