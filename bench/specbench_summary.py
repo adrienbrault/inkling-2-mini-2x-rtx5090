@@ -10,7 +10,7 @@ import statistics
 import sys
 from pathlib import Path
 
-for c in (1, 4, 8):
+for c in (1, 4, 8, 16):
     p = Path(sys.argv[1]) / f"specbench-c{c}.json"
     r = json.loads(p.read_text())
     rates = [(n - 1) / sum(itl) for n, itl in zip(r["output_lens"], r["itls"]) if n > 1 and sum(itl) > 0]

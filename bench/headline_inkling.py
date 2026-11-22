@@ -6,7 +6,7 @@ Prompt lengths are calibrated with the server's own /tokenize, so they are exact
 code  : a shared code context (inputs/code-corpus.txt, ExLlamaV3 sources) of 1,024 / 32,768 / 65,536 tokens,
         then per stream a fresh appended "tool output" (the next corpus slice, salted per cell and slot) of 2,048 / 8,192
         tokens plus a frozen HumanEval task (inputs/code-prompts.json, the same selection: c1 HumanEval/0,
-        c4 /1-4, c8 /5-12), 400 forced output tokens, temperature 0, reasoning_effort "none". Per depth: one warm
+        c4 /1-4, c8 /5-12; c16 = the 13 tasks then /0-2 again, the file holds 13), 400 forced output tokens, temperature 0, reasoning_effort "none". Per depth: one warm
         request (1 token), then per cell a simultaneous 1-token residency replay of the context by every stream, then
         the measured concurrent batch. Per stream: TTFT, decode rate = (tokens - 1) / (last - first token time);
         aggregate = tokens decoded by all streams during the window in which all are decoding / its length (the sum
@@ -122,7 +122,7 @@ def code(args):
     corpus = Path(args.corpus).read_text()
     prompts = json.loads(Path(args.prompts).read_text())
     tasks = [t for g in prompts["sets"].values() for b in ("warmup", "scored") for batch in g.get(b, []) for t in batch]
-    select = {1: tasks[0:1], 4: tasks[1:5], 8: tasks[5:13]}
+    select = {1: tasks[0:1], 4: tasks[1:5], 8: tasks[5:13], 16: tasks[0:13] + tasks[0:3]}
     rows = []
     for depth in (1024, 32768, 65536):
         def ctx_msgs(n):
@@ -131,7 +131,7 @@ def code(args):
         ctx = ctx_msgs(ctx_chars)[0]["content"]
         stream(args.url, [{"role": "user", "content": ctx}], 1, f"warm-d{depth}", out)
         for append in (2048, 8192):
-            for c in (1, 4, 8):
+            for c in (1, 4, 8, 16):
                 cell = f"d{depth}-a{append}-c{c}"
                 msgs = []
                 for slot, task in enumerate(select[c]):
