@@ -1,7 +1,7 @@
 # Configuration choices
 
-All measured 2026-11-21 on two RTX 5090s with the same checkpoint. Sections below name the image when it is not the
-served one (`sm120-r8`).
+All measured 2026-11-21 and 2026-11-22 on two RTX 5090s with the same checkpoint. The served image is `sm120-r10`.
+Each section names the image it was measured on; one request at a time, r10's output is bitwise identical to r8's.
 
 ## How the served configuration got here
 
@@ -12,7 +12,8 @@ Spec-Bench per stream (median), one boot each, README protocol:
 | r4: first published (bf16 KV, vLLM's default sequence limit) | 351 | 205 | 138 | 312,417 | [r4](../bench/results/20261121T021530Z-inkling2-specbench-served-r4) |
 | r5: decode products off cuBLAS, 16 sequences, bf16 KV | 373 | 225 | 171 | 481,529 | [bf16 boot](../bench/results/20261121T131647Z-inkling2-fp8kv) |
 | r5 with the fp8 KV cache | 369 | 226 | 171 | 699,259 | [fp8 boot](../bench/results/20261121T131647Z-inkling2-fp8kv) |
-| r8: + step budget + batch-sharded sampling (served) | 372 | 237 | 181 | 699,885 | [r8](../bench/results/20261121T222403Z-inkling2-specbench-served-r8) |
+| r8: + step budget + batch-sharded sampling | 372 | 237 | 181 | 699,885 | [r8](../bench/results/20261121T222403Z-inkling2-specbench-served-r8) |
+| r10: + conv pages + draft sharding (served) | 376 | 242 | 188 | 818,388 | [r10](../bench/results/20261122T053112Z-inkling2-specbench-served-r10) |
 
 The r8 changes target concurrent traffic with long prompts. Median TTFT at four and eight streams went from 56 / 74 ms
 (r5 fp8) to 55 / 70 ms on Spec-Bench, whose prompts are short. The scheduler budget matters most when a long prefill
@@ -35,7 +36,7 @@ The drafter's own cache stays bf16 (the overlay's drafter KV write covers the un
 Paired over the same tokens, fp8 minus bf16 is −0.00099 nats/token (standard error 0.00148) at 8K and +0.00109
 (0.00073) at 32K. fp8 is not bitwise identical to bf16: greedy text diverges after 0–204 characters.
 
-## Decode-aware step budget (`VLLM_DECODE_STEP_BUDGET`)
+## Decode-aware step budget (`VLLM_DECODE_STEP_BUDGET`, image r8)
 
 vLLM schedules up to 2,048 tokens per step here, so a long prefill runs in 2,048-token chunks. Every decoding stream
 waits for each chunk. The overlay's `patch_sched.py` caps a step at `VLLM_DECODE_STEP_BUDGET` tokens while any running
@@ -53,7 +54,7 @@ With the budget, greedy output on the same 11 prompts stays identical and cold p
 multi-turn agent sessions (6 and 10 concurrent sessions with long, mostly cached prompts). That replay is not in this
 repository. At 512 per step, prefills took too long under load there.
 
-## Batch-sharded sampling (`--enable-batch-sharded-sampling`)
+## Batch-sharded sampling (`--enable-batch-sharded-sampling`, image r8)
 
 At tensor parallel 2, vLLM gathers the full logits on both cards and samples every request on both. With batch-sharded
 sampling, each request is sampled on one card from the two cards' vocabulary shards. The day-0 image disables it for
@@ -64,7 +65,38 @@ with the step budget: 167 / 169 → 182 / 180 tok/s per stream (+7.6 %), TTFT un
 identical with and without it: at temperature 0, and at temperature 1.0 with a fixed seed per request, on 11 prompts
 over four boots ([results](../bench/results/20261121T231722Z-inkling2-seeded-identity)).
 
-## Output under concurrency
+## Conv pages and draft sharding (overlay r10)
+
+Two changes in r10; neither changes the output of a request served alone (bitwise):
+
+- **Conv pages** (`VLLM_INKLING_CONV_PAGE=1` with `--block-size 64`, `patch_convpage.py`). Inkling's short-conv layers
+  keep a small rolling state per request. The day-0 image stores it in pages sized like the attention pages, so most of
+  each conv page is padding. The overlay gives it eight-token pages of its own size in vLLM's block-outer layout. The
+  GPU gate compares every kernel that reads or writes the state with the unpatched layout: unaligned and chunked
+  prefill, block boundaries, decode with verification, prefix copies and CUDA-graph replay, 20 trials each.
+- **Draft sharding** (`VLLM_INKLING_DRAFT_SHARD=1`, `patch_draftshard.py`). DSpark proposes 7 tokens per step, and for
+  each it gathered the full-vocabulary draft logits from both cards. With the overlay each card samples from its own
+  vocabulary shard (the Gumbel noise is keyed by global token id, so it is the same noise), and the cards exchange one
+  small packet each with their winner. The two-card gate checks that draft token ids and the verifier's inputs are
+  bitwise equal for greedy and probabilistic drafting (fp32 and fp64 noise, mixed batches), eager and in CUDA-graph
+  replay, 20 trials each.
+
+Paired boots (A C A C), r8 against r10 with both on
+([results](../bench/results/20261122T032748Z-inkling2-r10-combined)):
+
+| | r8 | r10 |
+| --- | ---: | ---: |
+| KV pool | 699,885 tokens | 818,388 tokens |
+| Cold prefill at 2K / 8K / 246K | 17,911–17,949 / 18,253–18,367 / 8,572–8,577 tok/s | 18,702–18,778 / 18,446–18,483 / 8,691–8,692 tok/s |
+| Spec-Bench per stream, 1 / 4 / 8 streams | 371 / 238–242 / 176–178 tok/s | 376–378 / 242 / 181–189 tok/s |
+| Spec-Bench aggregate at 8 streams | 1,517 / 1,536 tok/s | 1,592 / 1,600 tok/s |
+| Text vs the first r8 boot, one request at a time (11 prompts, greedy and seeded) | identical | identical |
+
+Draft sharding alone, paired boots (A S A S): Spec-Bench aggregate at 4 / 8 streams 1,002 / 1,538–1,545 →
+1,030–1,033 / 1,587–1,596 tok/s, one stream 372 → 374 tok/s, text identical
+([results](../bench/results/20261122T012901Z-inkling2-draftshard)).
+
+## Output under concurrency (image r8)
 
 With several requests in flight, output is not reproducible on this engine. Which requests share a step changes the
 kernels' arithmetic. Two passes of the same 22 concurrent requests on the same boot gave 0 of 22 identical outputs, in

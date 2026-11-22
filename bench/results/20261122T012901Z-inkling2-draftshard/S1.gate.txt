@@ -1,0 +1,24 @@
+W1122 01:45:47.653000 546 torch/distributed/run.py:982] 
+W1122 01:45:47.653000 546 torch/distributed/run.py:982] *****************************************
+W1122 01:45:47.653000 546 torch/distributed/run.py:982] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W1122 01:45:47.653000 546 torch/distributed/run.py:982] *****************************************
+SymmMemCommunicator: Device capability 12.0 not supported, communicator is not available.
+SymmMemCommunicator: Device capability 12.0 not supported, communicator is not available.
+FlashInfer All Reduce is disabled because it is not supported for world_size=2.
+FlashInfer All Reduce is disabled because it is not supported for world_size=2.
+GPU case PASS greedy eager trials=20
+GPU case PASS greedy replay trials=20
+GPU case PASS prob-t0 eager trials=20
+GPU case PASS prob-t0 replay trials=20
+GPU case PASS prob-fp32 eager trials=20
+GPU case PASS prob-fp32 replay trials=20
+GPU case PASS prob-fp64 eager trials=20
+GPU case PASS prob-fp64 replay trials=20
+GPU case PASS mixed-fp32 eager trials=20
+GPU case PASS mixed-fp32 replay trials=20
+GPU case PASS mixed-fp64 eager trials=20
+GPU case PASS mixed-fp64 replay trials=20
+/usr/local/lib/python3.14/dist-packages/torch/distributed/c10d_logger.py:83: UserWarning: barrier(): using the device under current context. You can specify `device_id` in `init_process_group` to mute this warning.
+  return func(*args, **kwargs)
+[rank0]:[W1122 01:46:01.890285618 ProcessGroupNCCL.cpp:5310] Guessing device ID based on global rank. This can cause a hang if rank to GPU mapping is heterogeneous. You can specify device_id in init_process_group()
+PASS draftshard GPU TP2 draft IDs and verifier inputs

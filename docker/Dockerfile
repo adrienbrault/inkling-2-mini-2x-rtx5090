@@ -5,19 +5,35 @@
 # r7: compute_logits_local so vLLM's batch-sharded sampling engages (patch_bss.py; serve flag
 # --enable-batch-sharded-sampling).
 # r8: decode-aware step budget in vLLM's scheduler (patch_sched.py; env VLLM_DECODE_STEP_BUDGET, 0 = off).
+# r9: exact-size short-conv cache pages (patch_convpage.py; env VLLM_INKLING_CONV_PAGE=1 + --block-size 64; off = r8).
+# r10: DSpark draft sharding (patch_draftshard.py; env VLLM_INKLING_DRAFT_SHARD=1; off = r9): each card samples its
+# vocabulary shard and the cards exchange winners instead of gathering the full-vocabulary draft logits.
 # Base = vllm/vllm-openai:inkling-2-mini pulled 2026-11-21 (image id below; vLLM 0.1.dev25855+g7cb5dae22).
 FROM vllm/vllm-openai@sha256:c2dc759f5984f69c1e2418c6af7c26eb756f5ed2a8934c768ae1253645d1449e
 ARG V=/usr/local/lib/python3.14/dist-packages/vllm/models/inkling2/nvidia
 COPY kv_write_sm120.py decode_sm120.py $V/ops/
-COPY patch_dspark.py patch_embedding.py patch_decode.py patch_bss.py patch_sched.py /tmp/
+COPY patch_dspark.py patch_embedding.py patch_decode.py patch_bss.py patch_sched.py patch_convpage.py /tmp/
 RUN python3 /tmp/patch_dspark.py $V/dspark.py && \
     python3 /tmp/patch_bss.py $V/.. && \
     python3 /tmp/patch_decode.py $V && \
     python3 /tmp/patch_sched.py /usr/local/lib/python3.14/dist-packages/vllm/v1/core/sched/scheduler.py && \
+    python3 /tmp/patch_convpage.py /usr/local/lib/python3.14/dist-packages/vllm && \
     python3 /tmp/patch_embedding.py /usr/local/lib/python3.14/dist-packages/vllm/model_executor/layers/vocab_parallel_embedding.py && \
-    rm /tmp/patch_dspark.py /tmp/patch_embedding.py /tmp/patch_decode.py /tmp/patch_bss.py /tmp/patch_sched.py && \
+    rm /tmp/patch_dspark.py /tmp/patch_embedding.py /tmp/patch_decode.py /tmp/patch_bss.py /tmp/patch_sched.py /tmp/patch_convpage.py && \
     python3 -c "import ast,sys; [ast.parse(open(f).read()) for f in sys.argv[1:]]" $V/dspark.py $V/ops/kv_write_sm120.py $V/ops/decode_sm120.py $V/loop.py $V/sconv.py && \
     grep -q "kv_scatter(k, v, key_cache, value_cache, slot_mapping)" $V/dspark.py && \
     grep -q "stream_gemv(pair, down)" $V/loop.py && grep -q "sm12x_bf16_gemv(x, self.weight_proj)" $V/sconv.py && \
     grep -q "def compute_logits_local" $V/model.py && grep -q "Overlay r7: _sample_sequential" $V/../speculator.py && \
-    grep -q "Overlay r8: decode-aware" /usr/local/lib/python3.14/dist-packages/vllm/v1/core/sched/scheduler.py
+    grep -q "Overlay r8: decode-aware" /usr/local/lib/python3.14/dist-packages/vllm/v1/core/sched/scheduler.py && \
+    grep -q "VLLM_INKLING_CONV_PAGE" /usr/local/lib/python3.14/dist-packages/vllm/models/inkling/nvidia/sconv_swa_attn.py && \
+    grep -q "return (KVCacheLayout.BLNHC,)" /usr/local/lib/python3.14/dist-packages/vllm/models/inkling/nvidia/sconv_swa_attn.py && \
+    grep -q "INKLING_KV_PROBE_CONFIG" /usr/local/lib/python3.14/dist-packages/vllm/v1/core/sched/scheduler.py
+# r10 candidate: DSpark Markov draft sampling from vocab shards (patch_draftshard.py; env VLLM_INKLING_DRAFT_SHARD=1).
+ARG VLLM_DIR=/usr/local/lib/python3.14/dist-packages/vllm
+COPY patch_draftshard.py /tmp/patch_draftshard.py
+RUN python3 /tmp/patch_draftshard.py "$VLLM_DIR" && \
+    grep -Fq 'def markov_logits_local(' "$VLLM_DIR/models/inkling2/nvidia/dspark.py" && \
+    grep -Fq 'VLLM_INKLING_DRAFT_SHARD' "$VLLM_DIR/models/inkling2/speculator.py" && \
+    grep -Fq 'tensor_model_parallel_all_gather(packet, dim=0)' "$VLLM_DIR/v1/worker/gpu/sample/inkling_draftshard.py" && \
+    grep -Fq 'draft_shard_cache.materialize(' "$VLLM_DIR/v1/worker/gpu/model_runner.py" && \
+    rm /tmp/patch_draftshard.py

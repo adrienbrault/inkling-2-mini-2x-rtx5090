@@ -1,0 +1,7 @@
+{"c": 1, "drafts": 10377.0, "accepted": 20448.0, "mean_acceptance_length": 2.971}
+c1: Output token throughput (tok/s): 361.40 ;Median TTFT (ms): 33.90 ;Mean TPOT (ms): 2.60 ;
+{"c": 4, "drafts": 10253.0, "accepted": 20586.0, "mean_acceptance_length": 3.008}
+c4: Output token throughput (tok/s): 905.90 ;Median TTFT (ms): 54.49 ;Mean TPOT (ms): 4.12 ;
+{"c": 8, "drafts": 10328.0, "accepted": 20523.0, "mean_acceptance_length": 2.987}
+c8: Output token throughput (tok/s): 1372.56 ;Median TTFT (ms): 67.84 ;Mean TPOT (ms): 5.36 ;
+/srv/qwen5090/results/20261122T022826Z-inkling2-specbench-abr-S2

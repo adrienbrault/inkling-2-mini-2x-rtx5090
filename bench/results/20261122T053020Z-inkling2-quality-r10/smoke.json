@@ -1,0 +1,52 @@
+{
+ "tool_call": {
+  "status": 200,
+  "ok": true,
+  "detail": [
+   {
+    "id": "chatcmpl-tool-88c9c447282298f6",
+    "type": "function",
+    "function": {
+     "name": "get_weather",
+     "arguments": "{\"city\":\"Paris\"}"
+    }
+   }
+  ]
+ },
+ "image": {
+  "status": 200,
+  "ok": true,
+  "detail": "Red"
+ },
+ "t08": [
+  {
+   "status": 200,
+   "ok": true,
+   "tokens": 558,
+   "finish": "stop",
+   "head": "Silicon hearts hum steady, thousands strong,  \nThey split th"
+  },
+  {
+   "status": 200,
+   "ok": true,
+   "tokens": 528,
+   "finish": "stop",
+   "head": "Silicon bloom, a thousand tiny eyes,  \narrayed to light the "
+  },
+  {
+   "status": 200,
+   "ok": true,
+   "tokens": 840,
+   "finish": "stop",
+   "head": "Short poem:\nSilicon gardens hum with light,\nThousands of sma"
+  },
+  {
+   "status": 200,
+   "ok": true,
+   "tokens": 443,
+   "finish": "stop",
+   "head": "Thousand tiny lights in a dark cathedral,  \neach core a lant"
+  }
+ ],
+ "all_ok": true
+}

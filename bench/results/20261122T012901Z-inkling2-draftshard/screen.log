@@ -1,0 +1,26 @@
+2026-11-22T01:29:01Z A1 boot: (defaults)
+A1: greedy identical to A1 11/11 (short 8/8, long 3/3)
+A1: seeded T=1 identical to A1 11/11
+A1 specbench {"c": 1, "requests": 120, "per_stream_decode_median": 371.5, "aggregate": 407.8, "ttft_median_ms": 34.5, "wall_output_tok_s": 358.9}
+A1 specbench {"c": 4, "requests": 120, "per_stream_decode_median": 233.7, "aggregate": 1002.4, "ttft_median_ms": 54.6, "wall_output_tok_s": 877.5}
+A1 specbench {"c": 8, "requests": 120, "per_stream_decode_median": 179.5, "aggregate": 1538.0, "ttft_median_ms": 68.6, "wall_output_tok_s": 1329.8}
+2026-11-22T01:44:38Z S1 boot: IMAGE=sha256:e7504583a6b0054ca47f9a3d6c77e1169f0247fa805a99efa17e72f95da9103d DENV=VLLM_ALLREDUCE_USE_FLASHINFER_PCIE_IPC=1|VLLM_DECODE_STEP_BUDGET=1024|VLLM_INKLING_DRAFT_SHARD=1
+2026-11-22T01:46:04Z S1 gate: rc=0 PASS draftshard GPU TP2 draft IDs and verifier inputs 
+S1: greedy identical to A1 11/11 (short 8/8, long 3/3)
+S1: seeded T=1 identical to A1 11/11
+S1 specbench {"c": 1, "requests": 120, "per_stream_decode_median": 374.1, "aggregate": 410.5, "ttft_median_ms": 33.4, "wall_output_tok_s": 361.5}
+S1 specbench {"c": 4, "requests": 120, "per_stream_decode_median": 245.5, "aggregate": 1029.9, "ttft_median_ms": 53.0, "wall_output_tok_s": 907.8}
+S1 specbench {"c": 8, "requests": 120, "per_stream_decode_median": 185.4, "aggregate": 1595.5, "ttft_median_ms": 69.7, "wall_output_tok_s": 1374.4}
+2026-11-22T01:59:53Z A2 boot: (defaults)
+A2: greedy identical to A1 11/11 (short 8/8, long 3/3)
+A2: seeded T=1 identical to A1 11/11
+A2 specbench {"c": 1, "requests": 120, "per_stream_decode_median": 371.6, "aggregate": 407.8, "ttft_median_ms": 34.4, "wall_output_tok_s": 359.0}
+A2 specbench {"c": 4, "requests": 120, "per_stream_decode_median": 234.9, "aggregate": 1002.1, "ttft_median_ms": 55.9, "wall_output_tok_s": 884.3}
+A2 specbench {"c": 8, "requests": 120, "per_stream_decode_median": 177.4, "aggregate": 1544.6, "ttft_median_ms": 68.1, "wall_output_tok_s": 1329.2}
+2026-11-22T02:15:42Z S2 boot: IMAGE=sha256:e7504583a6b0054ca47f9a3d6c77e1169f0247fa805a99efa17e72f95da9103d DENV=VLLM_ALLREDUCE_USE_FLASHINFER_PCIE_IPC=1|VLLM_DECODE_STEP_BUDGET=1024|VLLM_INKLING_DRAFT_SHARD=1
+2026-11-22T02:16:46Z S2 gate: rc=0 PASS draftshard GPU TP2 draft IDs and verifier inputs 
+S2: greedy identical to A1 11/11 (short 8/8, long 3/3)
+S2: seeded T=1 identical to A1 11/11
+S2 specbench {"c": 1, "requests": 120, "per_stream_decode_median": 374.2, "aggregate": 410.8, "ttft_median_ms": 33.9, "wall_output_tok_s": 361.4}
+S2 specbench {"c": 4, "requests": 120, "per_stream_decode_median": 240.0, "aggregate": 1033.1, "ttft_median_ms": 54.5, "wall_output_tok_s": 905.9}
+S2 specbench {"c": 8, "requests": 120, "per_stream_decode_median": 184.6, "aggregate": 1586.8, "ttft_median_ms": 67.8, "wall_output_tok_s": 1372.6}

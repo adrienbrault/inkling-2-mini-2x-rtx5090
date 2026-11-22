@@ -1,0 +1,30 @@
+2026-11-22T03:27:48Z A1 boot: (defaults)
+A1: greedy identical to A1 11/11 (short 8/8, long 3/3)
+A1: seeded T=1 identical to A1 11/11
+2026-11-22T03:30:13Z A1 prefill: [(2047, 17910.6), (8192, 18366.7), (30718, 16686.7), (61438, 14713.2), (122878, 11902.4), (204800, 9460.6), (245759, 8577.1)]
+A1 specbench {"c": 1, "requests": 120, "per_stream_decode_median": 371.2, "aggregate": 407.4, "ttft_median_ms": 33.4, "wall_output_tok_s": 359.2}
+A1 specbench {"c": 4, "requests": 120, "per_stream_decode_median": 242.1, "aggregate": 1013.8, "ttft_median_ms": 54.2, "wall_output_tok_s": 893.8}
+A1 specbench {"c": 8, "requests": 120, "per_stream_decode_median": 175.7, "aggregate": 1517.1, "ttft_median_ms": 68.7, "wall_output_tok_s": 1306.9}
+2026-11-22T03:43:58Z C1 boot: IMAGE=sha256:e7504583a6b0054ca47f9a3d6c77e1169f0247fa805a99efa17e72f95da9103d DENV=VLLM_ALLREDUCE_USE_FLASHINFER_PCIE_IPC=1|VLLM_DECODE_STEP_BUDGET=1024|VLLM_INKLING_CONV_PAGE=1|VLLM_INKLING_DRAFT_SHARD=1 XARGS=--enable-batch-sharded-sampling|--block-size|64
+2026-11-22T03:44:49Z C1 gate: rc=0 PASS convpage unaligned-prefill: 20/20 block-boundaries: 20/20 chunked-prefill: 20/20 large-prefill: 20/20 decode-verify: 20/20 prefix-copy: 20/20 graph-replay: 20/20 
+C1: greedy identical to A1 11/11 (short 8/8, long 3/3)
+C1: seeded T=1 identical to A1 11/11
+2026-11-22T03:46:32Z C1 prefill: [(2047, 18701.8), (8187, 18445.5), (30716, 16702.8), (61440, 14758.7), (122877, 11972.7), (204797, 9567.4), (245758, 8690.9)]
+C1 specbench {"c": 1, "requests": 120, "per_stream_decode_median": 375.9, "aggregate": 412.6, "ttft_median_ms": 31.8, "wall_output_tok_s": 365.0}
+C1 specbench {"c": 4, "requests": 120, "per_stream_decode_median": 241.7, "aggregate": 1020.8, "ttft_median_ms": 53.3, "wall_output_tok_s": 900.7}
+C1 specbench {"c": 8, "requests": 120, "per_stream_decode_median": 181.1, "aggregate": 1591.5, "ttft_median_ms": 66.3, "wall_output_tok_s": 1373.3}
+2026-11-22T04:00:16Z A2 boot: (defaults)
+A2: greedy identical to A1 11/11 (short 8/8, long 3/3)
+A2: seeded T=1 identical to A1 11/11
+2026-11-22T04:02:46Z A2 prefill: [(2044, 17949.3), (8187, 18252.9), (30719, 16649.7), (61439, 14695.3), (122876, 11878.4), (204799, 9451.7), (245758, 8571.8)]
+A2 specbench {"c": 1, "requests": 120, "per_stream_decode_median": 371.4, "aggregate": 407.7, "ttft_median_ms": 33.4, "wall_output_tok_s": 359.8}
+A2 specbench {"c": 4, "requests": 120, "per_stream_decode_median": 237.5, "aggregate": 999.4, "ttft_median_ms": 55.3, "wall_output_tok_s": 882.4}
+A2 specbench {"c": 8, "requests": 120, "per_stream_decode_median": 177.7, "aggregate": 1536.2, "ttft_median_ms": 69.7, "wall_output_tok_s": 1331.8}
+2026-11-22T04:16:23Z C2 boot: IMAGE=sha256:e7504583a6b0054ca47f9a3d6c77e1169f0247fa805a99efa17e72f95da9103d DENV=VLLM_ALLREDUCE_USE_FLASHINFER_PCIE_IPC=1|VLLM_DECODE_STEP_BUDGET=1024|VLLM_INKLING_CONV_PAGE=1|VLLM_INKLING_DRAFT_SHARD=1 XARGS=--enable-batch-sharded-sampling|--block-size|64
+2026-11-22T04:17:14Z C2 gate: rc=0 PASS convpage unaligned-prefill: 20/20 block-boundaries: 20/20 chunked-prefill: 20/20 large-prefill: 20/20 decode-verify: 20/20 prefix-copy: 20/20 graph-replay: 20/20 
+C2: greedy identical to A1 11/11 (short 8/8, long 3/3)
+C2: seeded T=1 identical to A1 11/11
+2026-11-22T04:18:57Z C2 prefill: [(2046, 18777.7), (8187, 18483.0), (30720, 16711.9), (61438, 14761.8), (122877, 11970.0), (204800, 9568.1), (245759, 8692.4)]
+C2 specbench {"c": 1, "requests": 120, "per_stream_decode_median": 377.9, "aggregate": 414.7, "ttft_median_ms": 31.7, "wall_output_tok_s": 366.8}
+C2 specbench {"c": 4, "requests": 120, "per_stream_decode_median": 242.3, "aggregate": 1023.0, "ttft_median_ms": 53.2, "wall_output_tok_s": 902.6}
+C2 specbench {"c": 8, "requests": 120, "per_stream_decode_median": 189.4, "aggregate": 1600.4, "ttft_median_ms": 66.5, "wall_output_tok_s": 1384.3}

@@ -44,14 +44,17 @@ Measured and not adopted:
 - **A fused one-pass logit soft-cap.** It is not bitwise equal to PyTorch's three passes.
 - **Shorter DSpark drafts (3 to 6 tokens).** At one stream they are 3–5 % slower. At four and eight streams they gain 2–10 %, within run-to-run variation, and they change greedy text.
 
-## Scheduler and sampling (r7, r8)
+## Scheduler, sampling and cache layout (r7 to r10)
 
 | Patch | What it changes | Enabled by |
 | --- | --- | --- |
 | `patch_sched.py` (vLLM's V1 scheduler) | while any running request is decoding, a step carries at most `VLLM_DECODE_STEP_BUDGET` tokens; a prefill with nobody decoding keeps the full 2,048 | `-e VLLM_DECODE_STEP_BUDGET=1024`; unset or 0 = off |
 | `patch_bss.py` (Inkling's model and drafter) | adds `compute_logits_local` (the same head and soft-cap without the TP gather), so vLLM's batch-sharded sampling engages; the drafter's logits cache stays replicated | `--enable-batch-sharded-sampling` |
+| `patch_convpage.py` (Inkling's short-conv layer, vLLM's scheduler) | the short-conv state gets eight-token pages of its own size (4 heads × 8 tokens × 1,408 bf16 values = 88 KiB) in vLLM's block-outer `BLNHC` layout, instead of pages sized like the attention pages; attention pages and prefix-cache granularity go from 128 to 64 tokens, and the KV pool grows from 699,885 to 819,427 tokens (818,388 with draft sharding's buffers, as served) | `-e VLLM_INKLING_CONV_PAGE=1` with `--block-size 64` |
+| `patch_draftshard.py` (the DSpark drafter and vLLM's GPU sampler) | each card draws the drafter's sampled token from its own vocabulary shard and the cards exchange one small winner packet per draft position, instead of all-gathering the full-vocabulary draft logits seven times per step | `-e VLLM_INKLING_DRAFT_SHARD=1` (with `--enable-batch-sharded-sampling`) |
 
-Both are inert without their setting. Measurements: [`docs/CONFIGURATION.md`](../docs/CONFIGURATION.md).
+Each is inert without its setting; with it, output is bitwise identical to the overlay without it (checked on
+greedy and seeded sampled text, and by GPU gates on the patched kernels). Measurements: [`docs/CONFIGURATION.md`](../docs/CONFIGURATION.md).
 
 ## Credits
 
@@ -61,4 +64,4 @@ short-block DSpark drafting. The kernels and patches here are independent implem
 cuBLAS on this hardware.
 
 `patch_bss.py`'s `compute_logits_local` follows vLLM's own implementations for Llama and Qwen3 (Apache-2.0); the
-batch-sharded sampler is vLLM's. The decode-aware step budget is this repository's own.
+batch-sharded sampler is vLLM's. The decode-aware step budget, the exact-size conv pages and the draft sharding are this repository's own.

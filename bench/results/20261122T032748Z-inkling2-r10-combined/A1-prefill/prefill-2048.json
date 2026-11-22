@@ -1,0 +1,1 @@
+{"key": "prefill-2048", "prompt_tokens": 2047, "completion_tokens": 1, "finish": "length", "cached_tokens": 0, "ttft_s": 0.11429003198281862, "first_s": 180460.3347287, "last_s": 180460.33489312, "chunks": 2, "marks": [[180460.334729, 0], [180460.334893, 1]], "decode_tok_s": 6081.985356393603}
