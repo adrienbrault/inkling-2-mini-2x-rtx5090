@@ -1,0 +1,29 @@
+{
+ "cohort": 14,
+ "prompt_tokens": 96000,
+ "output_tokens": 4096,
+ "issues": [],
+ "all_decoding_window_s": -41.1,
+ "peak_running": 11.0,
+ "peak_waiting": 11.0,
+ "peak_kv_usage": 0.7224096194293425,
+ "preemption_delta": 0.0,
+ "ttft_s": [
+  17.75,
+  18.34,
+  22.9,
+  33.01,
+  41.7,
+  51.17,
+  60.52,
+  70.16,
+  79.8,
+  89.58,
+  99.28,
+  108.86,
+  118.22,
+  126.82
+ ],
+ "capacity_estimates": [],
+ "capacity_tokens_median": null
+}

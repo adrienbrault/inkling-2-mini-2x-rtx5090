@@ -1,0 +1,13 @@
+[
+ {
+  "cohort": 14,
+  "issues": [],
+  "all_decoding_window_s": 39.38,
+  "peak_running": 14.0,
+  "peak_waiting": 11.0,
+  "peak_kv_usage": 0.880193658478511,
+  "preemption_delta": 0.0,
+  "capacity_tokens_median": 1486835,
+  "live_tokens_at_start": 1120000
+ }
+]
