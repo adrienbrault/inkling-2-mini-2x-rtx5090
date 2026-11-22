@@ -1,13 +1,13 @@
 # Inkling-2-Mini on two RTX 5090s
 
-![Recipe card: decode at 1 and 8 agents, cold prefill, KV pool and memory on two RTX 5090s, 2026-11-22](docs/img/recipe-card-2b26f1e5.png)
+![Recipe card: decode at 1 to 16 agents, cold prefill, KV pool and memory on two RTX 5090s, 2026-11-22](docs/img/recipe-card-3e8c7610.png)
 
 Serving configuration, vLLM overlay, launch scripts and measurements for [Inkling-2-Mini](https://huggingface.co/thinkingmachines/Inkling-2-Mini) on two RTX 5090 cards.
 
-**Goal**: run many coding agents from one desktop box. Several agent sessions share the server, their prompts grow with every tool call up to the 262K window and mostly hit the prefix cache, and new prompts arrive while the others decode. The 16 sequences, the KV pool, the scheduler step budget and the benchmarks below follow from that workload.
+**Goal**: run many coding agents from one desktop box. Several agent sessions share the server, their prompts grow with every tool call up to the 262K window and mostly hit the prefix cache, and new prompts arrive while the others decode. The 16 sequences, the KV pool, the scheduler settings and the benchmarks below follow from that workload.
 
 - **Model**: [Inkling-2-Mini](https://huggingface.co/thinkingmachines/Inkling-2-Mini) (Thinking Machines; 26B total, 3.4B active; text and images in), the official checkpoint and its own DSpark drafter (7 draft tokens).
-- **Engine**: vLLM's Inkling day-0 image plus a small overlay ([`docker/`](docker/README.md)) that makes it run on the RTX 5090 and speeds up serving. A request served alone gets bitwise the same output with or without the overlay.
+- **Engine**: vLLM's Inkling day-0 image plus a small overlay ([`docker/`](docker/README.md)) that makes it run on the RTX 5090 and speeds up serving. A request served alone gets bitwise the same output with or without the overlay and the scheduler settings.
 - **Window and KV pool**: 262,144 tokens per request; an 818,388-token fp8 KV pool shared by 16 sequences, tensor parallel over both cards.
 - **Enabled**: images, reasoning, tool calls.
 
@@ -15,22 +15,23 @@ Every number was measured on one machine on the date given and links its raw res
 
 ## Numbers
 
-Measured 2026-11-22 on the served configuration ([`scripts/serve.sh`](scripts/serve.sh), image `sm120-r10`), one boot, stock power limits, temperature 0. Decode rate is one stream's output tokens per second from its first to its last token; the aggregate is the sum over the streams running together ([how the numbers are measured](#how-the-numbers-are-measured)).
+Measured 2026-11-22 on the served configuration ([`scripts/serve.sh`](scripts/serve.sh), image `sm120-r10`, fair prefill), one boot, stock power limits. Decode rate is one stream's output tokens per second from its first to its last token; the aggregate is the sum over the streams running together ([how the numbers are measured](#how-the-numbers-are-measured)).
 
-![Decode: aggregate and per-stream rate at 1, 4 and 8 streams for code at depth, Spec-Bench, and Spec-Bench without the drafter](docs/img/decode.svg)
+![Decode: aggregate and per-stream rate at 1, 4, 8 and 16 streams for code at depth, Spec-Bench, and Spec-Bench without the drafter](docs/img/decode.svg)
 
 Blue: code with a 2K append, averaged over the 1K / 32K / 64K cached depths. Brown: Spec-Bench. Grey dashed: Spec-Bench without the drafter, on an earlier image ([`docs/CONFIGURATION.md`](docs/CONFIGURATION.md)).
 
-- **1 agent**: 376 tok/s on Spec-Bench, 423 on code with a cached context; first token in 32 ms.
-- **8 agents**: 1,588 tok/s summed on Spec-Bench (188 each, first token 67 ms); 1,724 on cached code (207 each).
-- **8 agents at 64K cached context**: 174 tok/s each, 1,557 summed.
+- **1 agent**: 378 tok/s on Spec-Bench, 500 on code with a cached context; first token in 32 ms.
+- **16 agents**: 2,381 tok/s summed on Spec-Bench (138 each, first token 101 ms); 2,662 on cached code (145 each). At 64K cached context: 113 each, 2,283 summed.
+- **Agent sessions**: 697 tok/s summed with 10 coding-agent sessions replayed at once (prompts of about 39K–202K tokens, p10–p90, mostly cached), first token 0.29 s median and 0.72 s p90; 517 tok/s with 6 sessions.
+- **Newcomers**: a short request arriving behind a long cold prompt gets its first token in 0.5 s instead of 20 s (fair prefill).
 
 ![Cold prefill rate and time to first token versus prompt length](docs/img/prefill.svg)
 
-- **Cold prefill**: 18,712 tok/s at 2K prompt tokens, 14,693 at 61K and 8,675 at 246K (28.3 s to the first token).
-- **Quality**: tool-eval 82.5 ± 1.9 over 4 trials of 69 scenarios; GSM8K 95.5 % (5-shot, 200 problems).
+- **Cold prefill**: 18,636 tok/s at 2K prompt tokens, 14,700 at 61K and 8,676 at 246K (28.3 s to the first token).
+- **Quality**: tool-eval 82.8 ± 2.5 over 4 trials of 69 scenarios; GSM8K 95.5 % (5-shot, 200 problems).
 
-Sources: Spec-Bench [`specbench-served-r10`](bench/results/20261122T053112Z-inkling2-specbench-served-r10), code [`code-r10`](bench/results/20261122T053347Z-inkling2-code-r10), prefill [`prefill-r10a`](bench/results/20261122T053516Z-inkling2-prefill-r10a), tool-eval [`quality-r10`](bench/results/20261122T053020Z-inkling2-quality-r10), GSM8K [`gsm8k-r10`](bench/results/20261122T060316Z-inkling2-gsm8k-r10), memory [`memory-r10`](bench/results/20261122T053020Z-inkling2-memory-r10). Full tables: [details](#all-numbers).
+Sources: Spec-Bench [`specbench-served-r10-fair`](bench/results/20261122T122338Z-inkling2-specbench-served-r10-fair), code [`code-r10-fair`](bench/results/20261122T122632Z-inkling2-code-r10-fair), prefill [`prefill-r10-fair-a`](bench/results/20261122T122925Z-inkling2-prefill-r10-fair-a), agent sessions [`pi-r10-fair`](bench/results/20261122T122255Z-inkling2-pi-r10-fair), newcomers [`fair-prefill-768`](bench/results/20261122T092118Z-inkling2-fair-prefill-768), tool-eval and GSM8K [`quality-r10-fair`](bench/results/20261122T122255Z-inkling2-quality-r10-fair), memory [`memory-r10`](bench/results/20261122T053020Z-inkling2-memory-r10). Full tables: [details](#all-numbers).
 
 ## Quick start
 
@@ -58,7 +59,7 @@ curl -s http://localhost:8000/v1/chat/completions -H 'content-type: application/
 }'
 ```
 
-Reasoning (`reasoning_effort` from `none` to `max`), tool calls, image inputs and `prompt_tokens_details.cached_tokens` in `usage` are enabled by default. The model reasons briefly even at `reasoning_effort: "none"`, so evaluations with tight generation budgets or stop strings should account for reasoning tokens (2026-11-22, [`gsm8k-r10`](bench/results/20261122T060316Z-inkling2-gsm8k-r10)).
+Reasoning (`reasoning_effort` from `none` to `max`), tool calls, image inputs and `prompt_tokens_details.cached_tokens` in `usage` are enabled by default. The model reasons briefly even at `reasoning_effort: "none"`, so evaluations with tight generation budgets or stop strings should account for reasoning tokens (2026-11-22, [`quality-r10-fair`](bench/results/20261122T122255Z-inkling2-quality-r10-fair)).
 
 ## All numbers
 
@@ -66,20 +67,24 @@ Reasoning (`reasoning_effort` from `none` to `max`), tool calls, image inputs an
 | --- | --- | --- |
 | context window | 262,144 tokens | [`scripts/serve.sh`](scripts/serve.sh) |
 | KV pool on the GPUs | 818,388 tokens, fp8 target KV (unit-scale E4M3), bf16 drafter KV, 16 sequences | 2026-11-22, [`r10-combined`](bench/results/20261122T032748Z-inkling2-r10-combined) |
-| Spec-Bench decode, 1 / 4 / 8 streams (median per stream) | 376 / 242 / 188 tok/s | 2026-11-22, [`specbench-served-r10`](bench/results/20261122T053112Z-inkling2-specbench-served-r10) |
-| Spec-Bench decode aggregate, 1 / 4 / 8 streams | 413 / 1,018 / 1,588 tok/s | 2026-11-22, [`specbench-served-r10`](bench/results/20261122T053112Z-inkling2-specbench-served-r10) |
-| Spec-Bench wall-clock output, 1 / 4 / 8 streams | 363.46 / 896.16 / 1,373.87 tok/s | 2026-11-22, [`specbench-served-r10`](bench/results/20261122T053112Z-inkling2-specbench-served-r10) |
-| Spec-Bench TTFT (median), 1 / 4 / 8 streams | 32 / 54 / 67 ms | 2026-11-22, [`specbench-served-r10`](bench/results/20261122T053112Z-inkling2-specbench-served-r10) |
-| DSpark acceptance length, Spec-Bench, 1 / 4 / 8 streams | 2.97 / 2.98 / 3.00 | 2026-11-22, [`specbench-served-r10`](bench/results/20261122T053112Z-inkling2-specbench-served-r10) |
-| code at depth, 2K append, 1 stream (1K / 32K / 64K cached) | 423 / 446 / 451 tok/s | 2026-11-22, [`code-r10`](bench/results/20261122T053347Z-inkling2-code-r10) |
-| code at depth, 2K append, 8 streams aggregate (1K / 32K / 64K cached) | 1,724 / 1,619 / 1,557 tok/s (207 / 181 / 174 per stream) | 2026-11-22, [`code-r10`](bench/results/20261122T053347Z-inkling2-code-r10) |
-| cold prefill TTFT, end to end | 0.11 / 0.45 / 4.18 / 28.3 s at 2,045 / 8,187 / 61,435 / 245,758 tokens | 2026-11-22, [`prefill-r10a`](bench/results/20261122T053516Z-inkling2-prefill-r10a) |
-| tool-eval-bench 2.1.0, 69 scenarios, 4 trials, T=1.0, 8 in parallel | final score 83 / 100; trial mean 82.5 (sd 1.9) | 2026-11-22, [`quality-r10`](bench/results/20261122T053020Z-inkling2-quality-r10) |
-| GSM8K, lm-eval 0.4.12, 5-shot, n=200, T=0, `reasoning_effort` none | 95.5 % flexible extract (se 1.5); 63.5 % strict match | 2026-11-22, [`gsm8k-r10`](bench/results/20261122T060316Z-inkling2-gsm8k-r10) |
+| Spec-Bench decode, 1 / 4 / 8 / 16 streams (median per stream) | 378 / 245 / 188 / 138 tok/s | 2026-11-22, [`specbench-served-r10-fair`](bench/results/20261122T122338Z-inkling2-specbench-served-r10-fair) |
+| Spec-Bench decode aggregate, 1 / 4 / 8 / 16 streams | 415 / 1,028 / 1,600 / 2,381 tok/s | 2026-11-22, [`specbench-served-r10-fair`](bench/results/20261122T122338Z-inkling2-specbench-served-r10-fair) |
+| Spec-Bench wall-clock output, 1 / 4 / 8 / 16 streams | 366.67 / 901.81 / 1,378.28 / 2,005.83 tok/s | 2026-11-22, [`specbench-served-r10-fair`](bench/results/20261122T122338Z-inkling2-specbench-served-r10-fair) |
+| Spec-Bench TTFT (median), 1 / 4 / 8 / 16 streams | 32 / 54 / 69 / 101 ms | 2026-11-22, [`specbench-served-r10-fair`](bench/results/20261122T122338Z-inkling2-specbench-served-r10-fair) |
+| DSpark acceptance length, Spec-Bench, 1 / 4 / 8 / 16 streams | 2.97 / 3.00 / 3.00 / 2.95 | 2026-11-22, [`specbench-served-r10-fair`](bench/results/20261122T122338Z-inkling2-specbench-served-r10-fair) |
+| code at depth, 2K append, 1 stream (1K / 32K / 64K cached) | 500 / 449 / 484 tok/s | 2026-11-22, [`code-r10-fair`](bench/results/20261122T122632Z-inkling2-code-r10-fair) |
+| code at depth, 2K append, 8 streams aggregate (1K / 32K / 64K cached) | 1,868 / 1,699 / 1,554 tok/s (212 / 189 / 175 per stream) | 2026-11-22, [`code-r10-fair`](bench/results/20261122T122632Z-inkling2-code-r10-fair) |
+| code at depth, 2K append, 16 streams aggregate (1K / 32K / 64K cached) | 2,662 / 2,505 / 2,283 tok/s (145 / 128 / 113 per stream) | 2026-11-22, [`code-r10-fair`](bench/results/20261122T122632Z-inkling2-code-r10-fair) |
+| agent replay, 6 / 10 sessions: aggregate decode | 517 / 697 tok/s (236 / 144 per stream) | 2026-11-22, [`pi-r10-fair`](bench/results/20261122T122255Z-inkling2-pi-r10-fair) |
+| agent replay, 6 / 10 sessions: first token p50 / p90 | 0.25 / 0.74 s ; 0.29 / 0.72 s | 2026-11-22, [`pi-r10-fair`](bench/results/20261122T122255Z-inkling2-pi-r10-fair) |
+| short / 16K newcomer behind a cold 196K prompt, first token | 0.51–0.52 s / 6.66–6.67 s (20.4–20.5 s / 21.5 s without fair prefill) | 2026-11-22, [`fair-prefill-768`](bench/results/20261122T092118Z-inkling2-fair-prefill-768) |
+| cold prefill TTFT, end to end | 0.11 / 0.45 / 4.18 / 28.3 s at 2,044 / 8,191 / 61,437 / 245,759 tokens | 2026-11-22, [`prefill-r10-fair-a`](bench/results/20261122T122925Z-inkling2-prefill-r10-fair-a) |
+| tool-eval-bench 2.1.0, 69 scenarios, 4 trials, T=1.0, 8 in parallel | trial mean 82.8 (sd 2.5), median 82.5 | 2026-11-22, [`quality-r10-fair`](bench/results/20261122T122255Z-inkling2-quality-r10-fair) |
+| GSM8K, lm-eval 0.4.12, 5-shot, n=200, T=0, `reasoning_effort` none | 95.5 % flexible extract (se 1.5); 64.5 % strict match | 2026-11-22, [`quality-r10-fair`](bench/results/20261122T122255Z-inkling2-quality-r10-fair) |
 
-Served-path smoke checks on the same boot passed a tool call, an image input and four sampled generations at temperature 0.8 with the drafter (2026-11-22, [`quality-r10`](bench/results/20261122T053020Z-inkling2-quality-r10)).
+Served-path smoke checks on the same boot passed a tool call, an image input and four sampled generations at temperature 0.8 with the drafter (2026-11-22, [`quality-r10-fair`](bench/results/20261122T122255Z-inkling2-quality-r10-fair)).
 
-Memory per card (2026-11-22, [`memory-r10`](bench/results/20261122T053020Z-inkling2-memory-r10)): 10.27 GiB weights and non-torch memory, 15.38 GiB KV cache, 2.42 GiB kept for activations and 0.58 GiB CUDA graphs, within the 28.88 GiB budget of `--gpu-memory-utilization 0.92`. The 818,388-token figure is vLLM's admission estimate (3.12 requests at the full window); it charges every windowed and short-conv layer for its window plus the tokens in flight.
+Memory per card (2026-11-22, boot without the fair-prefill flags, which do not change allocation, [`memory-r10`](bench/results/20261122T053020Z-inkling2-memory-r10)): 10.27 GiB weights and non-torch memory, 15.38 GiB KV cache, 2.42 GiB kept for activations and 0.58 GiB CUDA graphs, within the 28.88 GiB budget of `--gpu-memory-utilization 0.92`. The 818,388-token figure is vLLM's admission estimate (3.12 requests at the full window); it charges every windowed and short-conv layer for its window plus the tokens in flight.
 
 ## Served configuration
 
@@ -88,7 +93,7 @@ Memory per card (2026-11-22, [`memory-r10`](bench/results/20261122T053020Z-inkli
 - Parallelism and all-reduce: tensor parallel 2 (`--tensor-parallel-size 2`), FlashInfer PCIe IPC all-reduce (`VLLM_ALLREDUCE_USE_FLASHINFER_PCIE_IPC=1`) with NCCL fallback, and vLLM's custom all-reduce off (`--disable-custom-all-reduce`).
 - Drafter: DSpark (`"method":"dspark","num_speculative_tokens":7,"draft_sample_method":"probabilistic","kv_cache_dtype":"auto"`), 7 draft tokens per step (the only value the checkpoint accepts), bf16 drafter KV cache, and draft sampling sharded across both cards (`VLLM_INKLING_DRAFT_SHARD=1`, overlay).
 - Context and KV pool: 262,144 tokens (`--max-model-len 262144`), 16 concurrent sequences (`--max-num-seqs 16`), `--gpu-memory-utilization 0.92`, fp8 target KV cache in unit-scale E4M3 (`--kv-cache-dtype fp8`), and exact-size short-conv pages (`VLLM_INKLING_CONV_PAGE=1 --block-size 64`, overlay), giving an 818,388-token KV pool (2026-11-22, [`r10-combined`](bench/results/20261122T032748Z-inkling2-r10-combined)).
-- Scheduler: `VLLM_DECODE_STEP_BUDGET=1024` (overlay): at most 1,024 tokens per step while any request is decoding, and 2,048 otherwise.
+- Scheduler: `VLLM_DECODE_STEP_BUDGET=1024` (overlay): at most 1,024 tokens per step while any request is decoding, and 2,048 otherwise. Fair prefill (`--long-prefill-token-threshold 768 --long-prefill-token-threshold-adaptive`, stock vLLM): while several requests prefill, each gets at most max(768, 2,048 / their number) tokens per step.
 - Sampling: `--enable-batch-sharded-sampling` (overlay): each request is sampled on one card from both cards' vocabulary shards.
 - API, warmup and caches: `--reasoning-parser inkling --tool-call-parser inkling --enable-auto-tool-choice` (`reasoning_effort` `none` to `max`), `--enable-prompt-tokens-details` (reports cached prompt tokens in `usage`), FlashInfer warmup autotune off (`--kernel-config '{"enable_flashinfer_autotune":false}'`), and persisted Triton cache (`TRITON_CACHE_DIR=/root/.cache/triton`).
 
@@ -107,48 +112,53 @@ Memory per card (2026-11-22, [`memory-r10`](bench/results/20261122T053020Z-inkli
 
 ## How the numbers are measured
 
-- **Boot and configuration**: Spec-Bench, code at depth, cold prefill, tool calling and smoke checks ran on one boot of [`scripts/serve.sh`](scripts/serve.sh) (image `inkling2-rtx5090:sm120-r10`) at stock power limits on 2026-11-22; GSM8K ran on another boot of the same configuration on 2026-11-22.
+- **Boot and configuration**: Spec-Bench, code at depth, cold prefill, the agent replay, tool calling, GSM8K and smoke checks ran on one boot of [`scripts/serve.sh`](scripts/serve.sh) (image `inkling2-rtx5090:sm120-r10`, fair prefill) at stock power limits on 2026-11-22.
 - **Figures**: [`bench/plot.py`](bench/plot.py) (`uv run bench/plot.py`) generates [`docs/img/decode.svg`](docs/img/decode.svg) and [`docs/img/prefill.svg`](docs/img/prefill.svg) directly from the raw files under [`bench/results/`](bench/results/).
-- **Tool calling**: tool-eval-bench 2.1.0, 69 scenarios, 4 trials, temperature 1.0 (the checkpoint's default), 8 in parallel (2026-11-22, [`quality-r10`](bench/results/20261122T053020Z-inkling2-quality-r10)): final score 83 / 100, trial mean 82.5 (standard deviation 1.9).
-- **GSM8K**: lm-eval 0.4.12 (`local-chat-completions`), 5-shot, first 200 problems, temperature 0, `reasoning_effort` `none`, concurrency 4, 4,096-token generation budget and a non-matching stop string so brief reasoning does not truncate answers (2026-11-22, [`gsm8k-r10`](bench/results/20261122T060316Z-inkling2-gsm8k-r10)): 95.5 % flexible extract (standard error 1.5), 63.5 % strict match.
+- **Agent replay**: [`bench/inkling_replay.py`](bench/inkling_replay.py) `--preset pi` replays coding-agent sessions: long-lived conversations that grow with every tool call (preset prompt p10 / p50 / p90 of about 39K / 115K / 202K tokens, mostly prefix-cached), replies of 282 tokens median and short gaps between steps, temperature 1.0, 6 and 10 sessions at once, a 150 s scored window after 60 s of warmup (2026-11-22, [`pi-r10-fair`](bench/results/20261122T122255Z-inkling2-pi-r10-fair)). Aggregate decode is the tokens decoded inside the window divided by its length.
+- **Newcomers**: [`bench/newcomer.py`](bench/newcomer.py): one stream decoding in the background, a cold 196,608-token prompt, and 2 s later a cold ~1K and ~16K prompt; medians of three trials per boot, four boots alternating with and without fair prefill (2026-11-22, [`fair-prefill-768`](bench/results/20261122T092118Z-inkling2-fair-prefill-768)).
+- **Tool calling**: tool-eval-bench 2.1.0, 69 scenarios, 4 trials, temperature 1.0 (the checkpoint's default), 8 in parallel (2026-11-22, [`quality-r10-fair`](bench/results/20261122T122255Z-inkling2-quality-r10-fair)): trial mean 82.8 (standard deviation 2.5), median 82.5.
+- **GSM8K**: lm-eval 0.4.12 (`local-chat-completions`), 5-shot, first 200 problems, temperature 0, `reasoning_effort` `none`, 4,096-token generation budget and a non-matching stop string so brief reasoning does not truncate answers (2026-11-22, [`quality-r10-fair`](bench/results/20261122T122255Z-inkling2-quality-r10-fair)): 95.5 % flexible extract (standard error 1.5), 64.5 % strict match.
 
 ### Spec-Bench (`vllm bench serve`)
 
-Measured 2026-11-22 ([`specbench-served-r10`](bench/results/20261122T053112Z-inkling2-specbench-served-r10), driver [`bench/specbench.sh`](bench/specbench.sh), summary [`bench/specbench_summary.py`](bench/specbench_summary.py)): 120-prompt stratified subsets of [Spec-Bench](https://github.com/hemingkx/Spec-Bench) per concurrency ([`bench/inputs/SPEC-BENCH.md`](bench/inputs/SPEC-BENCH.md)), temperature 0, 256 forced output tokens (`--ignore-eos`), 0 failed requests at every concurrency (38,963 input tokens, 30,720 generated tokens per cell). Decode aggregate is stream count times mean request decode rate (the benchmark keeps every stream busy); wall-clock output throughput is vLLM's total generated tokens divided by benchmark duration, including prefill, TTFT and request turnover.
+Measured 2026-11-22 ([`specbench-served-r10-fair`](bench/results/20261122T122338Z-inkling2-specbench-served-r10-fair), driver [`bench/specbench.sh`](bench/specbench.sh), summary [`bench/specbench_summary.py`](bench/specbench_summary.py)): 120-prompt stratified subsets of [Spec-Bench](https://github.com/hemingkx/Spec-Bench) per concurrency ([`bench/inputs/SPEC-BENCH.md`](bench/inputs/SPEC-BENCH.md)), temperature 0, 256 forced output tokens (`--ignore-eos`), 0 failed requests at every concurrency (38,963 input tokens, 30,720 generated tokens per cell). Decode aggregate is stream count times mean request decode rate (the benchmark keeps every stream busy); wall-clock output throughput is vLLM's total generated tokens divided by benchmark duration, including prefill, TTFT and request turnover.
 
 | Streams | Decode per stream (median) | Decode aggregate | Wall-clock output | Req/s | TTFT p50 / p99 | TPOT p50 / p99 | E2E p50 | Acceptance length |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 1 | 376 tok/s | 413 tok/s | 363.46 tok/s | 1.42 | 31.78 / 105.07 ms | 2.66 / 4.10 ms | 717.21 ms | 2.97 |
-| 4 | 242 tok/s | 1,018 tok/s | 896.16 tok/s | 3.50 | 53.81 / 157.16 ms | 4.14 / 6.25 ms | 1,124.34 ms | 2.98 |
-| 8 | 188 tok/s | 1,588 tok/s | 1,373.87 tok/s | 5.37 | 67.48 / 216.68 ms | 5.31 / 8.37 ms | 1,429.32 ms | 3.00 |
+| 1 | 378 tok/s | 415 tok/s | 366.67 tok/s | 1.43 | 31.75 / 105.04 ms | 2.64 / 4.08 ms | 706.58 ms | 2.97 |
+| 4 | 245 tok/s | 1,028 tok/s | 901.81 tok/s | 3.52 | 53.63 / 135.65 ms | 4.08 / 6.19 ms | 1,110.52 ms | 3.00 |
+| 8 | 188 tok/s | 1,600 tok/s | 1,378.28 tok/s | 5.38 | 69.19 / 201.57 ms | 5.31 / 8.24 ms | 1,429.71 ms | 3.00 |
+| 16 | 138 tok/s | 2,381 tok/s | 2,005.83 tok/s | 7.84 | 101.23 / 470.23 ms | 7.22 / 11.12 ms | 1,939.91 ms | 2.95 |
 
 ### Code at depth
 
-Measured 2026-11-22 ([`code-r10`](bench/results/20261122T053347Z-inkling2-code-r10), [`bench/headline_inkling.py`](bench/headline_inkling.py) `code`): a shared code context from [ExLlamaV3](https://github.com/turboderp-org/exllamav3) sources cached at 1K / 32K / 64K tokens, a fresh salted tool-output append and a frozen HumanEval task per stream, 400 forced output tokens, temperature 0, `reasoning_effort` `none`. The shared context is verified as a cache hit on every stream. Aggregate is the tokens decoded by all streams during the window in which every stream is decoding, divided by that window's length.
+Measured 2026-11-22 ([`code-r10-fair`](bench/results/20261122T122632Z-inkling2-code-r10-fair), [`bench/headline_inkling.py`](bench/headline_inkling.py) `code`): a shared code context from [ExLlamaV3](https://github.com/turboderp-org/exllamav3) sources cached at 1K / 32K / 64K tokens, a fresh salted tool-output append and a frozen HumanEval task per stream, 400 forced output tokens, temperature 0, `reasoning_effort` `none`. The shared context is verified as a cache hit on every stream. Aggregate is the tokens decoded by all streams during the window in which every stream is decoding, divided by that window's length.
 
-| Cached context | Append | 1 stream | 4 streams: per stream / aggregate | 8 streams: per stream / aggregate |
-| ---: | ---: | ---: | ---: | ---: |
-| 1K | 2K | 423 tok/s | 265 / 1,134 tok/s | 207 / 1,724 tok/s |
-| 32K | 2K | 446 tok/s | 253 / 1,079 tok/s | 181 / 1,619 tok/s |
-| 64K | 2K | 451 tok/s | 220 / 918 tok/s | 174 / 1,557 tok/s |
-| 1K | 8K | 559 tok/s | 213 / 1,005 tok/s | 144 / 1,681 tok/s |
-| 32K | 8K | 476 tok/s | 198 / 1,095 tok/s | 126 / 1,606 tok/s |
-| 64K | 8K | 619 tok/s | 181 / 974 tok/s | 108 / 1,420 tok/s |
+| Cached context | Append | 1 stream | 4 streams: per stream / aggregate | 8 streams: per stream / aggregate | 16 streams: per stream / aggregate |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 1K | 2K | 500 tok/s | 259 / 1,029 tok/s | 212 / 1,868 tok/s | 145 / 2,662 tok/s |
+| 32K | 2K | 449 tok/s | 282 / 1,253 tok/s | 189 / 1,699 tok/s | 128 / 2,505 tok/s |
+| 64K | 2K | 484 tok/s | 238 / 1,039 tok/s | 175 / 1,554 tok/s | 113 / 2,283 tok/s |
+| 1K | 8K | 466 tok/s | 225 / 1,140 tok/s | 158 / 1,929 tok/s | 104 / 1,666 tok/s\* |
+| 32K | 8K | 423 tok/s | 203 / 1,068 tok/s | 135 / 1,714 tok/s | 86 / 1,371 tok/s\* |
+| 64K | 8K | 467 tok/s | 184 / 998 tok/s | 120 / 1,404 tok/s | 76 / 1,215 tok/s\* |
 
-One stream's rate varies with the task and the appended code: each cell is one request, and the drafter accepts more on predictable code, so the six one-stream cells range from 423 to 619 tok/s on this boot. Median TTFT is 0.13–0.78 s for one stream; with eight streams, 64K context and 8K appends it reaches 3.6 s, because the prefills queue together behind the decoding streams.
+\* With 16 streams and 8K appends, the first streams finish before the last prefill does, so no window has every stream decoding; the aggregate is the sum of the per-stream rates.
+
+One stream's rate varies with the task and the appended code: each cell is one request, and the drafter accepts more on predictable code, so the six one-stream cells range from 423 to 500 tok/s on this boot. Median TTFT is 0.13–0.78 s for one stream; with 16 streams it is 1.1–1.8 s with 2K appends and 4.6–7.1 s with 8K appends, because the prefills queue together behind the decoding streams.
 
 ### Cold prefill
 
-Measured 2026-11-22 ([`prefill-r10a`](bench/results/20261122T053516Z-inkling2-prefill-r10a), [`bench/headline_inkling.py`](bench/headline_inkling.py) `prefill`): fresh salted prompts with zero cached prefix (verified), one at a time, 1 output token; end-to-end rate is prompt tokens divided by client TTFT. A second pass on the same boot is within 2 % on every cell ([`prefill-r10b`](bench/results/20261122T053630Z-inkling2-prefill-r10b)).
+Measured 2026-11-22 ([`prefill-r10-fair-a`](bench/results/20261122T122925Z-inkling2-prefill-r10-fair-a), [`bench/headline_inkling.py`](bench/headline_inkling.py) `prefill`): fresh salted prompts with zero cached prefix (verified), one at a time, 1 output token; end-to-end rate is prompt tokens divided by client TTFT. A second pass on the same boot is within 1 % on every cell ([`prefill-r10-fair-b`](bench/results/20261122T123039Z-inkling2-prefill-r10-fair-b)).
 
-| Prompt tokens | 2,045 | 8,187 | 30,715 | 61,435 | 122,876 | 204,797 | 245,758 |
+| Prompt tokens | 2,044 | 8,191 | 30,715 | 61,437 | 122,879 | 204,799 | 245,759 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| TTFT | 0.11 s | 0.45 s | 1.85 s | 4.18 s | 10.3 s | 21.5 s | 28.3 s |
-| Prefill rate | 18,712 | 18,345 | 16,626 | 14,693 | 11,947 | 9,544 | 8,675 tok/s |
+| TTFT | 0.11 s | 0.45 s | 1.85 s | 4.18 s | 10.3 s | 21.4 s | 28.3 s |
+| Prefill rate | 18,636 | 18,201 | 16,626 | 14,700 | 11,945 | 9,548 | 8,676 tok/s |
 
 ## Output checks and caveats
 
-- **Overlay changes are lossless for a lone request**: every serving change in the overlay (Triton decode GEMVs, decode-aware step budget, batch-sharded sampling, exact-size short-conv pages, and DSpark draft sharding) leaves the output of a request served alone bitwise identical. Paired boots of r8 against r10 matched on all 11 prompts of [`bench/greedy.py`](bench/greedy.py) (`--long`, 8 short and 3 long) at temperature 0 and at temperature 1.0 with a fixed seed per prompt (2026-11-22, [`r10-combined`](bench/results/20261122T032748Z-inkling2-r10-combined); earlier component checks on 2026-11-21 in [`stepbudget-identity`](bench/results/20261121T192820Z-inkling2-stepbudget-identity) and [`seeded-identity`](bench/results/20261121T231722Z-inkling2-seeded-identity), and 2026-11-22 in [`draftshard`](bench/results/20261122T012901Z-inkling2-draftshard)), alongside 20-trial GPU gates on the conv-page and draft-sharding kernels.
+- **Serving changes are lossless for a lone request**: every serving change (Triton decode GEMVs, decode-aware step budget, batch-sharded sampling, exact-size short-conv pages, DSpark draft sharding, and fair prefill) leaves the output of a request served alone bitwise identical. Paired boots of r8 against r10 matched on all 11 prompts of [`bench/greedy.py`](bench/greedy.py) (`--long`, 8 short and 3 long) at temperature 0 and at temperature 1.0 with a fixed seed per prompt (2026-11-22, [`r10-combined`](bench/results/20261122T032748Z-inkling2-r10-combined); earlier component checks on 2026-11-21 in [`stepbudget-identity`](bench/results/20261121T192820Z-inkling2-stepbudget-identity) and [`seeded-identity`](bench/results/20261121T231722Z-inkling2-seeded-identity), and 2026-11-22 in [`draftshard`](bench/results/20261122T012901Z-inkling2-draftshard)), alongside 20-trial GPU gates on the conv-page and draft-sharding kernels. Fair prefill kept the same 11 outputs on four alternating boots (2026-11-22, [`fair-prefill-768`](bench/results/20261122T092118Z-inkling2-fair-prefill-768)).
 - **Batched output varies run to run**: with several requests in flight, output is not reproducible on this engine because which requests share a step changes batch-variant kernels' arithmetic, as on the stock image. Two passes of the same 22 concurrent requests ([`bench/batched.py`](bench/batched.py)) on one boot produced 0 of 22 identical outputs in every configuration tried on image r8, and batch-sharded sampling diverged from the unsharded configuration no sooner than either configuration diverged from itself (2026-11-21, [`batched-parity`](bench/results/20261121T221734Z-inkling2-batched-parity)).
 - **fp8 target KV cache**: `--kv-cache-dtype fp8` changes arithmetic relative to bf16 KV (greedy text diverges after 0–204 characters). On image r5, paired NLL difference (fp8 minus bf16) was −0.00099 nats/token (se 0.00148) on an 8,191-token code text and +0.00109 (se 0.00073) on a 32,767-token code text (2026-11-21, [`fp8kv`](bench/results/20261121T131647Z-inkling2-fp8kv)).
 - **Drafter versus no drafter**: greedy output with the drafter is deterministic for a lone request across runs and restarts, but diverges from drafter-off greedy output after a few hundred characters because decode and prefill take different kernel paths. Replaying greedy generations as prompts ([`bench/teacher_check.py`](bench/teacher_check.py)) on image r3 gave the same non-top-1 rate with and without the drafter: 136 of 3,781 tokens (3.6 %, median / max log-prob gap 0.20 / 1.16) with the drafter on against 131 of 3,602 (3.6 %, 0.17 / 1.24) with it off (2026-11-21, [`teacher-check`](bench/results/20261121T0022Z-inkling2-teacher-check)).
@@ -173,6 +183,7 @@ Full progression from r4 to r10, paired A/B boots and all-reduce comparisons are
 | [`docs/CONFIGURATION.md`](docs/CONFIGURATION.md) | r4-to-r10 progression, paired comparisons, all-reduce and one-card measurements, and SM120 day-0 failure modes |
 | [`bench/specbench.sh`](bench/specbench.sh), [`bench/specbench_summary.py`](bench/specbench_summary.py) | Spec-Bench `vllm bench serve` driver and per-stream / aggregate summary script |
 | [`bench/headline_inkling.py`](bench/headline_inkling.py) | code-at-depth and cold-prefill benchmark driver |
+| [`bench/inkling_replay.py`](bench/inkling_replay.py), [`bench/newcomer.py`](bench/newcomer.py) | coding-agent session replay and the newcomer-behind-a-long-prefill probe |
 | [`bench/greedy.py`](bench/greedy.py), [`bench/batched.py`](bench/batched.py), [`bench/teacher_check.py`](bench/teacher_check.py) | single-request greedy/seeded identity, concurrent batched parity, and drafter teacher-replay checks |
 | [`bench/plot.py`](bench/plot.py) | draws [`docs/img/decode.svg`](docs/img/decode.svg) and [`docs/img/prefill.svg`](docs/img/prefill.svg) from committed raw results |
 | [`bench/inputs/`](bench/inputs/SPEC-BENCH.md) | stratified Spec-Bench subsets, frozen code corpus and HumanEval task prompts |
