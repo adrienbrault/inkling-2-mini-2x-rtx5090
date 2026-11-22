@@ -72,6 +72,10 @@ A second pass on the same boot is within 2 % on every cell ([results](bench/resu
 default), 8 in parallel; [results](bench/results/20261122T053020Z-inkling2-quality-r10)): final score 83 / 100, mean
 over the trials 82.5 (standard deviation 1.9).
 
+**GSM8K** (another boot of the same configuration; lm-eval 0.4.12, 5-shot, first 200 problems, temperature 0,
+`reasoning_effort` none, 4,096-token generation budget; [results](bench/results/20261122T060316Z-inkling2-gsm8k-r10)):
+95.5 % (flexible extract, standard error 1.5).
+
 ## Served configuration
 
 ```bash

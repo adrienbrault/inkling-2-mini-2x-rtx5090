@@ -10,5 +10,5 @@ From the measurement run that also produced the Spec-Bench, code-depth and prefi
   samples differently, so the two runs differ by sampling.
 - `smoke.json`: served-path checks (tool call, image input, reasoning efforts).
 
-GSM8K is not reported: the run used the same lm-eval settings as r8's, whose answers are cut off by reasoning (see the
-r8 note).
+This run's GSM8K used lm-eval's default generation budget, which cuts answers off (see the r8 note), so it is not
+included. The valid r10 measurement with a 4,096-token budget is `20261122T060316Z-inkling2-gsm8k-r10`.
