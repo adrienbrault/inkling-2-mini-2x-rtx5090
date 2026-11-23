@@ -1,0 +1,11 @@
+2.1: 2.1.0
+2026-11-23T20:39:00Z image sha256:72f9998cba1c229cdcb9d3b7e4b6eae9baef97d3609a21ee7715c72da7ae01c6 [serve /; models ['inkling-2-mini', 'inkling-2-mini-ablit']
+{"model": "inkling-2-mini", "prompt_tokens": {"plain-none": 36, "plain-reasoning_content": 196, "plain-reasoning": 196, "plain-both": 196, "tool-none": 145, "tool-reasoning_content": 305}, "reasoning_content_rendered": true, "reasoning_rendered": true, "tool_turn_reasoning_content_rendered": true}
+2026-11-23T20:41:45Z A 2.1.0 inkling-2-mini rc=0 mean 82 sd 1.4 n 69
+2026-11-23T20:44:23Z B 2.1.0+echo inkling-2-mini rc=0 mean 81.5 sd 1.3 n 69 tooleval_echo: echoed reasoning on 503 of 505 tool-call assistant turns
+2026-11-23T20:47:40Z C 3.0.0 inkling-2-mini rc=0 mean 87.5 sd 2.9 n 69
+2026-11-23T20:51:02Z A 2.1.0 inkling-2-mini-ablit rc=0 mean 78.5 sd 1.3 n 69
+2026-11-23T20:54:10Z B 2.1.0+echo inkling-2-mini-ablit rc=0 mean 77.2 sd 1.5 n 69 tooleval_echo: echoed reasoning on 556 of 557 tool-call assistant turns
+2026-11-23T20:57:39Z C 3.0.0 inkling-2-mini-ablit rc=0 mean 82.2 sd 2.9 n 69
+2026-11-23T20:57:39Z restore daily
+2026-11-23T20:58:09Z done: 20261123T203803Z-inkling2-tooleval-think-r14

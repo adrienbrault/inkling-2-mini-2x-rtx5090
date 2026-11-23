@@ -1,0 +1,14 @@
+{
+ "model": "inkling-2-mini",
+ "prompt_tokens": {
+  "plain-none": 36,
+  "plain-reasoning_content": 196,
+  "plain-reasoning": 196,
+  "plain-both": 196,
+  "tool-none": 145,
+  "tool-reasoning_content": 305
+ },
+ "reasoning_content_rendered": true,
+ "reasoning_rendered": true,
+ "tool_turn_reasoning_content_rendered": true
+}

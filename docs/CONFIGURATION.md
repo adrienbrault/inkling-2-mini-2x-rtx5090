@@ -129,7 +129,7 @@ On four boots in the order A G A G ([results](../bench/results/20261122T092118Z-
 | A2 | 514 tok/s, 0.23 / 0.70 s | 708 tok/s, 0.30 / 0.87 s | 1,611 / 2,456 tok/s |
 | F2 | 517 tok/s, 0.15 / 0.55 s | 706 tok/s, 0.20 / 0.79 s | 1,604 / 2,417 tok/s |
 
-At temperature 0 the 11 `bench/greedy.py --long` outputs had the same content, reasoning text and completion token counts on all four boots, except one long prompt whose reasoning ends in `"\n  "` on the F boots: the Rust frontend returns the last whitespace characters of the reasoning that the Python frontend drops. Its `usage` also omits the empty `prompt_tokens_details.multimodal_tokens` field. The tool-call, image and sampled smoke checks passed on all four boots, and tool-eval on the historical r10 Rust boot scored 83.5 ± 3.0 (82.8 ± 2.5 with the Python frontend).
+At temperature 0 the 11 `bench/greedy.py --long` outputs had the same content, reasoning text and completion token counts on all four boots, except one long prompt whose reasoning ends in `"\n  "` on the F boots: the Rust frontend returns the last whitespace characters of the reasoning that the Python frontend drops. Its `usage` also omits the empty `prompt_tokens_details.multimodal_tokens` field. The tool-call, image and sampled smoke checks passed on all four boots, and tool-eval (tool-eval-bench 2.1.0) on the historical r10 Rust boot scored 83.5 ± 3.0 (82.8 ± 2.5 with the Python frontend).
 
 ## Batch-sharded sampling (`--enable-batch-sharded-sampling`, image r8)
 

@@ -34,11 +34,11 @@ Blue: code with a 2K append, averaged over the 1K / 32K / 64K cached depths. Bro
 ![Cold prefill rate and time to first token versus prompt length](docs/img/prefill.svg)
 
 - **Cold prefill**: 19,012 tok/s at 2K prompt tokens, 14,830 at 61K and 8,724 at 246K (28.2 s to the first token). The [historical r10 1M run](#1m-window) took about 7 min.
-- **Quality**: tool-eval 83.2 ± 1.9 over 4 trials of 69 scenarios; GSM8K 94.5 % (5-shot, 200 problems).
+- **Quality**: tool-eval 87.5 ± 2.9 over 4 trials of 69 scenarios (tool-eval-bench 3.0.0, which sends earlier reasoning back; r14); GSM8K 94.5 % (5-shot, 200 problems).
 
 - **KV pool**: 8 agents with 96K-token prompts decoding together used 66 % of it, nothing preempted: about 1.42M tokens of context fit at once. With 12 such agents, 11 ran together and the 12th waited for room.
 
-Sources: KV pool [`kv-capacity-r13`](bench/results/20261122T200911Z-inkling2-kv-capacity-r13), Spec-Bench [`specbench-served-r13`](bench/results/20261122T192436Z-inkling2-specbench-served-r13), code [`code-r13`](bench/results/20261122T192732Z-inkling2-code-r13), prefill [`prefill-r13-a`](bench/results/20261122T192938Z-inkling2-prefill-r13-a), agent sessions [`pi-r13`](bench/results/20261122T192343Z-inkling2-pi-r13), newcomers [`newcomer-r13`](bench/results/20261122T200911Z-inkling2-newcomer-r13), tool-eval and GSM8K [`quality-r13`](bench/results/20261122T192343Z-inkling2-quality-r13), memory [`kv-capacity-r13`](bench/results/20261122T200911Z-inkling2-kv-capacity-r13). Full tables: [details](#all-numbers).
+Sources: KV pool [`kv-capacity-r13`](bench/results/20261122T200911Z-inkling2-kv-capacity-r13), Spec-Bench [`specbench-served-r13`](bench/results/20261122T192436Z-inkling2-specbench-served-r13), code [`code-r13`](bench/results/20261122T192732Z-inkling2-code-r13), prefill [`prefill-r13-a`](bench/results/20261122T192938Z-inkling2-prefill-r13-a), agent sessions [`pi-r13`](bench/results/20261122T192343Z-inkling2-pi-r13), newcomers [`newcomer-r13`](bench/results/20261122T200911Z-inkling2-newcomer-r13), tool-eval [`tooleval-think-r14`](bench/results/20261123T203803Z-inkling2-tooleval-think-r14), GSM8K [`quality-r13`](bench/results/20261122T192343Z-inkling2-quality-r13), memory [`kv-capacity-r13`](bench/results/20261122T200911Z-inkling2-kv-capacity-r13). Full tables: [details](#all-numbers).
 
 ## Quick start
 
@@ -101,6 +101,8 @@ Allow about 20.1 GB for the checkpoint and bundled drafter (19.5 GB + 636 MB), p
 
    For base-only use `EXPECT_MODELS=inkling-2-mini`. The check accepts a comma-separated list of required IDs and tests every returned name. It waits up to `READY_TIMEOUT` seconds (default 300), then checks chat, tools, images, sampled output and structured output. It keeps reports in the given directory. If it fails without a directory argument, it prints the temporary report directory. Structured cases use a 4,096-token output budget and `reasoning_effort: none`. The [r14 A/B](bench/results/20261122T203506Z-inkling2-r14-ab/summary.json) recorded feature smoke only. A full two-name structured pass on r14 is unverified. The [historical 1M run](bench/results/20261122T180116Z-inkling2-1m-window/summary.json) used a 1,024-token budget and recorded failures, including a Rust auto-tool case and a mixed schema miss.
 
+   **Agent clients**: send each assistant message's reasoning back in the conversation history, as `reasoning_content` (the served frontend also accepts `reasoning`). The chat template renders it on every earlier assistant turn; a client that drops it runs the model without its earlier reasoning. [`bench/think_echo_probe.py`](bench/think_echo_probe.py) checks that the server renders it: on r14 both field names added the reasoning to the prompt, on plain and tool-calling turns ([`tooleval-think-r14`](bench/results/20261123T203803Z-inkling2-tooleval-think-r14)/echo-probe.json). On tool-eval's short tool loops (at most 8 turns) the echo made no measurable difference ([tool calling](#how-the-numbers-are-measured)); longer agent sessions were not compared.
+
 ### Launch overrides
 
 Set overrides on `scripts/serve.sh` or export them first. The evidence column refers to archived runs except where it says local stubs.
@@ -146,7 +148,7 @@ Use Ctrl-C in the launch terminal or `docker stop inkling` to stop. The containe
 | agent replay, 6 / 10 sessions: first token p50 / p90 | 0.16 / 0.70 s ; 0.22 / 0.82 s | 2026-11-22, [`pi-r13`](bench/results/20261122T192343Z-inkling2-pi-r13) |
 | short / 16K newcomer behind a cold 196K prompt, first token (median of 3) | 0.54 s / 6.65 s (the long prompt itself 1.19x its solo time; a background stream kept 210 tok/s) | 2026-11-22, [`newcomer-r13`](bench/results/20261122T200911Z-inkling2-newcomer-r13) |
 | cold prefill TTFT, end to end | 0.11 / 0.44 / 4.14 / 28.2 s at 2,044 / 8,190 / 61,435 / 245,759 tokens | 2026-11-22, [`prefill-r13-a`](bench/results/20261122T192938Z-inkling2-prefill-r13-a) |
-| tool-eval-bench 2.1.0, 69 scenarios, 4 trials, T=1.0, 8 in parallel | trial mean 83.2 (sd 1.9), median 82.5 | 2026-11-22, [`quality-r13`](bench/results/20261122T192343Z-inkling2-quality-r13) |
+| tool-eval-bench 3.0.0, 69 scenarios, 4 trials, T=1.0, 8 in parallel, r14 | trial mean 87.5 (sd 2.9), median 87.5 | 2026-11-23, [`tooleval-think-r14`](bench/results/20261123T203803Z-inkling2-tooleval-think-r14) |
 | GSM8K, lm-eval 0.4.12, 5-shot, n=200, T=0, `reasoning_effort` none | 94.5 % flexible extract (se 1.6); 66.0 % strict match | 2026-11-22, [`quality-r13`](bench/results/20261122T192343Z-inkling2-quality-r13) |
 
 Served-path smoke checks on the same boot passed a tool call, an image input and four sampled generations at temperature 0.8 with the drafter (2026-11-22, [`quality-r13`](bench/results/20261122T192343Z-inkling2-quality-r13)).
@@ -183,11 +185,11 @@ Memory per card on r13 (2026-11-22): 10.65 GiB for weights and non-torch memory,
 
 ## How the numbers are measured
 
-- **Boot and configuration**: Spec-Bench, code at depth, cold prefill, the agent replay, tool calling, GSM8K and smoke checks ran on one boot of [`scripts/serve.sh`](scripts/serve.sh) (image `inkling2-rtx5090:sm120-r13`, both names, 1M window, fair prefill, Rust frontend) at stock power limits on 2026-11-22.
+- **Boot and configuration**: Spec-Bench, code at depth, cold prefill, the agent replay, GSM8K and smoke checks ran on one boot of [`scripts/serve.sh`](scripts/serve.sh) (image `inkling2-rtx5090:sm120-r13`, both names, 1M window, fair prefill, Rust frontend) at stock power limits on 2026-11-22. Tool calling was re-measured on one r14 boot (both names, 1M window) on 2026-11-23.
 - **Figures**: [`bench/plot.py`](bench/plot.py) (`uv run bench/plot.py`) generates [`docs/img/decode.svg`](docs/img/decode.svg) and [`docs/img/prefill.svg`](docs/img/prefill.svg) directly from the raw files under [`bench/results/`](bench/results/).
 - **Agent replay**: [`bench/inkling_replay.py`](bench/inkling_replay.py) `--preset pi` replays coding-agent sessions: long-lived conversations that grow with every tool call (preset prompt p10 / p50 / p90 of about 39K / 115K / 202K tokens, mostly prefix-cached), replies of 282 tokens median and short gaps between steps, temperature 1.0, 6 and 10 sessions at once, a 150 s scored window after 150 s of warmup (2026-11-22, [`pi-r13`](bench/results/20261122T192343Z-inkling2-pi-r13)). Aggregate decode is the tokens decoded inside the window divided by its length.
 - **Newcomers**: [`bench/newcomer.py`](bench/newcomer.py): one stream decoding in the background, a cold 196,608-token prompt, and 2 s later a cold ~1K and ~16K prompt; medians of three trials on r13 (2026-11-22, [`newcomer-r13`](bench/results/20261122T200911Z-inkling2-newcomer-r13)).
-- **Tool calling**: tool-eval-bench 2.1.0, 69 scenarios, 4 trials, temperature 1.0 (the checkpoint's default), 8 in parallel (2026-11-22, [`quality-r13`](bench/results/20261122T192343Z-inkling2-quality-r13)): trial mean 83.2 (standard deviation 1.9), median 82.5.
+- **Tool calling**: tool-eval-bench 3.0.0, 69 scenarios, 4 trials, temperature 1.0 (the checkpoint's default), 8 in parallel, on r14 (2026-11-23, [`tooleval-think-r14`](bench/results/20261123T203803Z-inkling2-tooleval-think-r14)): trial mean 87.5 (standard deviation 2.9), median 87.5. Version 3.0.0 sends each tool-calling turn's reasoning back as `reasoning_content`; 2.1.0 dropped it from the history. On the same boot 2.1.0 scored 82.0 (sd 1.4), and 2.1.0 with only that reasoning echo added ([`bench/tooleval_echo.py`](bench/tooleval_echo.py), echoed on 503 of 505 tool-calling turns) scored 81.5 (sd 1.3). The reasoning echo therefore made no measurable difference on this benchmark, and the gap to 3.0.0 comes from its other changes. The earlier 83.2 (r13) was measured with 2.1.0.
 - **GSM8K**: lm-eval 0.4.12 (`local-chat-completions`), 5-shot, first 200 problems, temperature 0, `reasoning_effort` `none`, 4,096-token generation budget and a non-matching stop string so brief reasoning does not truncate answers (2026-11-22, [`quality-r13`](bench/results/20261122T192343Z-inkling2-quality-r13)): 94.5 % flexible extract (standard error 1.6), 66.0 % strict match.
 
 ### Spec-Bench (`vllm bench serve`)
@@ -237,7 +239,7 @@ Measured 2026-11-22 on the historical r13 boot ([`ablit-r13`](bench/results/2026
 | --- | ---: | ---: |
 | [JailbreakBench](https://huggingface.co/datasets/JailbreakBench/JBB-Behaviors) harmful requests refused / answered / no final answer (100) | 95 / 5 / 0 | 2 / 96 / 2 |
 | JailbreakBench benign requests refused / answered / no final answer (100) | 24 / 75 / 1 | 1 / 93 / 6 |
-| tool-eval-bench, 69 scenarios × 4 trials | 83.2 ± 1.9 | 78.2 ± 2.2 |
+| tool-eval-bench 3.0.0, 69 scenarios × 4 trials (r14, 2026-11-23, [`tooleval-think-r14`](bench/results/20261123T203803Z-inkling2-tooleval-think-r14)) | 87.5 ± 2.9 | 82.2 ± 2.9 |
 | GSM8K (5-shot, 200 problems) | 94.5 % | 96.5 % |
 | tool call, image input, sampled output | pass | pass |
 

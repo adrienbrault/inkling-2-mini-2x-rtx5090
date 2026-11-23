@@ -74,7 +74,7 @@ Use a client venv with PyPI access. The r13 package versions below come from the
 ```bash
 python3 -m venv .venv-eval
 . .venv-eval/bin/activate
-python -m pip install 'tool-eval-bench==2.1.0' 'lm-eval[api]==0.4.12'
+python -m pip install 'tool-eval-bench==3.0.0' 'lm-eval[api]==0.4.12'
 ```
 
 ### Tool-eval
@@ -84,7 +84,7 @@ bash bench/tooleval.sh runs/tooleval
 MODEL=inkling-2-mini-ablit bash bench/tooleval.sh runs/tooleval-ablit
 ```
 
-The wrapper sends 69 scenarios (TC-01 to TC-69) in four trials at temperature 1.0 and parallelism 8. Require a completed report with zero request errors. Read `trial_statistics.final_score_mean` in each `tooleval.json`. The r13 means were 83.2 (trial standard deviation 1.9) for the base name and 78.2 (2.2) for the adapter. The earlier Rust frontend comparison is historical r10. [r13 quality](../bench/results/20261122T192343Z-inkling2-quality-r13), [r10 quality](../bench/results/20261122T143310Z-inkling2-quality-rustfe)
+The wrapper sends 69 scenarios (TC-01 to TC-69) in four trials at temperature 1.0 and parallelism 8. Use tool-eval-bench 3.0.0 or later: it sends each tool-calling turn's reasoning back as `reasoning_content`, while 2.1.0 dropped it from the history. Require a completed report with zero request errors. Read `trial_statistics.final_score_mean` in each `tooleval.json`. The r14 means with 3.0.0 were 87.5 (trial standard deviation 2.9) for the base name and 82.2 (2.9) for the adapter ([r14 tool-eval](../bench/results/20261123T203803Z-inkling2-tooleval-think-r14)). On the same boot, 2.1.0 gave 82.0 and 78.5, and 2.1.0 with the reasoning echo added (`bench/tooleval_echo.py`, run with the 2.1.0 environment's Python and the same arguments) gave 81.5 and 77.2. The r13 means with 2.1.0 were 83.2 (1.9) and 78.2 (2.2). The earlier Rust frontend comparison is historical r10. [r13 quality](../bench/results/20261122T192343Z-inkling2-quality-r13), [r10 quality](../bench/results/20261122T143310Z-inkling2-quality-rustfe)
 
 ### GSM8K
 
