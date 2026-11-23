@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Contains DSpark code from the vLLM Inkling fork, modified to calculate RoPE in-kernel.
 """Replace the optional Inkling2 DSpark RoPE table with on-the-fly trig (r14).
 
 Usage: python3 patch_ropetable.py /path/to/site-packages/vllm

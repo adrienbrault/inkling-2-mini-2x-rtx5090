@@ -1,0 +1,7 @@
+*
+!docker/
+!docker/*.py
+!docker/Dockerfile
+!LICENSE
+!LICENSE-APACHE
+!THIRD_PARTY.md

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Contains vLLM scheduler and Inkling fork code, modified for compact conv pages and diagnostics.
 """Compact Inkling2 SM120 conv pages after the r8 overlay.
 
 Usage: python3 patch_convpage.py /path/to/site-packages/vllm

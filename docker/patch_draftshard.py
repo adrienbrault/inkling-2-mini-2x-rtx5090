@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Contains vLLM sampler and Inkling fork code, modified for sharded DSpark sampling.
 """Apply the opt-in Inkling2 DSpark vocab sharding overlay after r8.
 
 Usage: python3 patch_draftshard.py /path/to/site-packages/vllm
@@ -5,6 +7,7 @@ Usage: python3 patch_draftshard.py /path/to/site-packages/vllm
 import ast
 import hashlib
 import sys
+from itertools import takewhile
 from pathlib import Path
 from textwrap import dedent
 
@@ -186,8 +189,7 @@ EDITS = {
     ],
 }
 
-KERNEL_SOURCE = r'''# SPDX-License-Identifier: Apache-2.0
-"""Inkling2 TP2 Markov sampling and verifier handoff."""
+KERNEL_SOURCE = r'''"""Inkling2 TP2 Markov sampling and verifier handoff."""
 from dataclasses import dataclass
 
 import numpy as np
@@ -485,6 +487,7 @@ def apply(root):
         raise ValueError(f"{generated}: already exists")
     changes = {}
     shard_gumbel = None
+    gumbel_notices = []
     for name, expected in EXPECT.items():
         path = root / name
         data = path.read_bytes()
@@ -508,11 +511,16 @@ def apply(root):
             if lo >= hi:
                 raise ValueError(f"{path}: Gumbel kernel anchors are out of order")
             shard_gumbel = source[lo:hi]
+            gumbel_notices = list(takewhile(lambda line: line.startswith("#") or not line.strip(),
+                                            source.splitlines()))
         else:
             changes[path] = source
     if shard_gumbel is None:
         raise ValueError("missing guarded Gumbel source")
-    changes[generated] = KERNEL_SOURCE + "\n\n" + shard_gumbel.rstrip() + "\n"
+    if not any(line.startswith("# SPDX-License-Identifier:") for line in gumbel_notices):
+        gumbel_notices.insert(0, "# SPDX-License-Identifier: Apache-2.0")
+    gumbel_notices.append("# Derived from vLLM's Gumbel sampler and modified for Inkling DSpark vocab sharding.")
+    changes[generated] = "\n".join(gumbel_notices) + "\n" + KERNEL_SOURCE + "\n\n" + shard_gumbel.rstrip() + "\n"
     for path, source in changes.items():
         ast.parse(source, filename=str(path))
     for path, source in changes.items():

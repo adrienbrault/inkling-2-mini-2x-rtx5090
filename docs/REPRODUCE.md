@@ -1,14 +1,22 @@
-# Reproduce the headline results
+# Reproduce the benchmark protocol
 
-Run from the repository root after [Quick start](../README.md#quick-start). Export `MODEL_DIR` for the checkpoint and set `URL` to the server root if you change the host port. The commands below use `http://127.0.0.1:8000`. Use separate output directories and keep other traffic off the server during a run.
-
-The headline boot used two RTX 5090s at stock power limits, TP2, `sm120-r10`, fp8 target KV, bf16 DSpark KV, fair prefill and the Rust frontend. The KV capacity and newcomer runs used the Python frontend as shown below. Save the launch settings, base digest from [the Dockerfile](../docker/Dockerfile), model commit, GPU topology, NVIDIA driver, power limits and client Python version with new results. The tool-eval report records Python 3.12.3. The archive does not establish the checkpoint commit or a host driver version for the headline boot. Use the references to compare the same workload and report repeat-run spread.
+Run from the repository root after [Quick start](../README.md#quick-start). Keep the server idle between workloads and use separate report directories. The harness passes the host-root URL, without `/v1`, to the clients. This preserves a URL you already exported:
 
 ```bash
-export URL=http://127.0.0.1:8000
+export URL="${URL:-http://127.0.0.1:${PORT:-8000}}"
 ```
 
-## Performance on the headline boot
+## Measurement boot
+
+The headline measurements were taken on 2026-11-22 on image `inkling2-rtx5090:sm120-r13`. The recorded launch source is commit [`2aa8760`](https://github.com/adrienbrault/inkling-2-mini-2x-rtx5090/tree/2aa8760df59080609d60d2dc9880c7ad1ac4d858). Inspect the historical entry points with `git show 2aa8760:scripts/serve.sh`, `git show 2aa8760:scripts/build-image.sh`, and `git show 2aa8760:docker/Dockerfile`.
+
+The headline configuration used two RTX 5090s at stock power limits, TP2, a 1,048,576-token window, both served names, fp8 target KV, bf16 DSpark KV, fair prefill, and the Rust frontend. The performance and quality captures share a boot. The KV capture records r13 at 1M with both names. The newcomer capture records r13, and its window and adapter state are **TO CONFIRM**. The r13 launcher defaults to Rust, and the separate KV and newcomer captures' frontends are **TO CONFIRM**. The checkpoint revision and host driver from the headline boot are **TO CONFIRM**. Tool-eval records client Python 3.12.3.
+
+Quick start builds r14. Its difference from r13 is in-kernel DSpark RoPE. The [r14 A/B](../bench/results/20261122T203506Z-inkling2-r14-ab/summary.json) matched the r13 outputs on 11 lone-request prompts in each sampling mode and matched the one-stream draft counters. It measured 24,553 KV blocks at 1M against 23,734 on r13. The headline suite, live KV residency and a full two-name structured check were not repeated on r14. The commands here describe how to run the protocol against a running server. Record the image digest, checkpoint revision, window, adapter and frontend, along with the host setup and dependency versions, for any new run.
+
+## Performance
+
+The Spec-Bench wrapper requires curl, awk, Python 3 and a local Linux Docker Engine with host networking so the client container can reach the server's loopback URL. It builds a client from `IMAGE` by installing the wrapper's pins, `pandas==3.1.1` and `datasets==5.2.0`, from PyPI into the base's Python 3.14. The historical client environment and an install of these pins on that base are **TO CONFIRM**. A failing build is a client dependency failure. Use the top-level harness below when reading older archived job scripts.
 
 ```bash
 bash bench/specbench.sh runs/specbench
@@ -18,91 +26,71 @@ python3 bench/inkling_replay.py runs/pi-6 --url "$URL" --preset pi --slots 6 --d
 python3 bench/inkling_replay.py runs/pi-10 --url "$URL" --preset pi --slots 10 --duration 300 --warmup 150
 ```
 
-| Workload | Output | Validity conditions | Reference |
-| --- | --- | --- | --- |
-| Spec-Bench | `specbench-c{1,4,8,16}.json`, logs and counter snapshots, plus `specbench-summary.jsonl` | Use the four frozen subsets. Every cell needs 120 successful responses of exactly 256 output tokens. Use an idle server for the speculative counter deltas. | At 1 / 4 / 8 / 16 streams, mean 416 / 258 / 200 / 151 and median 379 / 248 / 185 / 142 tok/s per stream. Aggregate 416 / 1,034 / 1,601 / 2,419 tok/s. Wall-clock 367.37 / 904.38 / 1,379.87 / 2,020.57 tok/s. Median TTFT 32 / 54 / 69 / 106 ms. Acceptance length 2.97 / 3.01 / 2.99 / 2.97. [Raw Spec-Bench results](../bench/results/20261122T143353Z-inkling2-specbench-served-rustfe) |
-| Code at depth | `code-summary.json` and per-request JSON files | Each measured stream must hit the warmed context cache and return 400 output tokens. Compare matching depth, append and concurrency. Use `aggregate_shared_window` when present. If streams lack a shared decode window, label `aggregate_sum_of_rates` as the fallback. | At 1K cached depth plus a 2K append, 532 tok/s per stream at concurrency 1 and 2,717 tok/s shared-window aggregate at concurrency 16. The plot averages across depths. [Raw code results](../bench/results/20261122T143647Z-inkling2-code-rustfe) |
-| Cold prefill | `prefill-summary.json` and per-prompt JSON files | Each salted prompt must report zero cached tokens and return one output token. Compare actual prompt tokens divided by end-to-end TTFT, matching each row by target length. | 19,115 / 14,835 / 8,716 tok/s at 2K / 61K / 246K, respectively. 246K TTFT was 28.2 s. All seven cells stayed within 0.4% on the second pass of the same boot. [Raw prefill results](../bench/results/20261122T143852Z-inkling2-prefill-rustfe-a), [second pass](../bench/results/20261122T143959Z-inkling2-prefill-rustfe-b) |
-| Agent replay `pi:6` | `runs/pi-6/summary.json` and `requests.jsonl` | The first 150 s of the 300 s run are warmup. Require `valid: true`, zero errors and zero forced-length misses. Record the scored request count and cached share. | 511 tok/s aggregate. TTFT p50 / p90 0.15 / 0.69 s. [Raw replay results](../bench/results/20261122T143310Z-inkling2-pi-rustfe) |
-| Agent replay `pi:10` | `runs/pi-10/summary.json` and `requests.jsonl` | Use the same scored window and checks as `pi:6`. | 711 tok/s aggregate. TTFT p50 / p90 0.23 / 0.72 s. [Raw replay results](../bench/results/20261122T143310Z-inkling2-pi-rustfe) |
+| Workload | Outputs and checks | r13 reference |
+| --- | --- | --- |
+| Spec-Bench | Read `specbench-summary.jsonl` and the counter snapshots. Each of the four frozen subsets needs 120 successful responses of exactly 256 output tokens. | At 1 / 4 / 8 / 16 streams, mean 416 / 254 / 196 / 150 tok/s per stream and aggregate 416 / 1,017 / 1,569 / 2,399 tok/s. [Raw results](../bench/results/20261122T192436Z-inkling2-specbench-served-r13) |
+| Code at depth | Read `code-summary.json`. Each stream needs a cache hit for the warmed context and 400 output tokens. Use the shared decode window when present, and label the sum of rates when used as a fallback. | At 1K cached depth and a 2K append, 519 tok/s on one stream and 2,897 tok/s shared-window aggregate at 16 streams. [Raw results](../bench/results/20261122T192732Z-inkling2-code-r13) |
+| Cold prefill | Read `prefill-summary.json`. Salted prompts need zero cached tokens and one output token. Divide actual input tokens by end-to-end TTFT. | 19,012 / 14,830 / 8,724 tok/s at 2K / 61K / 246K. TTFT at 246K was 28.2 s. [First pass](../bench/results/20261122T192938Z-inkling2-prefill-r13-a), [second pass](../bench/results/20261122T193045Z-inkling2-prefill-r13-b) |
+| Agent replay | Read `summary.json` and `requests.jsonl`. Score the last 150 s after 150 s of warmup. Require `valid: true`, zero request errors and no forced-length misses. | 6 / 10 sessions: 524 / 685 tok/s aggregate, median first token 0.16 / 0.22 s. [Raw results](../bench/results/20261122T192343Z-inkling2-pi-r13) |
 
-The Spec-Bench client builds from the serving image. The archive has no pandas or datasets versions to pin. The plotted drafter-off curve is from a historical r3/NCCL boot with other settings changed. [Drafter comparison](CONFIGURATION.md#drafter-on-or-off)
+The drafter-off line in the decode chart comes from a historical r3/NCCL boot. [Drafter comparison](CONFIGURATION.md#drafter-on-or-off)
 
 ## KV capacity and newcomer
 
-For KV capacity, boot with `VLLM_USE_RUST_FRONTEND=0 scripts/serve.sh` and keep fair prefill enabled.
+The KV probe used r13, a 1M window and both names. Use the following parameters to match the workload. Read the timestamped `summary.json` and both cohort files. The 8-request cohort reached simultaneous decode, 66% peak KV usage and zero preemptions. Its capacity estimate was about 1.42M live tokens. Eleven of the twelve requests in the other cohort decoded together, so it yielded no full-cohort capacity estimate. [Raw KV results](../bench/results/20261122T200911Z-inkling2-kv-capacity-r13)
 
 ```bash
 python3 bench/kv_capacity.py bench/inputs/code-corpus.txt runs/kv --url "$URL" \
-  --cohorts 14 --prompt-tokens 80000 --output-tokens 16384
+  --cohorts 8,12 --prompt-tokens 96000 --output-tokens 24576
 ```
 
-Read `summary.json` and `cohort-14.json` under the run directory printed by the probe. Require no request issues, simultaneous decode by all 14 requests and zero preemptions. The 14 × 80K reference peaked at 14 running and 88% KV usage, with a median live-tokens / KV-usage estimate of 1,486,835 tokens. The logged 818,388 is the engine's full-window admission estimate. In the separate 16 × 96K run, the default full-prompt reserve admitted 12 at once with zero preemptions. With `--no-scheduler-reserve-full-isl`, all 16 were admitted and 326 preemptions followed. Without a measured all-decoding overlap, there is no capacity estimate. [Raw KV results](../bench/results/20261122T124729Z-inkling2-kv-capacity)
-
-For newcomer, boot in off/on/off/on order. Start each server in one terminal and run its matching benchmark in another. Stop each server before the next boot.
+The r13 newcomer run used fair prefill and three trials. A background stream is already decoding when a salted 196,608-token prefill starts. The tool waits two seconds before sending the 1K and 16K newcomers. Read `newcomer-summary.json` for the median newcomer TTFT and the long request's slowdown relative to its solo run. [Raw newcomer results](../bench/results/20261122T200911Z-inkling2-newcomer-r13)
 
 ```bash
-# Control boot, repeat for off-1 and off-2
-VLLM_USE_RUST_FRONTEND=0 FAIR_PREFILL=0 scripts/serve.sh
-
-# Fair-prefill boot, repeat for on-1 and on-2
-VLLM_USE_RUST_FRONTEND=0 FAIR_PREFILL=1 scripts/serve.sh
+python3 bench/newcomer.py runs/newcomer --url "$URL" --long 196608 --trials 3
 ```
+
+The historical r10 KV residency and admission runs used a 262,144-token window, base name only and the Python frontend. The separately archived fair-prefill off/on A/B also used r10 with a 262,144-token window, base name only and the Python frontend. Follow their archives for the different cohorts and controls. [r10 KV](../bench/results/20261122T124729Z-inkling2-kv-capacity), [r10 fair prefill](../bench/results/20261122T092118Z-inkling2-fair-prefill-768)
+
+## Admission diagnostics
+
+Launch with `VLLM_INKLING_CONVPAGE_PROBE=1` and capture the scheduler log from another terminal. Set `URL` to the port you chose for the launch.
 
 ```bash
-# Run each command on its matching boot.
-python3 bench/newcomer.py runs/off-1 --url "$URL" --long 196608 --trials 3
-python3 bench/newcomer.py runs/on-1  --url "$URL" --long 196608 --trials 3
-python3 bench/newcomer.py runs/off-2 --url "$URL" --long 196608 --trials 3
-python3 bench/newcomer.py runs/on-2  --url "$URL" --long 196608 --trials 3
+mkdir -p runs/admission
+docker logs -f inkling > runs/admission/scheduler.log 2>&1 &
+log_pid=$!
+python3 bench/kv_probe.py admission bench/inputs/code-corpus.txt runs/admission \
+  --url "$URL" --scheduler-log runs/admission/scheduler.log
+kill "$log_pid"
 ```
 
-Read `newcomer-summary.json` for each boot. Keep the salted cold prompts, the background decoding stream and the two-second offset. Compare median short and mid TTFT and the long prompt's TTFT relative to its solo run. With fair prefill the short / mid ranges were 0.51–0.52 s / 6.66–6.67 s and the long prompt took 1.16× as long as solo. Without fair prefill the short / mid ranges were 20.44–20.50 s / 21.53–21.54 s and the long prompt took 1.07× as long as solo. [Raw newcomer results](../bench/results/20261122T092118Z-inkling2-fair-prefill-768)
+The log needs the `INKLING_KV_PROBE_CONFIG` entry and the queued and scheduled events for each probe request.
 
-## Quality on the headline boot
+## Quality
+
+Use a client venv with PyPI access. The r13 package versions below come from the reports. The complete venv lock is **TO CONFIRM**.
+
+```bash
+python3 -m venv .venv-eval
+. .venv-eval/bin/activate
+python -m pip install 'tool-eval-bench==2.1.0' 'lm-eval[api]==0.4.12'
+```
 
 ### Tool-eval
 
 ```bash
-python3 -m pip install 'tool-eval-bench==2.1.0'
-mkdir -p runs/tooleval
-tool-eval-bench --base-url "${URL%/}/v1" --model inkling-2-mini \
-  --temperature 1.0 --trials 4 --parallel 8 --json-file runs/tooleval/tooleval.json
-# Equivalent wrapper: bash bench/tooleval.sh runs/tooleval
+bash bench/tooleval.sh runs/tooleval
+MODEL=inkling-2-mini-ablit bash bench/tooleval.sh runs/tooleval-ablit
 ```
 
-This is the command the published results ran. Require the completed report, all 69 scenarios (TC-01 to TC-69), four trials and zero request errors. Read `trial_statistics.final_score_mean` in `tooleval.json` for the headline 83.5 (trial standard deviation 3.0). The top-level score is 86. The Python frontend comparison was 82.8 ± 2.5. [Raw quality results](../bench/results/20261122T143310Z-inkling2-quality-rustfe), [Python frontend results](../bench/results/20261122T122255Z-inkling2-quality-r10-fair)
+The wrapper sends 69 scenarios (TC-01 to TC-69) in four trials at temperature 1.0 and parallelism 8. Require a completed report with zero request errors. Read `trial_statistics.final_score_mean` in each `tooleval.json`. The r13 means were 83.2 (trial standard deviation 1.9) for the base name and 78.2 (2.2) for the adapter. The earlier Rust frontend comparison is historical r10. [r13 quality](../bench/results/20261122T192343Z-inkling2-quality-r13), [r10 quality](../bench/results/20261122T143310Z-inkling2-quality-rustfe)
 
 ### GSM8K
 
-The archive records the settings but does not include the original CLI invocation. This command uses the lm-eval API to pass the recorded settings, including the stop string as a list. The wrapper runs the same command.
-
 ```bash
-python3 -m pip install 'lm-eval[api]==0.4.12'
-mkdir -p runs/gsm8k
-python3 - "${URL%/}/v1/chat/completions" runs/gsm8k/gsm8k-results.json <<'PY'
-import json
-import sys
-
-from lm_eval import simple_evaluate
-from lm_eval.utils import handle_non_serializable
-
-chat_url, output = sys.argv[1:]
-results = simple_evaluate(
-    model="local-chat-completions",
-    model_args={"base_url": chat_url, "model": "inkling-2-mini", "num_concurrent": 4,
-                "max_retries": 1, "tokenized_requests": False, "tokenizer_backend": None},
-    tasks=["gsm8k"], apply_chat_template=True, fewshot_as_multiturn=True,
-    num_fewshot=5, limit=200, batch_size=1, device="cuda:0", bootstrap_iters=100000, log_samples=False,
-    random_seed=0, numpy_random_seed=1234, torch_random_seed=1234, fewshot_random_seed=1234,
-    gen_kwargs={"temperature": 0, "reasoning_effort": "none", "max_gen_toks": 4096,
-                "until": ["<|inkling-eval-no-stop|>"]},
-)
-with open(output, "w") as report:
-    json.dump(results, report, indent=2, default=handle_non_serializable)
-print(output)
-PY
-# Equivalent wrapper: bash bench/gsm8k.sh runs/gsm8k
+bash bench/gsm8k.sh runs/gsm8k
+MODEL=inkling-2-mini-ablit bash bench/gsm8k.sh runs/gsm8k-ablit
 ```
 
-Read `runs/gsm8k/gsm8k-results.json`. Require the first 200 test examples, five shots and the same answer extractors. Keep the non-matching stop string and generation budget to avoid cutting off answers during reasoning. The runs used the `openai/gsm8k` main configuration at dataset revision `740312add88f781978c0658806c59bc2815b9866`. Compare 94.5% flexible extraction (standard error 1.6 percentage points) and 68.0% strict match. [Raw quality results](../bench/results/20261122T143310Z-inkling2-quality-rustfe)
+The wrapper inherits the harness task and pins [`openai/gsm8k` at `740312add88f781978c0658806c59bc2815b9866`](https://huggingface.co/datasets/openai/gsm8k/tree/740312add88f781978c0658806c59bc2815b9866). The archived task configuration names `openai/gsm8k` and `main`. Its resolved revision was not recorded by lm-eval. Compare the first 200 test examples with five shots, the same extractors and the 4,096-token budget with `reasoning_effort` set to `none`. Read flexible extraction and strict match from `gsm8k-results.json`. The r13 base name yielded 94.5% and 66.0%, and the adapter yielded 96.5% and 73.5%. [r13 quality](../bench/results/20261122T192343Z-inkling2-quality-r13)

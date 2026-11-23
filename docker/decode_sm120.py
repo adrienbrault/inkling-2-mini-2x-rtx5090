@@ -1,13 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
+# Derived from Inkling GEMV code in the vLLM Inkling fork and modified for streamed decode.
 """Decode-path kernels for Inkling-2-Mini on SM12x (RTX 5090), added by the inkling-2-mini-2x-rtx5090 overlay.
 
 stream_gemv: the loop controllers' small batched projection, `torch.bmm(x, w.transpose(1, 2))` for bf16 x (S, T, K)
-    and w (S, N, K) with T <= 16, in one launch. Each (stream, column block) program runs exactly the arithmetic of
-    Inkling's `_gemv_kernel` (ops/gemv.py: BN 32, BK 256, MP 16, 4 warps), which matches cuBLAS bitwise on these
-    shapes; cuBLAS takes ~17 us for two to four streams at T = 8, one launch of this ~7 us.
-    Bitwise equal to cuBLAS (20 of 20 random trials per shape, kernels/decode_bench.py, 2026-11-21) for 2 to 4
-    streams at 2 to 16 tokens; cuBLAS takes other kernels for one token or one stream at 8+ tokens, so
-    `use_stream_gemv` admits only the measured envelope.
+    and w (S, N, K) with T <= 16, in one launch. Each (stream, column block) program uses the arithmetic of
+    Inkling's `_gemv_kernel` (ops/gemv.py: BN 32, BK 256, MP 16, 4 warps). `use_stream_gemv` selects the stream
+    and token shapes for which the overlay substitutes this kernel for cuBLAS.
 """
 import torch
 

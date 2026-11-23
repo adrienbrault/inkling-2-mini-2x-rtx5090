@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Measure Inkling KV residency or warm-prefix admission on localhost:8000.
+"""Measure Inkling KV residency or warm-prefix admission against a running server.
 
 Use an idle test server. Admission needs VLLM_INKLING_CONVPAGE_PROBE=1 and a
 readable, continuously captured server log passed as --scheduler-log.
@@ -347,10 +347,12 @@ def boot_excerpt(path):
 
 
 def main():
+    global BASE
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("mode", choices=("capacity", "admission"))
     parser.add_argument("text_file", type=Path)
     parser.add_argument("output_dir", type=Path)
+    parser.add_argument("--url", default=BASE, help="server root URL (default: %(default)s)")
     parser.add_argument("--model", default="inkling-2-mini")
     parser.add_argument("--scheduler-log", type=Path, help="log containing probe events and pool configuration")
     parser.add_argument("--boot-log", type=Path, help="save boot configuration lines in the run summary")
@@ -359,6 +361,7 @@ def main():
     parser.add_argument("--timeout", type=float, default=900)
     parser.add_argument("--capacity-launch", choices=("staggered", "simultaneous"), default="staggered")
     args = parser.parse_args()
+    BASE = args.url.rstrip("/")
     if args.interval <= 0 or args.timeout <= 0 or (args.num_blocks is not None and args.num_blocks <= 1):
         parser.error("interval and timeout must be positive, and num-blocks must exceed one")
     if args.mode == "admission" and args.scheduler_log is None:

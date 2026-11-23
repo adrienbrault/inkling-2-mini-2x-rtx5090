@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Contains vLLM Llama/Qwen3 logits and Inkling fork code, adapted and modified for batch sharding.
 """Let vLLM's batch-sharded sampling engage for Inkling-2 (overlay r7).
 
 vLLM samples each request on one tensor-parallel rank from local vocab shards exchanged all-to-all, instead of

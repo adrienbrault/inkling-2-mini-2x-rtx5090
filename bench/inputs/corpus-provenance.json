@@ -1,7 +1,6 @@
 {
   "repository": "https://github.com/turboderp-org/exllamav3",
   "snapshot_repository_commit": "b4620db1091e1df57d0ebe9cae78c3451ba95c8a",
-  "snapshot_root": "opera/dsv41/r7/kit/vendor/exllamav3/",
   "license": "MIT",
   "files_sha256": {
     "exllamav3/__init__.py": "7e22bc79ce171366fe514165db0cdd75c4bfc396c64321c603c2fdb6165c5bd5",

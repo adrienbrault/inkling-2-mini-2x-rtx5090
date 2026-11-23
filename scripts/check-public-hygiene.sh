@@ -26,20 +26,29 @@ PATS=(
   'xox[bpa]-[A-Za-z0-9-]{20,}'
 )
 RE=$(IFS='|'; echo "${PATS[*]}")
+# These known measurement-host references are permitted only inside the raw archive.
+ARCHIVE_ONLY='(^|[^A-Za-z0-9_-])flan([^A-Za-z0-9_-]|$)|/srv/qwen5090|opera/dsv41'
 # Exempt: the docker bridge gateway (172.17.0.1 is the same on every host), and lines carrying a hygiene-ok marker
 # with a reason (fictional addresses inside frozen benchmark prompts).
 EXEMPT='172\.17\.0\.1|hygiene-ok'
 hits=0
 if [ "${1:-}" = "--tree" ]; then
   while IFS= read -r -d '' f; do
-    [ "$f" = "$SELF" ] || [ "$f" = "CLAUDE.md" ] && continue
-    grep -aInE "$RE" -- "$f" | grep -avE "$EXEMPT" | sed "s|^|$f:|" | grep -a . && hits=1
-  done < <(git ls-files -z)
+    [[ $f == "$SELF" || ! -f $f ]] && continue
+    pattern=$RE
+    [[ $f == bench/results/* ]] || pattern="$pattern|$ARCHIVE_ONLY"
+    grep -InE "$pattern" -- "$f" | grep -vE "$EXEMPT" | sed "s|^|$f:|" | grep . && hits=1
+  done < <(git ls-files --cached --others --exclude-standard -z)
 else
-  # added lines of the staged diff, tagged with their file
-  out=$(git diff --cached -U0 --diff-filter=AM -- . ":!$SELF" ":!CLAUDE.md" \
-    | awk '/^\+\+\+ b\//{f=substr($0,7)} /^\+/ && !/^\+\+\+/{print f": "substr($0,2)}' \
-    | grep -aE "$RE" | grep -avE "$EXEMPT")
+  # Match added lines before printing their path prefix.
+  out=$(git diff --cached -U0 --diff-filter=AM -- . ":!$SELF" \
+    | RE_GENERAL="$RE" RE_ARCHIVE="$ARCHIVE_ONLY" RE_EXEMPT="$EXEMPT" awk '
+      BEGIN { general=ENVIRON["RE_GENERAL"]; archive_only=ENVIRON["RE_ARCHIVE"]; exempt=ENVIRON["RE_EXEMPT"] }
+      /^\+\+\+ b\// { f=substr($0,7); next }
+      /^\+/ && !/^\+\+\+/ {
+        line=substr($0,2)
+        if (line !~ exempt && (line ~ general || (f !~ /^bench\/results\// && line ~ archive_only))) print f ": " line
+      }')
   [ -n "$out" ] && { echo "$out"; hits=1; }
 fi
 if [ "$hits" = 1 ]; then echo "check-public-hygiene: FAIL (see lines above)"; exit 1; fi

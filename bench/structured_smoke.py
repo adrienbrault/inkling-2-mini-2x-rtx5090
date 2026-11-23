@@ -17,10 +17,11 @@ TOOL = {"type": "function", "function": {"name": "get_weather", "description": "
         "parameters": {"type": "object", "properties": {"city": {"type": "string"}, "unit": {"type": "string", "enum": ["c", "f"]}},
                        "required": ["city", "unit"]}}}
 Q = "Give facts about Paris."
+REQUEST_SETTINGS = {"max_tokens": 4096, "chat_template_kwargs": {"reasoning_effort": "none"}}
 
 
 def call(url, body, stream):
-    body = {**body, "stream": stream, "max_tokens": 1024}
+    body = {**body, **REQUEST_SETTINGS, "stream": stream}
     req = urllib.request.Request(url + "/v1/chat/completions", json.dumps(body).encode(), {"Content-Type": "application/json"})
     t = time.time()
     with urllib.request.urlopen(req, timeout=600) as r:
@@ -131,7 +132,8 @@ def main():
         print("mixed", json.dumps({"name": name, **mixed[name]}), flush=True)
 
     failed = [(r["name"], r["case"], r["stream"]) for r in results if not r["ok"]]
-    summary = {"passed": len(results) - len(failed), "of": len(results), "failed": failed, "mixed": mixed}
+    summary = {"passed": len(results) - len(failed), "of": len(results), "failed": failed, "mixed": mixed,
+               "request_settings": REQUEST_SETTINGS}
     print("summary", json.dumps(summary), flush=True)
     with open(args.out, "w") as report:
         json.dump({"cases": results, "summary": summary}, report, indent=1, ensure_ascii=False)

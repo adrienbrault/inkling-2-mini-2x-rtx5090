@@ -1,7 +1,9 @@
-"""Route two bf16 decode products off cuBLAS onto bitwise-identical Triton kernels (overlay r5).
-loop.py: the loop controllers' down projection uses decode_sm120.stream_gemv inside its measured envelope.
-sconv.py: the dynamic short-conv tap projection uses Inkling's own sm12x_bf16_gemv for 1 to 16 tokens (bitwise equal
-to cuBLAS on its (T, 2304) x (32, 2304) shape, 20 of 20 trials per T, kernels/decode_bench.py). usage: patch_decode.py V"""
+# SPDX-License-Identifier: Apache-2.0
+# Contains Inkling fork code from vLLM, modified to route selected decode products through Triton.
+"""Route two bf16 decode products off cuBLAS onto Triton kernels (overlay r5).
+loop.py: use decode_sm120.stream_gemv inside its selected shape range.
+sconv.py: use Inkling's own sm12x_bf16_gemv for 1 to 16 tokens.
+Usage: patch_decode.py V"""
 import hashlib
 import sys
 from pathlib import Path

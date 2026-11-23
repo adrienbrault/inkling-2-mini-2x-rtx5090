@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Contains Inkling fork code from vLLM, modified for the inactive-adapter path and Inkling logits head.
 """Opt in to Inkling2's inactive-adapter and unadapted-head paths after r10.
 
 Usage: python3 patch_lora.py /path/to/site-packages/vllm

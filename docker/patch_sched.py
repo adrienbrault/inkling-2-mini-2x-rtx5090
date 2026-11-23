@@ -1,11 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0
+# Contains vLLM scheduler code, modified to cap the step budget during decode.
 """Decode-aware step budget for vLLM's V1 scheduler (overlay r8; off unless VLLM_DECODE_STEP_BUDGET is set).
 
 While any running request is decoding, cap the step's scheduled tokens at VLLM_DECODE_STEP_BUDGET (0 or unset = off),
 so a chunked prefill interleaves with the decoders in smaller slices. A lone prefill (nobody decoding) keeps the full
-max_num_batched_tokens budget: its chunk boundaries, and so its output and cold-prefill rate, stay as without the
-patch. Motivation (agent-traffic replays, 2026-11-21): a global --max-num-batched-tokens 1024 gave +12-15 % aggregate
-decode at 10 concurrent agent sessions but changed long lone-prompt outputs (0/3 identical) and cost 5-10 % cold
-prefill; per-request caps (--long-prefill-token-threshold) kept both but gained only 2-3 %.
+max_num_batched_tokens budget and its original chunk boundaries.
 usage: patch_sched.py SCHEDULER_PY"""
 import hashlib
 import sys

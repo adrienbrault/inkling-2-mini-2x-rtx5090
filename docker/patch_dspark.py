@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Contains DSpark code from the vLLM Inkling fork, modified for SM12x KV-cache scatter.
 """Route the DSpark drafter's KV write through the SM12x Triton scatter (see kv_write_sm120.py)."""
 import hashlib
 import sys

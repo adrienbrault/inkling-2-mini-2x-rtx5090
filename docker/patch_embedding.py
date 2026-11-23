@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Contains vLLM embedding code, modified to select the unfused path on SM12x.
 """SM12x: use vLLM's unfused vocab-parallel embedding (masked gather + all-reduce, the same values) instead of the
 fused ops.vocab_parallel_embedding, which lives in the image's sm_120-less compiled core and fails at TP>1."""
 import hashlib

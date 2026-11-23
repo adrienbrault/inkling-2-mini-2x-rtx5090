@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
+# Derived from the vLLM Inkling fork's KV-cache scatter path and modified for Triton on SM12x.
 """Triton KV-cache scatter for the Inkling 2 DSpark drafter on consumer Blackwell (SM12x).
 
 The vllm/vllm-openai:inkling-2-mini day-0 image builds vLLM's compiled core (_C_stable_libtorch) for sm_80/89/90/100

@@ -22,8 +22,7 @@ SOFTWARE.
 
 ---
 
-NOTE ON THIRD-PARTY CODE: this repository contains and modifies code from
-vLLM, which is licensed under Apache License 2.0. Those parts remain under
-Apache-2.0 and are attributed in docker/README.md (Credits). The MIT license above applies
-to the original work in this repository (documentation, benchmarks, scripts,
-and the patch logic authored here).
+The MIT license above applies to original work outside files marked with
+another license. The vLLM-derived overlay and Spec-Bench subsets are covered
+by Apache License 2.0 (LICENSE-APACHE), subject to underlying dataset terms.
+See [THIRD_PARTY.md](THIRD_PARTY.md) for the file-by-file credits and license texts.

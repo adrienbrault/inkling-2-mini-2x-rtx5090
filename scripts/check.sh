@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Wait for a running server and smoke-test every name it serves.
-# Usage: URL=http://127.0.0.1:8000 scripts/check.sh [REPORT_DIR]
+# Usage: URL=http://127.0.0.1:8000 EXPECT_MODELS=inkling-2-mini scripts/check.sh [REPORT_DIR]
 set -euo pipefail
 
 root=$(cd -- "$(dirname -- "$0")/.." && pwd)
@@ -9,9 +9,10 @@ python3 - "$root/bench" "${1:-}" "${READY_TIMEOUT:-300}" <<'PY'
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
-from tempfile import TemporaryDirectory
+from tempfile import mkdtemp
 import time
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -49,8 +50,13 @@ def check(report_dir):
             break
 
     names = list(dict.fromkeys(model["id"] for model in models["data"]))
-    if not names or any(not name for name in names):
+    if not names or any(not isinstance(name, str) or not name for name in names):
         sys.exit("/v1/models returned no usable model names")
+
+    expected = {name.strip() for name in os.environ.get("EXPECT_MODELS", "").split(",") if name.strip()}
+    missing = expected.difference(names)
+    if missing:
+        sys.exit(f"/v1/models is missing expected IDs: {', '.join(sorted(missing))}; got {', '.join(names)}")
 
     failures = []
     for index, name in enumerate(names, start=1):
@@ -86,6 +92,14 @@ if reports:
     directory.mkdir(parents=True, exist_ok=True)
     check(directory)
 else:
-    with TemporaryDirectory() as directory:
-        check(Path(directory))
+    directory = Path(mkdtemp(prefix="inkling-smoke-"))
+    passed = False
+    try:
+        check(directory)
+        passed = True
+    finally:
+        if passed:
+            shutil.rmtree(directory)
+        else:
+            print(f"Smoke reports directory: {directory}", file=sys.stderr)
 PY

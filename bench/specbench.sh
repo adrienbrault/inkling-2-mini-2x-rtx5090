@@ -16,7 +16,7 @@ URL=${URL%/}
 IMAGE=${IMAGE:-inkling2-rtx5090:sm120-r14}
 docker image inspect "$IMAGE" >/dev/null ||
   { echo "Build $IMAGE first with scripts/build-image.sh and the same IMAGE value." >&2; exit 1; }
-# pandas and datasets at the versions of the client image the published results used.
+# Client build pins. The r13 archive does not record the installed versions.
 docker build -q -t inkling2-rtx5090:bench --build-arg "SERVING_IMAGE=$IMAGE" - <<'DF' > /dev/null
 ARG SERVING_IMAGE
 FROM ${SERVING_IMAGE}

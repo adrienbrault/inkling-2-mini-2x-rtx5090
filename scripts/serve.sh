@@ -7,44 +7,11 @@
 #
 # MODEL_DIR holds the official checkpoint (huggingface.co/thinkingmachines/Inkling-2-Mini, NVFP4/MXFP8, ~20 GB with the
 # drafter's mtp.safetensors). The server listens on PORT (default 8000) and serves the id "inkling-2-mini".
-# Settings and why (docs/CONFIGURATION.md has the measurements behind each):
-#   --tensor-parallel-size 2         both cards as one model; one card alone cannot hold the drafter and a useful context
-#   --speculative-config dspark      the checkpoint's own drafter; 7 draft tokens per step (the only value it accepts);
-#                                    the drafter's own KV cache stays bf16 ("kv_cache_dtype":"auto")
-#   --kv-cache-dtype fp8             the target's KV cache in unit-scale E4M3 (481,529-token pool in bf16), decode and
-#                                    prefill unchanged
-#   VLLM_INKLING_CONV_PAGE=1, --block-size 64  overlay r9: the short-conv state gets small pages of its own size instead
-#                                    of attention-sized ones: 819,427 KV tokens instead of 699,885 (818,388 with the draft
-#                                    sharding below), same output
-#   VLLM_INKLING_DRAFT_ROPE_ONTHEFLY=1  overlay r14: the drafter computes its RoPE cos/sin in its kernels instead of
-#                                    reading an fp32 table sized for the window (512 MiB per card at 1M): +819 KV
-#                                    blocks per card, bitwise the same drafts
-#   VLLM_INKLING_DRAFT_SHARD=1       overlay r10: the drafter samples each card's vocabulary shard and the cards swap
-#                                    winners instead of gathering full-vocabulary draft logits (same output)
-#   --max-num-seqs 16                16 concurrent sequences: a larger KV pool than vLLM's default sequence limit
-#                                    and faster decode at 8 streams
-#   VLLM_DECODE_STEP_BUDGET=1024     overlay r8: while any request is decoding, a step carries at most 1,024 tokens, so
-#                                    long prefills interleave with the decoding streams in smaller slices; a prefill with
-#                                    nobody decoding keeps vLLM's 2,048-token chunks (same output, same prefill rate)
-#   --long-prefill-token-threshold 768 --long-prefill-token-threshold-adaptive  fair prefill: while several requests
-#                                    prefill, each gets at most max(768, 2,048 / their number) tokens per step, so a short
-#                                    request behind a long cold prompt starts in 0.5 s instead of 20 s; a lone prefill is
-#                                    scheduled as before (same output); costs 2-4 % aggregate decode at 10 agent sessions
-#   VLLM_USE_RUST_FRONTEND=1        vLLM's Rust API server instead of the Python one: same output text and throughput,
-#                                    first token about 0.1 s sooner on long agent prompts; the streamed reasoning keeps
-#                                    its trailing whitespace
-#   --enable-batch-sharded-sampling  overlay r7: each request is sampled on one card from both cards' vocabulary shards
-#                                    instead of gathering the full logits on both
-#   TRITON_CACHE_DIR in CACHE_DIR    Inkling's kernels are Triton; without a persisted Triton cache every boot recompiles
-#                                    them (about 3 min 15 s to ready instead of about 40 s)
-#   VLLM_ALLREDUCE_USE_FLASHINFER_PCIE_IPC=1  FlashInfer's PCIe all-reduce for the TP group: about 10 % faster decode
-#                                    than NCCL (Inkling's own fused all-reduce needs NVLink multicast)
-#   --disable-custom-all-reduce      vLLM's custom all-reduce is compiled without sm_120 in the day-0 image
-#   --kernel-config autotune off     FlashInfer's warmup autotune profiles kernels that have no sm_120 build in the image
-#   --reasoning-parser / --tool-call-parser inkling, --enable-auto-tool-choice: chat, reasoning and tool calls
-#   --enable-prompt-tokens-details   usage reports cached prompt tokens
-# Required on sm_120 with this image: --disable-custom-all-reduce, the autotune setting and the bf16 drafter cache (the
-# overlay's drafter KV write covers the unquantized cache only and refuses an fp8 one).
+# Settings and their measurement sources: docs/CONFIGURATION.md. DSpark uses the checkpoint's fixed seven-token
+# draft length and bf16 drafter cache. The target uses fp8 KV by default. TP2 uses FlashInfer PCIe IPC and
+# batch-sharded sampling. The overlay enables compact conv pages, draft sharding and in-kernel drafter RoPE.
+# The launcher also enables fair prefill, the decode-aware step budget and the Rust frontend, and persists Triton
+# kernels in CACHE_DIR. The pinned base needs custom all-reduce and FlashInfer warmup autotune disabled on SM120.
 set -euo pipefail
 
 die() { printf 'serve.sh: %s\n' "$*" >&2; exit 1; }
@@ -135,6 +102,30 @@ if ! readable_file "$MODEL_DIR/tokenizer.json" && ! readable_file "$MODEL_DIR/to
   die "MODEL_DIR is missing tokenizer data (tokenizer.json, tokenizer.model, or vocab.json and merges.txt)"
 fi
 readable_file "$MODEL_DIR/mtp.safetensors" || die "MODEL_DIR is missing readable mtp.safetensors"
+index="$MODEL_DIR/model.safetensors.index.json"
+if [[ -e $index || -L $index ]]; then
+  python3 - "$index" <<'PY'
+import json
+import os
+import sys
+from pathlib import Path
+
+index = Path(sys.argv[1])
+try:
+    weights = json.loads(index.read_text(encoding="utf-8"))["weight_map"]
+    if not isinstance(weights, dict) or not weights:
+        raise ValueError("expected a nonempty weight_map")
+    for name in weights.values():
+        if not isinstance(name, str) or name != Path(name).name or not name.endswith(".safetensors"):
+            raise ValueError(f"invalid shard name {name!r}")
+    for name in sorted(set(weights.values())):
+        shard = index.parent / name
+        if not shard.is_file() or not os.access(shard, os.R_OK) or shard.stat().st_size == 0:
+            raise ValueError(f"missing, unreadable or empty shard {name}")
+except (OSError, KeyError, TypeError, ValueError) as exc:
+    sys.exit(f"serve.sh: cannot validate {index.name}: {exc}")
+PY
+fi
 shopt -s nullglob
 weights=0
 for shard in "$MODEL_DIR"/*.safetensors; do
