@@ -42,7 +42,7 @@ Sources: KV pool [`kv-capacity-r13`](bench/results/20261122T200911Z-inkling2-kv-
 
 ## Quick start
 
-Use x86-64 Linux, two RTX 5090s (32 GB each), Git, Bash, Python 3 with `venv`, curl, and a **local** Docker Engine with the NVIDIA Container Toolkit. The day-0 image needs a CUDA 13 driver. R580 is the minimum driver family for CUDA 13, and the exact minimum for the image's CUDA minor version is **TO CONFIRM**. The archived measurements do not record a tested driver, Docker or Container Toolkit combination.
+Use x86-64 Linux, two RTX 5090s (32 GB each), Git, Bash, Python 3 with `venv`, curl, and a **local** Docker Engine with the NVIDIA Container Toolkit. The day-0 image needs a CUDA 13 driver. The archived measurements ran on Ubuntu 24.04 (kernel 7.0), NVIDIA driver 610.57.04, Docker 29.1.3 and NVIDIA Container Toolkit 1.20.0; older CUDA 13 drivers (R580 and later) are untested.
 
 Allow about 20.1 GB for the checkpoint and bundled drafter (19.5 GB + 636 MB), plus space on the Docker and cache volumes. The image and Triton cache sizes were not recorded. The first build needs Docker Hub access. Package and model downloads need access to PyPI and the Hugging Face Hub.
 
@@ -56,7 +56,7 @@ Allow about 20.1 GB for the checkpoint and bundled drafter (19.5 GB + 636 MB), p
 
    Use device indices from `nvidia-smi -L` in `GPUS` below. Your account must be able to run `docker` against the local daemon so the model and cache bind mounts resolve on this host.
 
-2. Clone and fetch the checkpoint in a venv. The revision below is the quick-start pin. The exact checkpoint revision used in the benchmark archive is **TO CONFIRM**.
+2. Clone and fetch the checkpoint in a venv. Every archived result was measured on the revision below.
 
    ```bash
    git clone https://github.com/adrienbrault/inkling-2-mini-2x-rtx5090.git
