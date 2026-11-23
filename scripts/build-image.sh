@@ -3,4 +3,4 @@
 # overlay in docker/ (see docker/README.md).
 set -euo pipefail
 cd "$(dirname "$0")/../docker"
-docker build -t "${IMAGE:-inkling2-rtx5090:sm120-r13}" .
+docker build -t "${IMAGE:-inkling2-rtx5090:sm120-r14}" .

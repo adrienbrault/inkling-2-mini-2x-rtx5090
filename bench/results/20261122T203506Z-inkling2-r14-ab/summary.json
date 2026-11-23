@@ -1,0 +1,206 @@
+{
+ "R1": {
+  "specbench": [
+   {
+    "c": 1,
+    "requests": 120,
+    "per_stream_decode_median": 376.6,
+    "aggregate": 413.2,
+    "ttft_median_ms": 32.7,
+    "wall_output_tok_s": 363.9
+   },
+   {
+    "c": 8,
+    "requests": 120,
+    "per_stream_decode_median": 182.8,
+    "aggregate": 1550.6,
+    "ttft_median_ms": 71.8,
+    "wall_output_tok_s": 1327.7
+   },
+   {
+    "c": 16,
+    "requests": 120,
+    "per_stream_decode_median": 135.6,
+    "aggregate": 2354.8,
+    "ttft_median_ms": 113.7,
+    "wall_output_tok_s": 1975.2
+   }
+  ],
+  "kv_blocks": 23734,
+  "drafter_counts": [
+   {
+    "c": 1,
+    "drafts": 10377.0,
+    "accepted": 20448.0,
+    "mean_acceptance_length": 2.971
+   },
+   {
+    "c": 8,
+    "drafts": 10403.0,
+    "accepted": 20414.0,
+    "mean_acceptance_length": 2.962
+   },
+   {
+    "c": 16,
+    "drafts": 10300.0,
+    "accepted": 20493.0,
+    "mean_acceptance_length": 2.99
+   }
+  ],
+  "smoke": {
+   "tool_call": {
+    "status": 200,
+    "ok": true,
+    "detail": [
+     {
+      "id": "call_d2c7d6ee13044e1684abae0c",
+      "type": "function",
+      "function": {
+       "name": "get_weather",
+       "arguments": "{\"city\":\"Paris\"}"
+      }
+     }
+    ]
+   },
+   "image": {
+    "status": 200,
+    "ok": true,
+    "detail": "Red"
+   },
+   "t08": [
+    {
+     "status": 200,
+     "ok": true,
+     "tokens": 654,
+     "finish": "stop",
+     "head": "Silica seas fill with tiny lanterns,  \nA million cores lean "
+    },
+    {
+     "status": 200,
+     "ok": true,
+     "tokens": 536,
+     "finish": "stop",
+     "head": "In silicon halls, ten thousand lanes of light  \nreckon, divi"
+    },
+    {
+     "status": 200,
+     "ok": true,
+     "tokens": 349,
+     "finish": "stop",
+     "head": "Silicon streams, a thousand voices hum,  \nParallel heartbeat"
+    },
+    {
+     "status": 200,
+     "ok": true,
+     "tokens": 736,
+     "finish": "stop",
+     "head": "A short poem:\n\nThousands of little lanterns wake  \nin silico"
+    }
+   ],
+   "all_ok": true
+  }
+ },
+ "T1": {
+  "specbench": [
+   {
+    "c": 1,
+    "requests": 120,
+    "per_stream_decode_median": 377.8,
+    "aggregate": 414.6,
+    "ttft_median_ms": 32.6,
+    "wall_output_tok_s": 366.1
+   },
+   {
+    "c": 8,
+    "requests": 120,
+    "per_stream_decode_median": 180.6,
+    "aggregate": 1556.9,
+    "ttft_median_ms": 72.1,
+    "wall_output_tok_s": 1339.5
+   },
+   {
+    "c": 16,
+    "requests": 120,
+    "per_stream_decode_median": 136.7,
+    "aggregate": 2352.2,
+    "ttft_median_ms": 113.1,
+    "wall_output_tok_s": 1978.2
+   }
+  ],
+  "kv_blocks": 24553,
+  "drafter_counts": [
+   {
+    "c": 1,
+    "drafts": 10377.0,
+    "accepted": 20448.0,
+    "mean_acceptance_length": 2.971
+   },
+   {
+    "c": 8,
+    "drafts": 10398.0,
+    "accepted": 20392.0,
+    "mean_acceptance_length": 2.961
+   },
+   {
+    "c": 16,
+    "drafts": 10400.0,
+    "accepted": 20384.0,
+    "mean_acceptance_length": 2.96
+   }
+  ],
+  "smoke": {
+   "tool_call": {
+    "status": 200,
+    "ok": true,
+    "detail": [
+     {
+      "id": "call_e1bbb225532a4c11a6ed01a5",
+      "type": "function",
+      "function": {
+       "name": "get_weather",
+       "arguments": "{\"city\":\"Paris\"}"
+      }
+     }
+    ]
+   },
+   "image": {
+    "status": 200,
+    "ok": true,
+    "detail": "Red"
+   },
+   "t08": [
+    {
+     "status": 200,
+     "ok": true,
+     "tokens": 654,
+     "finish": "stop",
+     "head": "Silica seas fill with tiny lanterns,  \nA million cores lean "
+    },
+    {
+     "status": 200,
+     "ok": true,
+     "tokens": 536,
+     "finish": "stop",
+     "head": "In silicon halls, ten thousand lanes of light  \nreckon, divi"
+    },
+    {
+     "status": 200,
+     "ok": true,
+     "tokens": 349,
+     "finish": "stop",
+     "head": "Silicon streams, a thousand voices hum,  \nParallel heartbeat"
+    },
+    {
+     "status": 200,
+     "ok": true,
+     "tokens": 736,
+     "finish": "stop",
+     "head": "A short poem:\n\nThousands of little lanterns wake  \nin silico"
+    }
+   ],
+   "all_ok": true
+  }
+ },
+ "T1_vs_R1_greedy": "11/11 identical",
+ "T1_vs_R1_seeded": "11/11 identical"
+}

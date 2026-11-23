@@ -16,6 +16,9 @@
 #   VLLM_INKLING_CONV_PAGE=1, --block-size 64  overlay r9: the short-conv state gets small pages of its own size instead
 #                                    of attention-sized ones: 819,427 KV tokens instead of 699,885 (818,388 with the draft
 #                                    sharding below), same output
+#   VLLM_INKLING_DRAFT_ROPE_ONTHEFLY=1  overlay r14: the drafter computes its RoPE cos/sin in its kernels instead of
+#                                    reading an fp32 table sized for the window (512 MiB per card at 1M): +819 KV
+#                                    blocks per card, bitwise the same drafts
 #   VLLM_INKLING_DRAFT_SHARD=1       overlay r10: the drafter samples each card's vocabulary shard and the cards swap
 #                                    winners instead of gathering full-vocabulary draft logits (same output)
 #   --max-num-seqs 16                16 concurrent sequences: a larger KV pool than vLLM's default sequence limit
@@ -57,7 +60,7 @@ mount_path() {
 
 MODEL_DIR=${MODEL_DIR:-}
 CACHE_DIR=${CACHE_DIR:-$HOME/.cache/inkling2-vllm}
-IMAGE=${IMAGE:-inkling2-rtx5090:sm120-r13}
+IMAGE=${IMAGE:-inkling2-rtx5090:sm120-r14}
 PORT=${PORT:-8000}
 BIND=${BIND:-127.0.0.1}
 GPUS=${GPUS:-0,1}
@@ -107,8 +110,9 @@ VLLM_INKLING_CONV_PAGE=${VLLM_INKLING_CONV_PAGE:-$conv_pages}
 draft_shard=0
 if [[ $DSPARK == 1 && $tp2 == 1 && $BATCH_SHARDED_SAMPLING == 1 ]]; then draft_shard=1; fi
 VLLM_INKLING_DRAFT_SHARD=${VLLM_INKLING_DRAFT_SHARD:-$draft_shard}
+VLLM_INKLING_DRAFT_ROPE_ONTHEFLY=${VLLM_INKLING_DRAFT_ROPE_ONTHEFLY:-$DSPARK}
 for name in DSPARK FAIR_PREFILL BATCH_SHARDED_SAMPLING VLLM_ALLREDUCE_USE_FLASHINFER_PCIE_IPC VLLM_USE_RUST_FRONTEND \
-            VLLM_INKLING_CONV_PAGE VLLM_INKLING_DRAFT_SHARD VLLM_INKLING_CONVPAGE_PROBE; do
+            VLLM_INKLING_CONV_PAGE VLLM_INKLING_DRAFT_SHARD VLLM_INKLING_DRAFT_ROPE_ONTHEFLY VLLM_INKLING_CONVPAGE_PROBE; do
   [[ ${!name} =~ ^[01]$ ]] || die "$name must be 0 or 1"
 done
 if (( tp == 1 )); then
@@ -169,7 +173,7 @@ server_args=(/models/inkling-2-mini --served-model-name inkling-2-mini --port 80
              --kernel-config '{"enable_flashinfer_autotune":false}' --disable-custom-all-reduce
              --enable-prompt-tokens-details --kv-cache-dtype "$KV_CACHE_DTYPE")
 for name in VLLM_ALLREDUCE_USE_FLASHINFER_PCIE_IPC VLLM_INKLING_CONV_PAGE VLLM_INKLING_DRAFT_SHARD \
-            VLLM_USE_RUST_FRONTEND VLLM_INKLING_CONVPAGE_PROBE; do
+            VLLM_INKLING_DRAFT_ROPE_ONTHEFLY VLLM_USE_RUST_FRONTEND VLLM_INKLING_CONVPAGE_PROBE; do
   if [[ ${!name} == 1 ]]; then docker_args+=(-e "$name=1"); fi
 done
 if [[ $DSPARK == 1 ]]; then
@@ -193,7 +197,7 @@ fi
 printf 'Starting Inkling at http://%s:%s (TP%s)\n' "$BIND" "$PORT" "$tp"
 for name in MODEL_DIR CACHE_DIR IMAGE PORT BIND GPUS MAX_MODEL_LEN MAX_NUM_SEQS GPU_MEMORY_UTILIZATION ABLIT_DIR \
             DSPARK KV_CACHE_DTYPE FAIR_PREFILL BATCH_SHARDED_SAMPLING VLLM_ALLREDUCE_USE_FLASHINFER_PCIE_IPC \
-            VLLM_DECODE_STEP_BUDGET VLLM_INKLING_CONV_PAGE VLLM_INKLING_DRAFT_SHARD VLLM_USE_RUST_FRONTEND \
+            VLLM_DECODE_STEP_BUDGET VLLM_INKLING_CONV_PAGE VLLM_INKLING_DRAFT_SHARD VLLM_INKLING_DRAFT_ROPE_ONTHEFLY VLLM_USE_RUST_FRONTEND \
             VLLM_INKLING_CONVPAGE_PROBE; do
   printf '  %s=%s\n' "$name" "${!name}"
 done

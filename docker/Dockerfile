@@ -48,3 +48,14 @@ RUN grep -Fq 'self.token_mapping_meta.prepare_tensors(self.token_lora_indices)' 
     grep -Fq 'VLLM_INKLING_LORA_SKIP' "$V/lora.py" && \
     grep -Fq 'VLLM_INKLING_LORA_HEAD' "$V/model.py" && \
     rm /tmp/patch_lora.py
+
+# r14 candidate: compact DSpark RoPE, enabled at model load by VLLM_INKLING_DRAFT_ROPE_ONTHEFLY=1.
+COPY patch_ropetable.py /tmp/patch_ropetable.py
+RUN python3 /tmp/patch_ropetable.py "$VLLM_DIR" && \
+    grep -Fq 'os.environ.get("VLLM_INKLING_DRAFT_ROPE_ONTHEFLY") == "1"' "$V/dspark.py" && \
+    grep -Fq 'init_cache=False,' "$V/dspark.py" && \
+    grep -Fq 'ON_THE_FLY=on_the_fly,' "$V/ops/dspark.py" && \
+    grep -Fq 'ON_THE_FLY=cos_sin_cache.ndim == 1,' "$V/ops/dspark.py" && \
+    grep -Fq 'tldevice.cos(phase)' "$V/ops/dspark.py" && \
+    grep -Fq 'tldevice.sin(phase)' "$V/ops/dspark.py" && \
+    rm /tmp/patch_ropetable.py

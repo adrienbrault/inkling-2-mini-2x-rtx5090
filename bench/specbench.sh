@@ -13,7 +13,7 @@ bench=$(cd -- "$(dirname -- "$0")" && pwd -P)
 DATA=$bench/inputs
 URL=${URL:-http://127.0.0.1:${PORT:-8000}}
 URL=${URL%/}
-IMAGE=${IMAGE:-inkling2-rtx5090:sm120-r13}
+IMAGE=${IMAGE:-inkling2-rtx5090:sm120-r14}
 docker image inspect "$IMAGE" >/dev/null ||
   { echo "Build $IMAGE first with scripts/build-image.sh and the same IMAGE value." >&2; exit 1; }
 # pandas and datasets at the versions of the client image the published results used.
