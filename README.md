@@ -1,6 +1,6 @@
 # Inkling-2-Mini on two RTX 5090s
 
-![Recipe card: decode at 1 to 16 agents, cold prefill, 1M window, KV pool and memory on two RTX 5090s, 2026-11-22](docs/img/recipe-card-01fab30b.png)
+![Recipe card: decode at 1 to 16 agents, cold prefill, 1M window, KV pool and memory on two RTX 5090s, 2026-11-22](docs/img/recipe-card-d3be0043.png)
 
 Serving configuration, vLLM overlay and launch scripts for [Inkling-2-Mini](https://huggingface.co/thinkingmachines/Inkling-2-Mini) on x86-64 Linux with two RTX 5090s (32 GB each), Docker and the NVIDIA Container Toolkit. The recipe is for coding agents sharing one server, with long prompts that mostly hit the prefix cache.
 
