@@ -1,0 +1,35 @@
+2026-11-24T15:28:45Z A = served DSpark (r14) B = DFlash2 (/srv/qwen5090/fast/models/inkling-2-mini-dflash2), cells=[1 4]
+2026-11-24T15:28:45Z ### A1 boot ###
+A1 engine       6 dspark
+A1 pool 2026-11-24T15:29:24.019215917Z (EngineCore pid=62) INFO 11-24 15:29:24 [kv_cache_utils.py:1134] GPU KV cache size: 1,264,522 tokens, Maximum concurrency for 1,048,576 tokens per request: 1.21x
+A1 {"c": 1, "requests": 60, "per_stream_decode_median": 384.0, "aggregate": 426.8, "ttft_median_ms": 32.4, "wall_output_tok_s": 375.5}
+A1 {"c": 4, "requests": 60, "per_stream_decode_median": 233.1, "aggregate": 981.7, "ttft_median_ms": 59.9, "wall_output_tok_s": 847.9}
+A1 spec {"c": 1, "drafts": 5034.0, "accepted": 10376.0, "mean_acceptance_length": 3.061}
+A1 spec {"c": 4, "drafts": 5298.0, "accepted": 10096.0, "mean_acceptance_length": 2.906}
+A1: greedy identical to A1 8/8; c1 probe 285.7 tok/s
+2026-11-24T15:30:47Z ### B1 boot ###
+B1 engine       5 DFlash2
+B1 pool 2026-11-24T15:31:24.074795428Z (EngineCore pid=62) INFO 11-24 15:31:24 [kv_cache_utils.py:1134] GPU KV cache size: 1,357,651 tokens, Maximum concurrency for 1,048,576 tokens per request: 1.29x
+B1 {"c": 1, "requests": 60, "per_stream_decode_median": 525.8, "aggregate": 549.0, "ttft_median_ms": 33.3, "wall_output_tok_s": 482.3}
+B1 {"c": 4, "requests": 60, "per_stream_decode_median": 305.0, "aggregate": 1267.7, "ttft_median_ms": 60.5, "wall_output_tok_s": 1072.4}
+B1 spec {"c": 1, "drafts": 3699.0, "accepted": 11734.0, "mean_acceptance_length": 4.172}
+B1 spec {"c": 4, "drafts": 3833.0, "accepted": 11583.0, "mean_acceptance_length": 4.022}
+B1: greedy identical to A1 8/8; c1 probe 377.6 tok/s
+2026-11-24T15:32:34Z ### A2 boot ###
+A2 engine       6 dspark
+A2 pool 2026-11-24T15:33:11.069050978Z (EngineCore pid=62) INFO 11-24 15:33:11 [kv_cache_utils.py:1134] GPU KV cache size: 1,264,522 tokens, Maximum concurrency for 1,048,576 tokens per request: 1.21x
+A2 {"c": 1, "requests": 60, "per_stream_decode_median": 385.0, "aggregate": 428.2, "ttft_median_ms": 32.4, "wall_output_tok_s": 378.0}
+A2 {"c": 4, "requests": 60, "per_stream_decode_median": 238.9, "aggregate": 991.2, "ttft_median_ms": 60.2, "wall_output_tok_s": 856.6}
+A2 spec {"c": 1, "drafts": 5034.0, "accepted": 10376.0, "mean_acceptance_length": 3.061}
+A2 spec {"c": 4, "drafts": 5303.0, "accepted": 10108.0, "mean_acceptance_length": 2.906}
+A2: greedy identical to A1 8/8; c1 probe 286.8 tok/s
+2026-11-24T15:34:35Z ### B2 boot ###
+B2 engine       5 DFlash2
+B2 pool 2026-11-24T15:35:11.684586659Z (EngineCore pid=62) INFO 11-24 15:35:11 [kv_cache_utils.py:1134] GPU KV cache size: 1,357,651 tokens, Maximum concurrency for 1,048,576 tokens per request: 1.29x
+B2 {"c": 1, "requests": 60, "per_stream_decode_median": 524.7, "aggregate": 547.6, "ttft_median_ms": 33.3, "wall_output_tok_s": 481.1}
+B2 {"c": 4, "requests": 60, "per_stream_decode_median": 320.7, "aggregate": 1281.4, "ttft_median_ms": 60.6, "wall_output_tok_s": 1076.2}
+B2 spec {"c": 1, "drafts": 3699.0, "accepted": 11734.0, "mean_acceptance_length": 4.172}
+B2 spec {"c": 4, "drafts": 3829.0, "accepted": 11622.0, "mean_acceptance_length": 4.035}
+B2: greedy identical to A1 8/8; c1 probe 376.8 tok/s
+2026-11-24T15:36:21Z restore daily
+2026-11-24T15:36:42Z screen done: /srv/qwen5090/results/20261124T152845Z-inkling2-ab-dflash2

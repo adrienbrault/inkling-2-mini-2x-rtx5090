@@ -1,0 +1,75 @@
+{
+  "date": "2026-11-24",
+  "protocol": "Spec-Bench c1 and c4, 60 prompts per cell, forced 256 tokens, temperature 0; A B A B in one session",
+  "images": {
+    "A": "inkling2-rtx5090:sm120-r14",
+    "B": "inkling2-rtx5090:sm120-r15"
+  },
+  "arms": {
+    "A1": {
+      "drafter": "dspark",
+      "decode_median_c1": 384.0,
+      "decode_median_c4": 233.1,
+      "aggregate_c1": 426.8,
+      "aggregate_c4": 981.7,
+      "ttft_median_ms_c1": 32.45,
+      "ttft_median_ms_c4": 59.89,
+      "wall_output_tok_s_c1": 375.5,
+      "wall_output_tok_s_c4": 847.92,
+      "kv_pool_tokens": 1264522,
+      "mean_acceptance_length_c1": 3.061,
+      "mean_acceptance_length_c4": 2.906
+    },
+    "A2": {
+      "drafter": "dspark",
+      "decode_median_c1": 385.0,
+      "decode_median_c4": 238.9,
+      "aggregate_c1": 428.2,
+      "aggregate_c4": 991.2,
+      "ttft_median_ms_c1": 32.4,
+      "ttft_median_ms_c4": 60.16,
+      "wall_output_tok_s_c1": 378.04,
+      "wall_output_tok_s_c4": 856.63,
+      "kv_pool_tokens": 1264522,
+      "mean_acceptance_length_c1": 3.061,
+      "mean_acceptance_length_c4": 2.906
+    },
+    "B1": {
+      "drafter": "dflash2",
+      "decode_median_c1": 525.8,
+      "decode_median_c4": 305.0,
+      "aggregate_c1": 549.0,
+      "aggregate_c4": 1267.7,
+      "ttft_median_ms_c1": 33.27,
+      "ttft_median_ms_c4": 60.55,
+      "wall_output_tok_s_c1": 482.3,
+      "wall_output_tok_s_c4": 1072.35,
+      "kv_pool_tokens": 1357651,
+      "mean_acceptance_length_c1": 4.172,
+      "mean_acceptance_length_c4": 4.022
+    },
+    "B2": {
+      "drafter": "dflash2",
+      "decode_median_c1": 524.7,
+      "decode_median_c4": 320.7,
+      "aggregate_c1": 547.6,
+      "aggregate_c4": 1281.4,
+      "ttft_median_ms_c1": 33.34,
+      "ttft_median_ms_c4": 60.61,
+      "wall_output_tok_s_c1": 481.14,
+      "wall_output_tok_s_c4": 1076.2,
+      "kv_pool_tokens": 1357651,
+      "mean_acceptance_length_c1": 4.172,
+      "mean_acceptance_length_c4": 4.035
+    }
+  },
+  "greedy": {
+    "prompts": 8,
+    "identical_to_A1": {
+      "A1": "8/8",
+      "A2": "8/8",
+      "B1": "8/8",
+      "B2": "8/8"
+    }
+  }
+}

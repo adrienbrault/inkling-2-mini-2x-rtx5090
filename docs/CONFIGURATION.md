@@ -1,6 +1,6 @@
 # Configuration choices
 
-The served image is `sm120-r14`. The headline measurements are from r13 on two RTX 5090s, and the older comparisons retain their original image revisions. See the [measurement boot](REPRODUCE.md#measurement-boot) and [r14 A/B](../bench/results/20261122T203506Z-inkling2-r14-ab/summary.json).
+The served image is `sm120-r15`. The headline measurements are from r13 on two RTX 5090s, and the older comparisons retain their original image revisions. See the [measurement boot](REPRODUCE.md#measurement-boot) and [r14 A/B](../bench/results/20261122T203506Z-inkling2-r14-ab/summary.json).
 
 ## Knobs
 
@@ -10,15 +10,16 @@ Set these variables before running [`scripts/serve.sh`](../scripts/serve.sh). It
 | --- | --- | --- | --- | --- | --- |
 | `MODEL_DIR` | Required | Mounts the official checkpoint read-only. | Disk for weights and the drafter. | Official Inkling-2-Mini checkpoint. | Needs an absolute path, readable config and tokenizer files, target weight shards and `mtp.safetensors`. |
 | `CACHE_DIR` | `$HOME/.cache/inkling2-vllm` | Mounts a writable cache and persists Triton kernels between boots. | Disk and container-written files. | Cache mount used by the historical recipe. | An inaccessible path stops launch. An empty cache recompiles the kernels. |
-| `IMAGE` | `inkling2-rtx5090:sm120-r14` | Selects the local serving image. | A new build may pull the base image and recompile kernels at startup. | Headline r13, RoPE A/B r13 and r14. | Build with the same tag before serving. Other builds may lack the required SM120 paths. |
+| `IMAGE` | `inkling2-rtx5090:sm120-r15` | Selects the local serving image. | A new build may pull the base image and recompile kernels at startup. | Headline r13, RoPE A/B r13 and r14, r15 verified with DSpark on 2026-11-25. | Build with the same tag before serving. Other builds may lack the required SM120 paths. |
 | `PORT` | `8000` | Sets the published host port. The container listens on 8000. | Update client URLs when it changes. | Host ports `8000` and `8022` appear in the recipe and archived launch commands. | Docker fails to publish an occupied port. |
 | `BIND` | `127.0.0.1` | Sets the host IPv4 address. Use `0.0.0.0` for all interfaces. | Exposing the port gives reachable clients access to the API. | Untested as a launcher override. | Docker must be able to bind the address. The recipe provides no API key. |
-| `GPUS` | `0,1` | Selects devices by index and derives tensor parallelism from their count. | TP2 communicates over PCIe and leaves more room for KV. | TP2 on two RTX 5090s. TP1 at 32K without DSpark on an earlier image. | Unknown device IDs fail in Docker. TP1 requires `DSPARK=0` and disables TP-only switches. |
+| `GPUS` | `0,1` | Selects devices by index and derives tensor parallelism from their count. | TP2 communicates over PCIe and leaves more room for KV. | TP2 on two RTX 5090s. TP1 at 32K without DSpark on an earlier image. | Unknown device IDs fail in Docker. TP1 requires `DRAFTER=none` and disables TP-only switches. |
 | `MAX_MODEL_LEN` | `1048576` | Caps the total prompt plus output tokens per request. | A request near 1M slows other traffic while prefilling and decoding. | r10 compared 1M and 262,144. The r14 A/B used 1M. [Window results](../README.md#1m-window) | Startup rejects a window that cannot fit. Prompts beyond the window get HTTP 400. |
 | `MAX_NUM_SEQS` | `16` | Caps concurrently scheduled sequences. Admission also needs enough free KV. | Larger limits can change activation and CUDA graph reserves. | 16 on r13 and in the r14 A/B setup. Earlier runs also used the engine default. | If VRAM is insufficient, try a shorter window and a smaller sequence cap. |
 | `GPU_MEMORY_UTILIZATION` | `0.92` | Sets the vLLM device memory fraction. | A higher fraction reduces the headroom available to other work. | 0.92 in the [r13 memory capture](../bench/results/20261122T200911Z-inkling2-kv-capacity-r13/boot-memory.txt). | The launcher accepts values above 0 and up to 1. Startup and workload memory depend on the configuration. |
 | `ABLIT_DIR` | `MODEL_DIR-ablit` when that directory exists | Mounts the abliteration LoRA read-only and adds the request name `inkling-2-mini-ablit`. Empty turns it off. | With overlay r13 (`VLLM_INKLING_LORA_SKIP`, `VLLM_INKLING_LORA_HEAD`, set automatically), requests to `inkling-2-mini` run as without LoRA: same output, speed within noise. The adapter uses a second set of CUDA graphs. | The pinned OpenUncensored rank-2 adapter on `attn.wo_ud` (`scripts/fetch-adapter.sh`). | `--specialize-active-lora` must stay off: its capture drops the adapter in batches that mix both names. |
-| `DSPARK` | `1` | Enables DSpark with 7 draft tokens, probabilistic drafts and `auto` drafter KV. | Drafter weights and KV take memory. Low-concurrency decode was faster with DSpark in the historical comparison. | On in the r13 headline runs and the r14 A/B. Off in earlier TP1 and TP2 boots. | With DSpark off, the defaults also drop conv pages, draft sharding and in-kernel RoPE. The launcher still requires the full checkpoint, including `mtp.safetensors`. |
+| `DRAFTER` | `dspark` | Selects the drafter: `dspark` (the checkpoint's own head, the served default), `dflash2` (the block-diffusion drafter in `DRAFT_DIR`) or `none`. | Drafter weights and KV take memory. DFlash2 is 37 % faster at one stream on short prompts but loses 11-16 % per stream on the agent replay. | DSpark on the r13 headline runs, the r14 A/B and the 2026-11-25 r15 verification; DFlash2 in the [2026-11-24 screen](../bench/results/20261124T152845Z-inkling2-ab-dflash2); `none` in earlier TP1 and TP2 boots. |
+| `DRAFT_DIR` | Unset | Mounts the DFlash2 drafter read-only at `/draft`; required with `DRAFTER=dflash2`. | 945 MB of disk, about 0.5 GB of memory per card. | [`incoai/Inkling-2-Mini-DFlash2`](https://huggingface.co/incoai/Inkling-2-Mini-DFlash2), fetched by [`scripts/fetch-drafter.sh`](../scripts/fetch-drafter.sh). | Needs an absolute path with `config.json` and at least one `*.safetensors`. The fetch script writes `eagle_aux_hidden_state_layer_ids`, which must stay equal to the drafter's `dflash_config.target_layer_ids`. |
 | `KV_CACHE_DTYPE` | `fp8` | Target KV accepts `fp8` or `auto`. `auto` lets the engine select the dtype and disables conv pages by default. | bf16 held a smaller pool and produced different greedy text in the r5 comparison. | fp8 on r13 and r14 A/B. bf16 on r5. Confirm the resolved dtype in the log for `auto`. | Compact conv pages require fp8 target KV. |
 | `VLLM_INKLING_CONV_PAGE` | `1` | Selects compact short-conv pages and passes `--block-size 64`. | Disabling it gives up the pool gain. | On in r9/r10. Off in the r8 baseline. | Requires SM120 TP2, the checkpoint's conv geometry, fp8 target and bf16 DSpark KV, hybrid KV management, BLNHC or automatic layout, and no KV connector, PP or CP. |
 | `VLLM_INKLING_DRAFT_SHARD` | `1` | Samples draft tokens from the two local vocabulary shards. | Sharded sampling adds buffers. See [the historical A/B](#conv-pages-and-draft-sharding-overlay-r10). | `0` and `1` in the paired draft-sharding boots. | Needs DSpark, TP2 and batch-sharded sampling. Unsupported communicator, head or draft layouts can fall back to dense drafting. Check for `Inkling2 DSpark vocab-sharded draft sampling enabled (TP2).` |
@@ -46,9 +47,9 @@ Start from the repository root with `MODEL_DIR` exported as in [Quick start](../
 ```bash
 scripts/serve.sh
 
-DSPARK=0 ABLIT_DIR= scripts/serve.sh
+DRAFTER=none ABLIT_DIR= scripts/serve.sh
 
-GPUS=0 DSPARK=0 ABLIT_DIR= MAX_MODEL_LEN=32768 KV_CACHE_DTYPE=auto VLLM_USE_RUST_FRONTEND=0 \
+GPUS=0 DRAFTER=none ABLIT_DIR= MAX_MODEL_LEN=32768 KV_CACHE_DTYPE=auto VLLM_USE_RUST_FRONTEND=0 \
   VLLM_DECODE_STEP_BUDGET=0 FAIR_PREFILL=0 scripts/serve.sh
 ```
 
@@ -251,3 +252,35 @@ Without the overlay and flags in `scripts/serve.sh`, these fail with `cudaErrorN
 | DSpark KV-cache write | `reshape_and_cache_flash` from the drafter's `_write_kv` | Triton scatter (`docker/kv_write_sm120.py`) |
 | Fused vocab-parallel embedding (TP 2) | `ops.vocab_parallel_embedding` | unfused path on SM12x (`docker/patch_embedding.py`) |
 | Custom all-reduce (TP 2) | vLLM `custom_all_reduce` | `--disable-custom-all-reduce` |
+
+## DFlash2 drafter versus the checkpoint's DSpark head (opt-in, overlay r15, 2026-11-24)
+
+The DFlash2 drafter replaces the checkpoint's DSpark head. Same boot settings, same prompts, tensor parallel 2, 1M
+window, both names: Spec-Bench c1 and c4 at 60 prompts per cell, forced 256 tokens, temperature 0, run twice each way
+(A B A B). Result: [screen](../bench/results/20261124T152845Z-inkling2-ab-dflash2).
+
+| | DSpark A1 / A2 | DFlash2 B1 / B2 | Change |
+| --- | ---: | ---: | ---: |
+| Decode median, one stream (tok/s) | 384.0 / 385.0 | 525.8 / 524.7 | **+37 %** |
+| Decode median, four streams (tok/s) | 233.1 / 238.9 | 305.0 / 320.7 | **+33 %** |
+| Aggregate, one stream (tok/s) | 426.8 / 428.2 | 549.0 / 547.6 | +29 % |
+| Aggregate, four streams (tok/s) | 981.7 / 991.2 | 1,267.7 / 1,281.4 | +29 % |
+| Acceptance length, c1 / c4 | 3.061 / 2.906 | 4.172 / 4.022–4.035 | +36 % / +38 % |
+| Median TTFT, c1 / c4 (ms) | 32.4 / 59.9 | 33.3 / 60.5 | unchanged |
+| KV pool (tokens) | 1,264,522 | 1,357,651 | +7.4 % |
+| Greedy text versus A1 | 8/8 | 8/8 | identical |
+
+Both repeats agree on draft counts and acceptances (the workload is deterministic at temperature 0), so the A-A spread
+is effectively zero. The DSpark arm keeps compact conv pages and draft sharding; the DFlash2 arm runs stock cache pages
+with `--block-size 64` and, because the target and drafter share a boot, its pool is larger rather than smaller.
+
+Two things the drafter needs that are not flag choices, both in overlay r15 ([`docker/README.md`](../docker/README.md)):
+the target's embedding norm applied to the drafter's inputs, and the selector's `after_correction` softcap order.
+Without them the drafter binds but accepts about 0.2 % of its draft tokens. Keeping the drafter's own
+`eagle_aux_hidden_state_layer_ids` verbatim matters for the same reason: the engine-derived `+1` form selects the wrong
+layer visits and accepts nothing.
+
+The agent replay inverts this comparison: at six sessions DFlash2 reached 189.2 tok/s per stream and 509
+aggregate against DSpark's 212.6 / 501, and at ten 130.6 / 628 against 155.9 / 733, with acceptance 3.10 / 3.05
+against 3.82 / 3.96. That is why `DRAFTER` defaults to `dspark` since 2026-11-25.
+

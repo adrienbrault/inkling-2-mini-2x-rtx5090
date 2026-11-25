@@ -1,15 +1,21 @@
 #!/usr/bin/env bash
-# Serve Inkling-2-Mini on two RTX 5090s with vLLM: tensor parallel 2, the bundled DSpark drafter, 1,048,576-token context,
-# fp8 KV cache, and the abliterated name inkling-2-mini-ablit beside inkling-2-mini when the adapter is present.
+# Serve Inkling-2-Mini on two RTX 5090s with vLLM: tensor parallel 2, the checkpoint's DSpark drafter by default,
+# 1,048,576-token context, fp8 KV cache, and the abliterated name inkling-2-mini-ablit beside inkling-2-mini when the
+# adapter is present. The DFlash2 drafter is one override away (DRAFTER=dflash2 with DRAFT_DIR).
 #
-#   bash scripts/build-image.sh            # once: day-0 vLLM image + the SM120 overlay in docker/
+#   bash scripts/build-image.sh                                    # once: day-0 vLLM image + the SM120 overlay in docker/
 #   MODEL_DIR=/path/to/Inkling-2-Mini bash scripts/serve.sh
+#   # optional DFlash2 arm:
+#   scripts/fetch-drafter.sh "$HOME/Inkling-2-Mini-DFlash2"          # once: the DFlash2 drafter (absolute path)
+#   MODEL_DIR=/path/to/Inkling-2-Mini DRAFT_DIR="$HOME/Inkling-2-Mini-DFlash2" DRAFTER=dflash2 bash scripts/serve.sh
 #
 # MODEL_DIR holds the official checkpoint (huggingface.co/thinkingmachines/Inkling-2-Mini, NVFP4/MXFP8, ~20 GB with the
 # drafter's mtp.safetensors). The server listens on PORT (default 8000) and serves the id "inkling-2-mini".
-# Settings and their measurement sources: docs/CONFIGURATION.md. DSpark uses the checkpoint's fixed seven-token
-# draft length and bf16 drafter cache. The target uses fp8 KV by default. TP2 uses FlashInfer PCIe IPC and
-# batch-sharded sampling. The overlay enables compact conv pages, draft sharding and in-kernel drafter RoPE.
+# Settings and their measurement sources: docs/CONFIGURATION.md. DSpark is the checkpoint's own head and the default
+# (2026-11-25): it keeps compact conv pages, draft sharding and in-kernel drafter RoPE. DFlash2 is a separate 0.5B
+# block-diffusion drafter with seven draft tokens, bf16 drafter cache and Triton attention: faster on short prompts
+# (+37 % at one stream on Spec-Bench) but -11 % / -16 % per stream on the agent replay, which is why it is opt-in.
+# The target uses fp8 KV by default, TP2 uses FlashInfer PCIe IPC and batch-sharded sampling.
 # The launcher also enables fair prefill, the decode-aware step budget and the Rust frontend, and persists Triton
 # kernels in CACHE_DIR. The pinned base needs custom all-reduce and FlashInfer warmup autotune disabled on SM120.
 set -euo pipefail
@@ -27,7 +33,8 @@ mount_path() {
 
 MODEL_DIR=${MODEL_DIR:-}
 CACHE_DIR=${CACHE_DIR:-$HOME/.cache/inkling2-vllm}
-IMAGE=${IMAGE:-inkling2-rtx5090:sm120-r14}
+IMAGE=${IMAGE:-inkling2-rtx5090:sm120-r15}   # one overlay serves both drafters (DSpark on r15 verified 2026-11-25:
+                                            # smoke all_ok, both names); r13 stays the headline image.
 PORT=${PORT:-8000}
 BIND=${BIND:-127.0.0.1}
 GPUS=${GPUS:-0,1}
@@ -38,7 +45,11 @@ GPU_MEMORY_UTILIZATION=${GPU_MEMORY_UTILIZATION:-0.92}
 # MODEL_DIR-ablit. ABLIT_DIR= (empty) turns it off; ABLIT_DIR=/path selects another directory.
 if [[ -z ${ABLIT_DIR+set} && -n $MODEL_DIR && -d ${MODEL_DIR%/}-ablit ]]; then ABLIT_DIR=${MODEL_DIR%/}-ablit; fi
 ABLIT_DIR=${ABLIT_DIR:-}
-DSPARK=${DSPARK:-1}
+# The drafter: dspark (default, the checkpoint's own head), dflash2 or none. DFlash2 lives in its own directory
+# (DRAFT_DIR) and needs overlay r15 plus VLLM_INKLING_DFLASH2_SM120=1, which serve.sh sets for it.
+DRAFTER=${DRAFTER:-dspark}
+DRAFT_DIR=${DRAFT_DIR:-}
+draft_mount=()
 KV_CACHE_DTYPE=${KV_CACHE_DTYPE:-fp8}
 FAIR_PREFILL=${FAIR_PREFILL:-1}
 VLLM_USE_RUST_FRONTEND=${VLLM_USE_RUST_FRONTEND:-1}
@@ -70,20 +81,24 @@ fi
 tp2=0
 if (( tp == 2 )); then tp2=1; fi
 conv_pages=0
-if [[ $DSPARK == 1 && $tp2 == 1 && $KV_CACHE_DTYPE == fp8 ]]; then conv_pages=1; fi
+if [[ $DRAFTER == dspark && $tp2 == 1 && $KV_CACHE_DTYPE == fp8 ]]; then conv_pages=1; fi
 BATCH_SHARDED_SAMPLING=${BATCH_SHARDED_SAMPLING:-$tp2}
 VLLM_ALLREDUCE_USE_FLASHINFER_PCIE_IPC=${VLLM_ALLREDUCE_USE_FLASHINFER_PCIE_IPC:-$tp2}
 VLLM_INKLING_CONV_PAGE=${VLLM_INKLING_CONV_PAGE:-$conv_pages}
 draft_shard=0
-if [[ $DSPARK == 1 && $tp2 == 1 && $BATCH_SHARDED_SAMPLING == 1 ]]; then draft_shard=1; fi
+if [[ $DRAFTER == dspark && $tp2 == 1 && $BATCH_SHARDED_SAMPLING == 1 ]]; then draft_shard=1; fi
 VLLM_INKLING_DRAFT_SHARD=${VLLM_INKLING_DRAFT_SHARD:-$draft_shard}
-VLLM_INKLING_DRAFT_ROPE_ONTHEFLY=${VLLM_INKLING_DRAFT_ROPE_ONTHEFLY:-$DSPARK}
-for name in DSPARK FAIR_PREFILL BATCH_SHARDED_SAMPLING VLLM_ALLREDUCE_USE_FLASHINFER_PCIE_IPC VLLM_USE_RUST_FRONTEND \
+rope_on_the_fly=0
+if [[ $DRAFTER == dspark ]]; then rope_on_the_fly=1; fi
+VLLM_INKLING_DRAFT_ROPE_ONTHEFLY=${VLLM_INKLING_DRAFT_ROPE_ONTHEFLY:-$rope_on_the_fly}
+for name in FAIR_PREFILL BATCH_SHARDED_SAMPLING VLLM_ALLREDUCE_USE_FLASHINFER_PCIE_IPC VLLM_USE_RUST_FRONTEND \
             VLLM_INKLING_CONV_PAGE VLLM_INKLING_DRAFT_SHARD VLLM_INKLING_DRAFT_ROPE_ONTHEFLY VLLM_INKLING_CONVPAGE_PROBE; do
   [[ ${!name} =~ ^[01]$ ]] || die "$name must be 0 or 1"
 done
+[[ $DRAFTER == dflash2 || $DRAFTER == dspark || $DRAFTER == none ]] ||
+  die "DRAFTER must be dflash2, dspark or none"
 if (( tp == 1 )); then
-  [[ $DSPARK == 0 ]] || die "set DSPARK=0 when selecting one GPU"
+  [[ $DRAFTER == none ]] || die "set DRAFTER=none when selecting one GPU"
   [[ $BATCH_SHARDED_SAMPLING == 0 && $VLLM_ALLREDUCE_USE_FLASHINFER_PCIE_IPC == 0 ]] ||
     die "batch-sharded sampling and FlashInfer PCIe IPC require two GPUs"
 fi
@@ -135,6 +150,18 @@ for shard in "$MODEL_DIR"/*.safetensors; do
 done
 (( weights )) || die "MODEL_DIR needs at least one target weight shard (*.safetensors) in addition to mtp.safetensors"
 
+if [[ $DRAFTER == dflash2 ]]; then
+  [[ $DRAFT_DIR == /* && -d $DRAFT_DIR && -r $DRAFT_DIR && -x $DRAFT_DIR ]] ||
+    die "DRAFT_DIR must be an absolute path to a readable DFlash2 drafter directory (scripts/fetch-drafter.sh)"
+  DRAFT_DIR=$(mount_path "$DRAFT_DIR") || die "DRAFT_DIR cannot be mounted (check access and colons in its path)"
+  readable_file "$DRAFT_DIR/config.json" || die "DRAFT_DIR is missing readable config.json"
+  shopt -s nullglob
+  draft_weights=("$DRAFT_DIR"/*.safetensors)
+  shopt -u nullglob
+  (( ${#draft_weights[@]} )) || die "DRAFT_DIR needs at least one *.safetensors file"
+  draft_mount=(-v "$DRAFT_DIR:/draft:ro")
+fi
+
 if [[ -n $ABLIT_DIR ]]; then
   [[ -d $ABLIT_DIR && -r $ABLIT_DIR && -x $ABLIT_DIR ]] || die "ABLIT_DIR must be a readable adapter directory"
   ABLIT_DIR=$(mount_path "$ABLIT_DIR") || die "ABLIT_DIR cannot be mounted (check access and colons in its path)"
@@ -157,6 +184,7 @@ CACHE_DIR=$(mount_path "$CACHE_DIR") || die "CACHE_DIR cannot be mounted (check 
 docker_args=(--rm --name inkling --gpus "\"device=$GPUS\"" --ipc=host --stop-timeout 30 -p "$BIND:$PORT:8000"
              -e TRITON_CACHE_DIR=/root/.cache/triton -e "VLLM_DECODE_STEP_BUDGET=$VLLM_DECODE_STEP_BUDGET"
              -v "$MODEL_DIR:/models/inkling-2-mini:ro" -v "$CACHE_DIR:/root/.cache")
+if [[ ${#draft_mount[@]} -gt 0 ]]; then docker_args+=("${draft_mount[@]}"); fi
 server_args=(/models/inkling-2-mini --served-model-name inkling-2-mini --port 8000
              --tensor-parallel-size "$tp" --max-model-len "$MAX_MODEL_LEN"
              --gpu-memory-utilization "$GPU_MEMORY_UTILIZATION" --max-num-seqs "$MAX_NUM_SEQS"
@@ -167,10 +195,20 @@ for name in VLLM_ALLREDUCE_USE_FLASHINFER_PCIE_IPC VLLM_INKLING_CONV_PAGE VLLM_I
             VLLM_INKLING_DRAFT_ROPE_ONTHEFLY VLLM_USE_RUST_FRONTEND VLLM_INKLING_CONVPAGE_PROBE; do
   if [[ ${!name} == 1 ]]; then docker_args+=(-e "$name=1"); fi
 done
-if [[ $DSPARK == 1 ]]; then
+if [[ $DRAFTER == dspark ]]; then
   server_args+=(--speculative-config '{"method":"dspark","num_speculative_tokens":7,"draft_sample_method":"probabilistic","kv_cache_dtype":"auto"}')
+elif [[ $DRAFTER == dflash2 ]]; then
+  server_args+=(--speculative-config '{"method":"dflash","model":"/draft","num_speculative_tokens":7,"kv_cache_dtype":"auto","attention_backend":"TRITON_ATTN"}')
+  # Overlay r15: the draft's own layers reach vllm.ir and its context-KV precompute calls the compiled core; these move
+  # the norms and RoPE onto native/Triton implementations. TRITON_ATTN above is the one backend with SM12x kernels that
+  # also declares non-causal attention, which this draft needs.
+  server_args+=(--ir-op-priority '{"rms_norm":["native"],"fused_add_rms_norm":["native"],"rotary_embedding":["native"],"rotary_embedding_query_only":["native"]}'
+                --compilation-config '{"custom_ops":["-silu_and_mul"]}')
+  docker_args+=(-e VLLM_INKLING_DFLASH2_SM120=1)
 fi
-if [[ $VLLM_INKLING_CONV_PAGE == 1 ]]; then server_args+=(--block-size 64); fi
+# 64-token blocks: compact conv pages require them with DSpark, and the DFlash2 screen ran with them (a larger block
+# amortises per-step drafter work; the pool grew rather than shrank at this size).
+if [[ $VLLM_INKLING_CONV_PAGE == 1 || $DRAFTER == dflash2 ]]; then server_args+=(--block-size 64); fi
 if [[ $BATCH_SHARDED_SAMPLING == 1 ]]; then server_args+=(--enable-batch-sharded-sampling); fi
 if [[ $FAIR_PREFILL == 1 ]]; then
   server_args+=(--long-prefill-token-threshold 768 --long-prefill-token-threshold-adaptive)
@@ -187,7 +225,7 @@ fi
 
 printf 'Starting Inkling at http://%s:%s (TP%s)\n' "$BIND" "$PORT" "$tp"
 for name in MODEL_DIR CACHE_DIR IMAGE PORT BIND GPUS MAX_MODEL_LEN MAX_NUM_SEQS GPU_MEMORY_UTILIZATION ABLIT_DIR \
-            DSPARK KV_CACHE_DTYPE FAIR_PREFILL BATCH_SHARDED_SAMPLING VLLM_ALLREDUCE_USE_FLASHINFER_PCIE_IPC \
+            DRAFTER DRAFT_DIR KV_CACHE_DTYPE FAIR_PREFILL BATCH_SHARDED_SAMPLING VLLM_ALLREDUCE_USE_FLASHINFER_PCIE_IPC \
             VLLM_DECODE_STEP_BUDGET VLLM_INKLING_CONV_PAGE VLLM_INKLING_DRAFT_SHARD VLLM_INKLING_DRAFT_ROPE_ONTHEFLY VLLM_USE_RUST_FRONTEND \
             VLLM_INKLING_CONVPAGE_PROBE; do
   printf '  %s=%s\n' "$name" "${!name}"

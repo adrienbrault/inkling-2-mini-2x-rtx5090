@@ -1,5 +1,6 @@
-# Inkling-2-Mini on RTX 5090 (SM120): the vLLM day-0 image plus SM12x fallbacks for two kernels its compiled core
-# lacks (built for sm_80/89/90/100): a Triton KV scatter for the DSpark drafter, and the unfused TP embedding.
+# Inkling-2-Mini on RTX 5090 (SM120): the vLLM day-0 image plus SM12x fallbacks for kernels its compiled core lacks
+# (built for sm_80/89/90/100): a Triton KV scatter for the drafters, the unfused TP embedding, and the DFlash2
+# drafter's context-KV precompute.
 # r5 (2026-11-21): two bf16 decode products moved off cuBLAS onto Triton kernels (patch_decode.py).
 # r7: compute_logits_local so vLLM's batch-sharded sampling engages (patch_bss.py; serve flag
 # --enable-batch-sharded-sampling).
@@ -58,5 +59,24 @@ RUN python3 /tmp/patch_ropetable.py "$VLLM_DIR" && \
     grep -Fq 'tldevice.cos(phase)' "$V/ops/dspark.py" && \
     grep -Fq 'tldevice.sin(phase)' "$V/ops/dspark.py" && \
     rm /tmp/patch_ropetable.py
+
+# r15 (2026-11-24): the DFlash2 drafter on SM120. Its context-KV precompute calls the compiled core directly
+# (rotary_embedding, rms_norm, reshape_and_cache_flash) and Qwen3MLP reaches silu_and_mul, so this adds Triton RoPE and
+# norm kernels, routes the cache write to the r8 scatter, and carries the two Inkling binding fixes the drafter needs
+# (the target's embedding norm on its input embeddings, and the selector's after-correction softcap). Runtime switch
+# VLLM_INKLING_DFLASH2_SM120=1, default off; the draft's attention backend is TRITON_ATTN and the launcher passes
+# --ir-op-priority and --compilation-config.
+COPY docker/patch_dflash2_sm120.py /tmp/patch_dflash2_sm120.py
+RUN python3 /tmp/patch_dflash2_sm120.py "$VLLM_DIR" && \
+    grep -Fq 'VLLM_INKLING_DFLASH2_SM120' "$VLLM_DIR/model_executor/models/qwen3_dflash.py" && \
+    grep -Fq '_dflash2_rope_neox_inplace' "$VLLM_DIR/model_executor/models/qwen3_dflash.py" && \
+    grep -Fq '_dflash2_rms_norm_grouped_out' "$VLLM_DIR/model_executor/models/qwen3_dflash.py" && \
+    grep -Fq '_dflash2_sm120_kv_scatter' "$VLLM_DIR/_custom_ops.py" && \
+    grep -Fq 'VLLM_INKLING_DFLASH2_SM120' "$VLLM_DIR/model_executor/models/qwen3_dflash2.py" && \
+    grep -Fq 'VLLM_INKLING_DFLASH2_SM120' "$VLLM_DIR/v1/worker/gpu/spec_decode/dflash/utils.py" && \
+    python3 -c "import ast,sys; [ast.parse(open(f).read()) for f in sys.argv[1:]]" \
+        "$VLLM_DIR/model_executor/models/qwen3_dflash.py" "$VLLM_DIR/model_executor/models/qwen3_dflash2.py" \
+        "$VLLM_DIR/_custom_ops.py" "$VLLM_DIR/v1/worker/gpu/spec_decode/dflash/utils.py" && \
+    rm /tmp/patch_dflash2_sm120.py
 
 COPY LICENSE LICENSE-APACHE THIRD_PARTY.md /usr/share/doc/inkling-overlay/

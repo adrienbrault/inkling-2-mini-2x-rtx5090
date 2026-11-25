@@ -2,13 +2,15 @@
 
 vLLM's Inkling-2-Mini day-0 image (`vllm/vllm-openai:inkling-2-mini`, vLLM `0.1.dev25855+g7cb5dae22`) builds its compiled
 core library (`_C_stable_libtorch`) for sm_80, sm_89, sm_90 and sm_100 only, with no PTX to fall back on. The RTX 5090
-is sm_120. Inkling-2-Mini's own kernels are Triton and Gluon and run there, but three paths reach the compiled core and
+is sm_120. Inkling-2-Mini's own kernels are Triton and Gluon and run there, but these paths reach the compiled core and
 fail with `cudaErrorNoKernelImageForDevice`:
 
 | Path | Fix |
 | --- | --- |
 | The DSpark drafter writes its KV cache with `reshape_and_cache_flash` | `kv_write_sm120.py`: the same scatter as a Triton kernel; `patch_dspark.py` routes the drafter's `_write_kv` to it on SM12x with the unquantized cache |
 | At tensor parallel 2, `VocabParallelEmbedding` uses the fused `ops.vocab_parallel_embedding` | `patch_embedding.py`: on SM12x, vLLM's unfused path (masked lookup, then all-reduce), which computes the same values |
+| The DFlash2 drafter's context-KV precompute calls `rotary_embedding`, the grouped and hidden `rms_norm` and, through `_custom_ops`, `reshape_and_cache_flash`; Qwen3MLP reaches `silu_and_mul` | `patch_dflash2_sm120.py` (r15): Triton RoPE and norm kernels, the cache write routed to the same scatter, and the MLP activation via `--compilation-config {"custom_ops":["-silu_and_mul"]}` |
+| FlashAttention's fa3 kernels, the draft's default backend | `"attention_backend":"TRITON_ATTN"` in the speculative config |
 | vLLM's custom all-reduce | `--disable-custom-all-reduce` in `scripts/serve.sh` (NCCL) |
 
 FlashInfer's warmup autotune also profiles kernels with no sm_120 build; `scripts/serve.sh` turns it off.
@@ -34,8 +36,11 @@ Paths below are relative to the installed `vllm` package. `None` in the predeces
 | `patch_draftshard.py` | `models/inkling2/nvidia/dspark.py`, `models/inkling2/speculator.py`, `v1/worker/gpu/model_runner.py`. Hashes `v1/worker/gpu/sample/gumbel.py` and uses it to generate `v1/worker/gpu/sample/inkling_draftshard.py`. | `patch_dspark.py` for DSpark, `patch_bss.py` for the speculator | `VLLM_INKLING_DRAFT_SHARD=1` with a supported TP2 DSpark layout and batch-sharded sampling. | Optional performance patch. |
 | `patch_lora.py` | `models/inkling2/nvidia/lora.py`, `models/inkling2/nvidia/model.py`. The build also checks vLLM's Punica metadata keeps its `no_lora_flag_cpu` contract. | `patch_bss.py` (hashes `model.py` after it) | `VLLM_INKLING_LORA_SKIP=1` skips the attention LoRA delta in steps with no adapter request; `VLLM_INKLING_LORA_HEAD=1` keeps the Inkling logits head when `lm_head` is not a LoRA target. Both only matter with `--enable-lora`. | Optional performance patch (r13). Do not combine with `--specialize-active-lora`. |
 | `patch_ropetable.py` | `models/inkling2/nvidia/dspark.py`, `models/inkling2/nvidia/ops/dspark.py` | `patch_dspark.py` and `patch_draftshard.py` (hashes `dspark.py` after them) | `VLLM_INKLING_DRAFT_ROPE_ONTHEFLY=1` at model load. | Optional memory patch (r14). |
+| `patch_dflash2_sm120.py` | `model_executor/models/qwen3_dflash.py`, `model_executor/models/qwen3_dflash2.py`, `_custom_ops.py`, `v1/worker/gpu/spec_decode/dflash/utils.py` | None (hashes the clean base files) | `VLLM_INKLING_DFLASH2_SM120=1`, `"attention_backend":"TRITON_ATTN"`, `--ir-op-priority` on native norms and RoPE, `--compilation-config {"custom_ops":["-silu_and_mul"]}` (all set by `scripts/serve.sh` for `DRAFTER=dflash2`). | Required for the DFlash2 drafter on the pinned SM120 base. |
 
-The guards expect each replacement anchor exactly once in the input. The conv-page patch also looks for the decode-budget code inserted by the scheduler patch. A changed or missing predecessor can stop the build even if its runtime switch is off. The Dockerfile parses selected Python files and checks markers for KV scatter, GEMV routing, local logits, scheduler budget, conv layout and probe telemetry. The draft-sharding block checks local draft logits, its runtime switch, the winner gather and runner cache materialization. Subsequent blocks check LoRA and RoPE markers.
+The guards expect each replacement anchor exactly once in the input. The DFlash2 block parses its four files and checks
+the switch, the RoPE anchor, the grouped norm, the cache shim, the embedding-norm attach and the selector softcap. The
+conv-page patch also looks for the decode-budget code inserted by the scheduler patch. A changed or missing predecessor can stop the build even if its runtime switch is off. The Dockerfile parses selected Python files and checks markers for KV scatter, GEMV routing, local logits, scheduler budget, conv layout and probe telemetry. The draft-sharding block checks local draft logits, its runtime switch, the winner gather and runner cache materialization. Subsequent blocks check LoRA and RoPE markers.
 
 ## Draft-sharding A/B
 
@@ -52,6 +57,27 @@ Build with `IMAGE=inkling2-rtx5090:sm120-test scripts/build-image.sh`. Launch th
 1. Record the new base digest, vLLM version, Python package location, entrypoint and SM120 kernel coverage. Extract the clean files in the table and diff them against the pinned base. Check for fixes already upstream.
 2. Apply the surviving patches in Dockerfile order. Inspect each patch's input after its predecessors run. Update hashes and anchors against that input. Update the build markers when the checked code changes.
 3. Build under a new tag. Boot it and run `scripts/check.sh` and both lone-request captures with the same settings as the r14 control. Use the [reproduction commands](../docs/REPRODUCE.md) for benchmark comparisons. Repeat concurrent comparisons on the baseline to measure normal output and timing variation. Rerun the relevant GPU gates if available. The checkout includes [conv-page gate captures](../bench/results/20261122T032748Z-inkling2-r10-combined) and [draft-sharding gate captures](../bench/results/20261122T012901Z-inkling2-draftshard). Save baseline and candidate flags, results and image digests.
+
+## DFlash2 drafter (r15)
+
+This drafter is **opt-in and off by default**: the served default is the checkpoint's own DSpark head, because
+the agent replay is 11-16 % faster without it. `DRAFTER=dflash2` serves `incoai/Inkling-2-Mini-DFlash2` ([`scripts/fetch-drafter.sh`](../scripts/fetch-drafter.sh)), a
+0.5B block-diffusion drafter with eight-token blocks and seven draft tokens, instead of the checkpoint's own DSpark head.
+It binds without engine changes but does not run unpatched on SM120: its own layers go through `vllm.ir`
+(`--ir-op-priority` moves the norms and RoPE to `native`), while its context-KV precompute calls `_C`/`torch.ops._C`
+directly, which the day-0 image builds only for sm_80/89/90/100. The r15 patch shims each of those calls with Triton
+kernels (`_dflash2_rope_neox_inplace`, `_dflash2_rms_norm_out`, `_dflash2_rms_norm_grouped_out`), routes
+`reshape_and_cache{,_flash}` to r8's `kv_scatter` for the unquantized drafter cache, and carries two Inkling binding
+fixes the drafter needs: the target's `embed_norm` applied to the drafter's input embeddings, and the selector's
+`after_correction` softcap order (`30 * tanh((unary + correction) / 30)`) instead of capping the unary logits.
+
+Kernel numerics were checked against a CPU fp32 reference (max relative difference 1.2e-3; limit 2e-2) — the compiled
+core cannot serve as the reference on SM120, because its non-neox rotary has no image. The drafter needs
+`"kv_cache_dtype":"auto"` (bf16) for the same reason: the scatter covers unquantized caches only, while the target keeps
+fp8.
+
+The r15 image is also safe for the DSpark recipe: every DFlash2 edit is behind `VLLM_INKLING_DFLASH2_SM120=1`, and the
+extra flags are inert on that path. `DRAFTER=dspark` reproduces the r14 recipe on the same image.
 
 ## Decode products moved off cuBLAS
 

@@ -1,0 +1,64 @@
+W1124 16:03:20.919000 1 torch/utils/cpp_extension.py:183] No CUDA runtime is found, using CUDA_HOME='/usr/local/cuda'
+Failed to import from vllm._C: ModuleNotFoundError("No module named 'vllm._C'")
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x7dea602fce00>, trust_remote_code=False, seed=7326, num_prompts=120, dataset_name='spec_bench', no_stream=False, dataset_path='/data/specbench-subset-c16.jsonl', no_oversample=True, skip_chat_template=False, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category=None, sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, random_mm_video_encode_fps=30.0, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url='http://127.0.0.1:8022', host='127.0.0.1', port=8000, endpoint='/v1/chat/completions', header=None, max_concurrency=16, model='inkling-2-mini', input_len=None, output_len=None, tokenizer='/model', tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=False, num_warmups=0, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/out', result_filename='specbench-c16.json', ignore_eos=True, self_timed=None, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,99', goodput=None, request_id_prefix='bench-6ce2326f-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body=None, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, logging_config=LoggingConfig(log_level='INFO', formatter='text', configure_logging=True, pylogging_config_file=None))
+(MainProcess pid=1) INFO 11-24 16:03:22 [datasets.py:310] Skipping oversampling. Total samples: 120.
+Starting initial single prompt test run...
+Skipping endpoint ready check.
+Starting main benchmark run...
+Traffic request rate: inf
+Burstiness factor: 1.0 (Poisson process)
+Maximum request concurrency: 16
+  0%|          | 0/120 [00:00<?, ?it/s]  1%|          | 1/120 [00:01<02:31,  1.27s/it]  3%|▎         | 4/120 [00:01<00:32,  3.59it/s]  5%|▌         | 6/120 [00:01<00:25,  4.47it/s]  7%|▋         | 8/120 [00:01<00:18,  6.20it/s]  8%|▊         | 10/120 [00:01<00:14,  7.56it/s] 10%|█         | 12/120 [00:02<00:12,  8.47it/s] 12%|█▏        | 14/120 [00:02<00:10,  9.85it/s] 13%|█▎        | 16/120 [00:02<00:10,  9.95it/s] 15%|█▌        | 18/120 [00:02<00:10,  9.51it/s] 17%|█▋        | 20/120 [00:03<00:14,  7.12it/s] 19%|█▉        | 23/120 [00:03<00:10,  8.99it/s] 21%|██        | 25/120 [00:03<00:09,  9.94it/s] 22%|██▎       | 27/120 [00:03<00:08, 11.41it/s] 24%|██▍       | 29/120 [00:03<00:07, 12.02it/s] 27%|██▋       | 32/120 [00:04<00:07, 11.88it/s] 28%|██▊       | 34/120 [00:04<00:07, 10.90it/s] 30%|███       | 36/120 [00:04<00:09,  9.23it/s] 32%|███▏      | 38/120 [00:04<00:08, 10.06it/s] 33%|███▎      | 40/120 [00:05<00:11,  7.10it/s] 37%|███▋      | 44/120 [00:05<00:07, 10.21it/s] 40%|████      | 48/120 [00:05<00:05, 12.80it/s] 42%|████▎     | 51/120 [00:05<00:05, 12.98it/s] 44%|████▍     | 53/120 [00:06<00:07,  8.44it/s] 46%|████▌     | 55/120 [00:06<00:07,  8.81it/s] 48%|████▊     | 57/120 [00:06<00:06,  9.29it/s] 49%|████▉     | 59/120 [00:06<00:06,  9.53it/s] 51%|█████     | 61/120 [00:07<00:05, 11.07it/s] 52%|█████▎    | 63/120 [00:07<00:04, 11.55it/s] 54%|█████▍    | 65/120 [00:07<00:05, 10.02it/s] 56%|█████▌    | 67/120 [00:07<00:05, 10.22it/s] 57%|█████▊    | 69/120 [00:07<00:05,  9.00it/s] 60%|██████    | 72/120 [00:08<00:03, 12.17it/s] 62%|██████▏   | 74/120 [00:08<00:03, 12.06it/s] 63%|██████▎   | 76/120 [00:08<00:04, 10.61it/s] 65%|██████▌   | 78/120 [00:08<00:05,  8.04it/s] 68%|██████▊   | 81/120 [00:09<00:04,  8.79it/s] 69%|██████▉   | 83/120 [00:09<00:03, 10.22it/s] 72%|███████▏  | 86/120 [00:09<00:02, 11.36it/s] 73%|███████▎  | 88/120 [00:09<00:03,  8.95it/s] 75%|███████▌  | 90/120 [00:09<00:03,  9.43it/s] 78%|███████▊  | 93/120 [00:10<00:02, 10.84it/s] 79%|███████▉  | 95/120 [00:10<00:02, 12.17it/s] 81%|████████  | 97/120 [00:10<00:01, 13.01it/s] 82%|████████▎ | 99/120 [00:10<00:02,  9.14it/s] 84%|████████▍ | 101/120 [00:11<00:02,  7.94it/s] 86%|████████▌ | 103/120 [00:11<00:01,  9.25it/s] 88%|████████▊ | 105/120 [00:11<00:01,  9.47it/s] 89%|████████▉ | 107/120 [00:11<00:01, 11.16it/s] 91%|█████████ | 109/120 [00:11<00:00, 11.75it/s] 93%|█████████▎| 112/120 [00:11<00:00, 14.82it/s] 95%|█████████▌| 114/120 [00:12<00:00, 11.97it/s] 97%|█████████▋| 116/120 [00:12<00:00, 12.85it/s] 98%|█████████▊| 118/120 [00:12<00:00, 13.38it/s]100%|██████████| 120/120 [00:12<00:00,  9.65it/s]
+tip: install termplotlib and gnuplot to plot the metrics
+============ Serving Benchmark Result ============
+Successful requests:                     120       
+Failed requests:                         0         
+Maximum request concurrency:             16        
+Benchmark duration (s):                  12.43     
+Total input tokens:                      38963     
+Total generated tokens:                  30720     
+Request throughput (req/s):              9.65      
+Output token throughput (tok/s):         2470.85   
+Peak output token throughput (tok/s):    694.00    
+Peak concurrent requests:                30.00     
+Total token throughput (tok/s):          5604.70   
+---------------Time to First Token----------------
+Mean TTFT (ms):                          141.58    
+Median TTFT (ms):                        119.94    
+P50 TTFT (ms):                           119.94    
+P90 TTFT (ms):                           193.89    
+P99 TTFT (ms):                           500.40    
+-----Time per Output Token (excl. 1st token)------
+Mean TPOT (ms):                          5.68      
+Median TPOT (ms):                        5.56      
+P50 TPOT (ms):                           5.56      
+P90 TPOT (ms):                           7.54      
+P99 TPOT (ms):                           8.99      
+---------------Inter-token Latency----------------
+Mean ITL (ms):                           23.61     
+Median ITL (ms):                         19.64     
+P50 ITL (ms):                            19.64     
+P90 ITL (ms):                            27.61     
+P99 ITL (ms):                            66.38     
+----------------End-to-end Latency----------------
+Mean E2EL (ms):                          1588.73   
+Median E2EL (ms):                        1547.68   
+P50 E2EL (ms):                           1547.68   
+P90 E2EL (ms):                           2080.34   
+P99 E2EL (ms):                           2516.73   
+---------------Speculative Decoding---------------
+Acceptance rate (%):                     44.44     
+Acceptance length:                       4.11      
+Drafts:                                  7513      
+Draft tokens:                            52591     
+Accepted tokens:                         23371     
+Verified tokens:                         52591     
+Per-position acceptance (%):
+  Position 0:                            80.51     
+  Position 1:                            63.29     
+  Position 2:                            49.29     
+  Position 3:                            39.09     
+  Position 4:                            31.85     
+  Position 5:                            26.21     
+  Position 6:                            20.83     
+==================================================

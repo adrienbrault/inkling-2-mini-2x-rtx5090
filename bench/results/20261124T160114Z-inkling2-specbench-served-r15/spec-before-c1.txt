@@ -1,0 +1,3 @@
+vllm:spec_decode_num_accepted_tokens_total{model_name="inkling-2-mini",engine="0"} 35
+vllm:spec_decode_num_drafts_total{model_name="inkling-2-mini",engine="0"} 10
+vllm:spec_decode_num_draft_tokens_total{model_name="inkling-2-mini",engine="0"} 70

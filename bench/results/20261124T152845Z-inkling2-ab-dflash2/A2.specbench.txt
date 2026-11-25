@@ -1,0 +1,5 @@
+{"c": 1, "drafts": 5034.0, "accepted": 10376.0, "mean_acceptance_length": 3.061}
+c1: Output token throughput (tok/s): 378.04 ;Median TTFT (ms): 32.40 ;Mean TPOT (ms): 2.49 ;
+{"c": 4, "drafts": 5303.0, "accepted": 10108.0, "mean_acceptance_length": 2.906}
+c4: Output token throughput (tok/s): 856.63 ;Median TTFT (ms): 60.16 ;Mean TPOT (ms): 4.30 ;
+/srv/qwen5090/results/20261124T153326Z-inkling2-specbench-ab-dflash2-A2

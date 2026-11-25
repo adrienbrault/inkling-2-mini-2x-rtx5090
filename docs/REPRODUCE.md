@@ -12,7 +12,16 @@ The headline measurements were taken on 2026-11-22 on image `inkling2-rtx5090:sm
 
 The headline configuration used two RTX 5090s at stock power limits, TP2, a 1,048,576-token window, both served names, fp8 target KV, bf16 DSpark KV, fair prefill, and the Rust frontend. The performance and quality captures share a boot. The KV capture records r13 at 1M with both names. The newcomer capture records r13, and its window and adapter state are **TO CONFIRM**. The r13 launcher defaults to Rust, and the separate KV and newcomer captures' frontends are **TO CONFIRM**. The checkpoint revision and host driver from the headline boot are **TO CONFIRM**. Tool-eval records client Python 3.12.3.
 
-Quick start builds r14. Its difference from r13 is in-kernel DSpark RoPE. The [r14 A/B](../bench/results/20261122T203506Z-inkling2-r14-ab/summary.json) matched the r13 outputs on 11 lone-request prompts in each sampling mode and matched the one-stream draft counters. It measured 24,553 KV blocks at 1M against 23,734 on r13. The headline suite, live KV residency and a full two-name structured check were not repeated on r14. The commands here describe how to run the protocol against a running server. Record the image digest, checkpoint revision, window, adapter and frontend, along with the host setup and dependency versions, for any new run.
+Quick start builds r15. Its overlay adds the DFlash2 drafter's SM120 kernels (`docker/patch_dflash2_sm120.py`, default
+off) on top of r14's in-kernel DSpark RoPE; the served default is still the checkpoint's own DSpark head, and a
+2026-11-25 boot of r15 + DSpark served both names, passed the feature smoke and measured 227.1 tok/s per stream / 542
+aggregate at six agent sessions with acceptance 4.05 and a 1,264,522-token pool at 1M; that boot's logs stayed on
+the host, so nothing in `bench/results/` is dated 2026-11-25. The DFlash2 arm is opt-in (`DRAFTER=dflash2` with `DRAFT_DIR`); its 2026-11-24 measurements are the
+`*-r15` result directories and the [DFlash2 screen](../bench/results/20261124T152845Z-inkling2-ab-dflash2/summary.json),
+which matched the DSpark arm's greedy output on 8 lone-request prompts in all four boots. The r15 headline cells were
+measured on the DFlash2 arm; the default tables in the README stay the r13 DSpark rows. Live KV residency, the newcomer
+probe and the structured two-name check were not repeated on r15. Record the image digest, checkpoint revision, window,
+drafter, adapter and frontend, along with the host setup and dependency versions, for any new run.
 
 ## Performance
 

@@ -12,7 +12,7 @@ Spec-Bench on r13, 2026-11-22: **416 tok/s** on one stream and **2,399 tok/s sum
 
 - **Model**: [Inkling-2-Mini](https://huggingface.co/thinkingmachines/Inkling-2-Mini) (Thinking Machines; 26B total, 3.4B active; text and images in), the official checkpoint and its own DSpark drafter (7 draft tokens).
 - **Engine**: vLLM's Inkling day-0 image plus a small overlay ([`docker/`](docker/README.md)) that makes it run on the RTX 5090 and speeds up serving. The day-0 image needs the overlay to serve this configuration on SM120. See [output checks](#output-checks-and-caveats) for the measured comparisons.
-- **Window and KV pool**: up to 1,048,576 tokens per request; the fp8 KV pool holds about 1.42M tokens of context at once, measured on `sm120-r13` (the served `sm120-r14` has 3.5 % more KV blocks, [`r14-ab`](bench/results/20261122T203506Z-inkling2-r14-ab); capacity not re-measured), shared by 16 sequences, tensor parallel over both cards. A request near 1M fits one at a time and slows the others while it runs ([1M window](#1m-window)).
+- **Window and KV pool**: up to 1,048,576 tokens per request; the fp8 KV pool holds about 1.42M tokens of context at once, measured on `sm120-r13` (the served `sm120-r15` overlay raises the KV block count by 3.5 %, [`r14-ab`](bench/results/20261122T203506Z-inkling2-r14-ab); capacity not re-measured), shared by 16 sequences, tensor parallel over both cards. A request near 1M fits one at a time and slows the others while it runs ([1M window](#1m-window)).
 - **Model names**: `inkling-2-mini`, plus `inkling-2-mini-ablit` when the launcher loads the pinned rank-2 LoRA. Choose the name per request ([abliterated name](#abliterated-name)).
 - **Enabled**: images, reasoning, tool calls.
 
@@ -20,7 +20,7 @@ The reported measurements were taken on one machine on the dates given, with raw
 
 ## Numbers
 
-The headline measurements are from 2026-11-22 on r13 ([recorded recipe](docs/REPRODUCE.md#measurement-boot), commit `2aa8760`), with a 1M window, both names, fair prefill, Rust frontend and stock power limits. They are for `inkling-2-mini`. The launcher now builds r14, which computes DSpark RoPE in-kernel. The [r14 A/B](bench/results/20261122T203506Z-inkling2-r14-ab/summary.json) matched 11 lone-request outputs per sampling mode and the one-stream draft counters, with 3.5 % more KV blocks at 1M. The headline suite and live KV capacity were not re-measured on r14. Decode rate is one stream's output tokens per second from its first to its last token, averaged over the requests (the median is in the tables below); the aggregate is the sum over the streams running together ([how the numbers are measured](#how-the-numbers-are-measured)).
+The headline measurements are from 2026-11-22 on r13 ([recorded recipe](docs/REPRODUCE.md#measurement-boot), commit `2aa8760`), with a 1M window, both names, fair prefill, Rust frontend and stock power limits. They are for `inkling-2-mini`. Overlay r14 computes DSpark RoPE in-kernel and r15 adds the DFlash2 drafter's kernels behind a default-off switch. The [r14 A/B](bench/results/20261122T203506Z-inkling2-r14-ab/summary.json) matched 11 lone-request outputs per sampling mode and the one-stream draft counters, with 3.5 % more KV blocks at 1M. The headline suite and live KV capacity were not re-measured on r14. Decode rate is one stream's output tokens per second from its first to its last token, averaged over the requests (the median is in the tables below); the aggregate is the sum over the streams running together ([how the numbers are measured](#how-the-numbers-are-measured)). The build now produced by `scripts/build-image.sh` is overlay r15; the served default on it is still the checkpoint's own DSpark drafter. A 2026-11-25 boot of that combination served both names, passed the feature smoke, and measured **227.1 tok/s per stream and 542 tok/s aggregate at six agent sessions** (acceptance 4.05, 1,264,522-token pool at 1M) — at or above the r13 DSpark rows below. That boot's raw logs stayed on the serving host; no result directory here is dated 2026-11-25. The r13 headline cells were not re-run on r15; the DFlash2 drafter, which overlay r15 adds, is documented as an [opt-in](#the-dflash2-opt-in) with its own 2026-11-24 measurements.
 
 ![Decode: aggregate and per-stream rate at 1, 4, 8 and 16 streams for code at depth, Spec-Bench, and Spec-Bench without the drafter](docs/img/decode.svg)
 
@@ -39,6 +39,33 @@ Blue: code with a 2K append, averaged over the 1K / 32K / 64K cached depths. Bro
 - **KV pool**: 8 agents with 96K-token prompts decoding together used 66 % of it, nothing preempted: about 1.42M tokens of context fit at once. With 12 such agents, 11 ran together and the 12th waited for room.
 
 Sources: KV pool [`kv-capacity-r13`](bench/results/20261122T200911Z-inkling2-kv-capacity-r13), Spec-Bench [`specbench-served-r13`](bench/results/20261122T192436Z-inkling2-specbench-served-r13), code [`code-r13`](bench/results/20261122T192732Z-inkling2-code-r13), prefill [`prefill-r13-a`](bench/results/20261122T192938Z-inkling2-prefill-r13-a), agent sessions [`pi-r13`](bench/results/20261122T192343Z-inkling2-pi-r13), newcomers [`newcomer-r13`](bench/results/20261122T200911Z-inkling2-newcomer-r13), tool-eval [`tooleval-think-r14`](bench/results/20261123T203803Z-inkling2-tooleval-think-r14), GSM8K [`quality-r13`](bench/results/20261122T192343Z-inkling2-quality-r13), memory [`kv-capacity-r13`](bench/results/20261122T200911Z-inkling2-kv-capacity-r13). Full tables: [details](#all-numbers).
+
+## The DFlash2 opt-in
+
+Overlay r15 also carries a DFlash2 block-diffusion drafter (`incoai/Inkling-2-Mini-DFlash2`, 0.5B, BF16, 945 MB, fetched
+by [`scripts/fetch-drafter.sh`](scripts/fetch-drafter.sh)). It is **not** the default: on short prompts it is clearly
+faster, on the agent replay it is slower. Same boot settings, tensor parallel 2, 1M window, both names, 60 prompts per
+cell, forced 256 tokens, temperature 0, A B A B in one session. A is the r14 default image with
+DSpark, B is r15 with DFlash2; DSpark on r15 was not re-run on Spec-Bench ([raw results](bench/results/20261124T152845Z-inkling2-ab-dflash2/summary.json)):
+
+| | DSpark (default) A1 / A2 | DFlash2 B1 / B2 | Change |
+| --- | ---: | ---: | ---: |
+| Decode median, one stream (tok/s) | 384.0 / 385.0 | 525.8 / 524.7 | **+37 %** |
+| Decode median, four streams (tok/s) | 233.1 / 238.9 | 305.0 / 320.7 | +33 % |
+| Aggregate, four streams (tok/s) | 981.7 / 991.2 | 1,267.7 / 1,281.4 | +29 % |
+| Acceptance length, c1 / c4 | 3.061 / 2.906 | 4.172 / 4.022–4.035 | +36 % / +38 % |
+| KV pool at 1M (tokens) | 1,264,522 | 1,357,651 | +7.4 % |
+| Greedy text versus A1 | 8/8 identical | 8/8 identical | — |
+
+Agent replay, the workload the recipe exists for, inverts it (these replay and depth numbers were measured on the
+serving host and are not archived here): at six sessions DFlash2 reached 189.2 tok/s per stream and
+509 aggregate against DSpark's 212.6 / 501 on 2026-11-24, and at ten sessions 130.6 / 628 against 155.9 / 733, with
+acceptance length 3.10 / 3.05 against 3.82 / 3.96. Acceptance at depth (512-token outputs, cold prompts) stayed between
+2.88 and 3.75 up to 110K prompt tokens, so the loss is the draft block's sliding context rather than a cliff. The
+[Spec-Bench](bench/results/20261124T160114Z-inkling2-specbench-served-r15), [code at
+depth](bench/results/20261124T160335Z-inkling2-code-r15) and [cold
+prefill](bench/results/20261124T160534Z-inkling2-prefill-r15a) tables in this repository's history were measured with
+this opt-in arm; the default tables below are the r13 DSpark measurements.
 
 ## Quick start
 
@@ -80,11 +107,21 @@ Allow about 20.1 GB for the checkpoint and bundled drafter (19.5 GB + 636 MB), p
 
    ```bash
    scripts/build-image.sh
-   docker run --rm --gpus "\"device=${GPUS:-0,1}\"" --entrypoint nvidia-smi "${IMAGE:-inkling2-rtx5090:sm120-r14}" -L
+   docker run --rm --gpus "\"device=${GPUS:-0,1}\"" --entrypoint nvidia-smi "${IMAGE:-inkling2-rtx5090:sm120-r15}" -L
    scripts/serve.sh
    ```
 
-   The build and launch share the default tag `inkling2-rtx5090:sm120-r14`. Set the same `IMAGE` in both commands to use another tag. Allow a few minutes on a cold Triton cache. The engine prints warmup and KV cache information in the launch terminal. `CACHE_DIR` defaults to `$HOME/.cache/inkling2-vllm`. The API binds to loopback with no API key.
+   The build and launch share the default tag `inkling2-rtx5090:sm120-r15`. Set the same `IMAGE` in both commands to use another tag. Allow a few minutes on a cold Triton cache. The engine prints warmup and KV cache information in the launch terminal. `CACHE_DIR` defaults to `$HOME/.cache/inkling2-vllm`. The API binds to loopback with no API key.
+   The default drafter is the checkpoint's own DSpark head, so nothing else is fetched. For the optional DFlash2 arm, after building in step 4, fetch it into its own directory and launch with `DRAFTER=dflash2` instead:
+
+   ```bash
+   export DRAFT_DIR="$PWD/../Inkling-2-Mini-DFlash2"
+   scripts/fetch-drafter.sh "$DRAFT_DIR"
+   MODEL_DIR="$MODEL_DIR" DRAFT_DIR="$DRAFT_DIR" DRAFTER=dflash2 scripts/serve.sh
+   ```
+
+   The fetch pins revision `4f9088ea` and verifies the 989,975,616-byte `model.safetensors`; it also writes the drafter's `eagle_aux_hidden_state_layer_ids`, which must stay equal to its `dflash_config.target_layer_ids`.
+
 
 5. In a second terminal from the repository root, list the served names, try chat, and run the smoke suite. Expect `inkling-2-mini` and `inkling-2-mini-ablit` after fetching the adapter, or just `inkling-2-mini` for base-only.
 
@@ -110,12 +147,14 @@ Set overrides on `scripts/serve.sh` or export them first. The evidence column re
 | Override | Effect | Evidence |
 | --- | --- | --- |
 | `MAX_MODEL_LEN=262144` | Use a shorter prompt-plus-output window than the default 1,048,576. | Both windows compared on [r10](bench/results/20261122T180116Z-inkling2-1m-window). r14 A/B used 1M. |
-| `GPUS=2,3` | Use two distinct numeric indices for TP2. For one index, set `DSPARK=0`. | TP2 on two RTX 5090s and a [historical TP1 run](bench/results/20261121T014555Z-inkling2-specbench-tp1-nospec-32k). The `2,3` override was checked with local stubs. |
+| `GPUS=2,3` | Use two distinct numeric indices for TP2. For one index, set `DRAFTER=none`. | TP2 on two RTX 5090s and a [historical TP1 run](bench/results/20261121T014555Z-inkling2-specbench-tp1-nospec-32k). The `2,3` override was checked with local stubs. |
 | `PORT=8022` | Publish a different host port. | 8022 appears in the [r13 evaluation metadata](bench/results/20261122T192343Z-inkling2-quality-r13/gsm8k-results.json). |
 | `ABLIT_DIR=` | Serve only the base name, even with a sibling adapter directory. An absolute path selects a different adapter directory. | [r13 adapter A/B](bench/results/20261122T182215Z-inkling2-r13-ab). |
 | `MAX_NUM_SEQS=8` | Lower the concurrent sequence limit from 16. | 16 on the [r13 recipe](docs/REPRODUCE.md#measurement-boot). Eight is an unmeasured fallback. |
 | `GPU_MEMORY_UTILIZATION=0.92` | Set vLLM's per-device memory fraction; 0.92 is the default. | [r13 memory capture](bench/results/20261122T200911Z-inkling2-kv-capacity-r13/boot-memory.txt). |
-| `DSPARK=0` | Skip speculative decoding. By default this drops compact conv pages, draft sharding and in-kernel drafter RoPE. The launcher still checks for the full checkpoint including `mtp.safetensors`. | [Historical drafter-off TP2](bench/results/20261121T012150Z-inkling2-specbench-nospec-r3) and TP1. The r14 drafter-off profile was checked with local stubs. |
+| `DRAFTER=none` | Skip speculative decoding. The launcher then drops compact conv pages, draft sharding and in-kernel drafter RoPE. | [Historical drafter-off TP2](bench/results/20261121T012150Z-inkling2-specbench-nospec-r3) and TP1. The r14 drafter-off profile was checked with local stubs. |
+| `DRAFTER=dflash2` | Serve the DFlash2 block-diffusion drafter (`incoai/Inkling-2-Mini-DFlash2`) instead of the checkpoint's own DSpark head. It needs `DRAFT_DIR`, overlay r15 and `VLLM_INKLING_DFLASH2_SM120=1`, which the launcher sets for it. | [DFlash2 A/B](bench/results/20261124T152845Z-inkling2-ab-dflash2/summary.json): +37 % decode at one stream on Spec-Bench, identical greedy text 8/8, but 189 vs 213 tok/s per stream at six agent sessions and 131 vs 156 at ten in the paired 2026-11-24 replay, so it stays opt-in. |
+| `DRAFT_DIR=/path/to/Inkling-2-Mini-DFlash2` | Select the DFlash2 drafter directory when `DRAFTER=dflash2`. Empty with `DRAFTER=dflash2` is refused at launch. | [`incoai/Inkling-2-Mini-DFlash2`](https://huggingface.co/incoai/Inkling-2-Mini-DFlash2) via [`scripts/fetch-drafter.sh`](scripts/fetch-drafter.sh). |
 
 For a port override, run `PORT=8022 scripts/serve.sh` in the launch terminal and `URL=http://127.0.0.1:8022 scripts/check.sh reports/smoke` in the client terminal. Pass the host-root URL, before `/v1`.
 
@@ -158,9 +197,9 @@ Memory per card on r13 (2026-11-22): 10.65 GiB for weights and non-torch memory,
 ## Served configuration
 
 - Weights: [Inkling-2-Mini](https://huggingface.co/thinkingmachines/Inkling-2-Mini), official NVFP4/MXFP8 checkpoint (19.5 GB) plus the bundled DSpark drafter `mtp.safetensors` (636 MB).
-- Engine and image: `vllm/vllm-openai:inkling-2-mini` (vLLM `0.1.dev25855+g7cb5dae22`, pinned by digest in [`docker/Dockerfile`](docker/Dockerfile)) plus the [`docker/`](docker/README.md) overlay (`inkling2-rtx5090:sm120-r14`), built by [`scripts/build-image.sh`](scripts/build-image.sh) and started by [`scripts/serve.sh`](scripts/serve.sh) on port 8000 as `inkling-2-mini`.
+- Engine and image: `vllm/vllm-openai:inkling-2-mini` (vLLM `0.1.dev25855+g7cb5dae22`, pinned by digest in [`docker/Dockerfile`](docker/Dockerfile)) plus the [`docker/`](docker/README.md) overlay (`inkling2-rtx5090:sm120-r15`), built by [`scripts/build-image.sh`](scripts/build-image.sh) and started by [`scripts/serve.sh`](scripts/serve.sh) on port 8000 as `inkling-2-mini`.
 - Parallelism and all-reduce: tensor parallel 2 (`--tensor-parallel-size 2`), FlashInfer PCIe IPC all-reduce (`VLLM_ALLREDUCE_USE_FLASHINFER_PCIE_IPC=1`) with NCCL fallback, and vLLM's custom all-reduce off (`--disable-custom-all-reduce`).
-- Drafter: DSpark (`"method":"dspark","num_speculative_tokens":7,"draft_sample_method":"probabilistic","kv_cache_dtype":"auto"`), 7 draft tokens per step (the only value the checkpoint accepts), bf16 drafter KV cache, and draft sampling sharded across both cards (`VLLM_INKLING_DRAFT_SHARD=1`, overlay).
+- Drafter: DSpark by default (`"method":"dspark","num_speculative_tokens":7,"draft_sample_method":"probabilistic","kv_cache_dtype":"auto"`), 7 draft tokens per step (the only value the checkpoint accepts), bf16 drafter KV cache, and draft sampling sharded across both cards (`VLLM_INKLING_DRAFT_SHARD=1`, overlay). `DRAFTER=dflash2` replaces it with the DFlash2 block-diffusion drafter in `DRAFT_DIR` (`"method":"dflash","attention_backend":"TRITON_ATTN"`, overlay r15), documented in [the opt-in section](#the-dflash2-opt-in).
 - Context and KV pool: 1,048,576 tokens (`--max-model-len 1048576`, [1M window](#1m-window)), 16 concurrent sequences (`--max-num-seqs 16`), `--gpu-memory-utilization 0.92`, fp8 target KV cache in unit-scale E4M3 (`--kv-cache-dtype fp8`), and exact-size short-conv pages (`VLLM_INKLING_CONV_PAGE=1 --block-size 64`, overlay). The comparable r13 boot held about 1.42M tokens of context at once (2026-11-22, [`kv-capacity-r13`](bench/results/20261122T200911Z-inkling2-kv-capacity-r13)).
 - Scheduler: `VLLM_DECODE_STEP_BUDGET=1024` (overlay): at most 1,024 tokens per step while any request is decoding, and 2,048 otherwise. Fair prefill (`--long-prefill-token-threshold 768 --long-prefill-token-threshold-adaptive`, stock vLLM): while several requests prefill, each gets at most max(768, 2,048 / their number) tokens per step.
 - Sampling: `--enable-batch-sharded-sampling` (overlay): each request is sampled on one card from both cards' vocabulary shards.
@@ -306,8 +345,8 @@ The r4–r10 progression, paired A/B boots and all-reduce comparisons are in [Co
 
 | path | contents |
 | --- | --- |
-| [`scripts/build-image.sh`](scripts/build-image.sh) | builds `inkling2-rtx5090:sm120-r14` from the pinned day-0 vLLM base image and [`docker/`](docker/README.md) |
-| [`scripts/serve.sh`](scripts/serve.sh) | launches the served TP2 + DSpark configuration on `:8000` |
+| [`scripts/build-image.sh`](scripts/build-image.sh) | builds `inkling2-rtx5090:sm120-r15` from the pinned day-0 vLLM base image and [`docker/`](docker/README.md) |
+| [`scripts/serve.sh`](scripts/serve.sh), [`scripts/fetch-drafter.sh`](scripts/fetch-drafter.sh) | launches the served TP2 + DSpark configuration on `:8000`; fetches and verifies the optional DFlash2 drafter |
 | [`docker/`](docker/README.md) | [`Dockerfile`](docker/Dockerfile), Triton kernels (`kv_write_sm120.py`, `decode_sm120.py`), SHA-checked patch scripts, design notes and credits |
 | [`docs/CONFIGURATION.md`](docs/CONFIGURATION.md) | r4-to-r10 progression, paired comparisons, all-reduce and one-card measurements, and SM120 day-0 failure modes |
 | [`bench/specbench.sh`](bench/specbench.sh), [`bench/specbench_summary.py`](bench/specbench_summary.py) | Spec-Bench `vllm bench serve` driver and per-stream / aggregate summary script |
