@@ -34,7 +34,7 @@ Blue: code with a 2K append, averaged over the 1K / 32K / 64K cached depths. Bro
 ![Cold prefill rate and time to first token versus prompt length](docs/img/prefill.svg)
 
 - **Cold prefill**: 19,012 tok/s at 2K prompt tokens, 14,830 at 61K and 8,724 at 246K (28.2 s to the first token). The [historical r10 1M run](#1m-window) took about 7 min.
-- **Quality**: tool-eval 87.5 ± 2.9 over 4 trials of 69 scenarios (tool-eval-bench 3.0.0, which sends earlier reasoning back; r14); GSM8K 94.5 % (5-shot, 200 problems).
+- **Quality**: tool-eval 87.5 ± 2.9 over 4 trials of 69 scenarios (tool-eval-bench 3.0.0, which sends tool-calling turns' reasoning back; r14); GSM8K 94.5 % (5-shot, 200 problems).
 
 - **KV pool**: 8 agents with 96K-token prompts decoding together used 66 % of it, nothing preempted: about 1.42M tokens of context fit at once. With 12 such agents, 11 ran together and the 12th waited for room.
 
